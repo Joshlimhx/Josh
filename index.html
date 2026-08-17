@@ -166,6 +166,9 @@
   <section id="section-global-systemic">
     <h2>04 — Global Systemic Risk <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— cross-asset gauges, not tied to one country</span></h2>
     <div class="grid" id="globalSystemicGrid"></div>
+
+    <h2 style="margin-top:24px; font-size:16px;">Central Bank Calendar — remaining 2026</h2>
+    <div class="grid" id="cbCalendarGrid"></div>
   </section>
 
   <footer id="footerSources">Sources loading…</footer>
@@ -392,13 +395,44 @@ async function load(){
     `<strong style="color:var(--amber)">Flagged as overstated:</strong><br>` +
     (fc.flagged_as_overstated||[]).map(f => `— "${f.claim}": ${f.issue}`).join('<br>');
 
+  // ---- Central Bank Calendar ----
+  const cb = manual.central_bank_calendar || {};
+  const cbNames = {fed: 'Fed', ecb: 'ECB', boj: 'BOJ', boe: 'BOE'};
+  const todayStr = new Date().toISOString().slice(0,10);
+  const cbEntries = [];
+  Object.entries(cb).forEach(([key, info]) => {
+    if (!info.remaining_2026) return;
+    info.remaining_2026.forEach(dateRange => {
+      const firstDate = dateRange.split('_')[0].replace(/_\d+$/, '');
+      cbEntries.push({bank: cbNames[key] || key, dateRange, firstDate, rate: info.current_rate || info.current_rate_deposit_facility});
+    });
+  });
+  cbEntries.sort((a,b) => a.firstDate.localeCompare(b.firstDate));
+  document.getElementById('cbCalendarGrid').innerHTML = cbEntries.map(e => {
+    const isNext = e.firstDate >= todayStr && !cbEntries.some(o => o.bank===e.bank && o.firstDate >= todayStr && o.firstDate < e.firstDate);
+    return `<div class="card">
+      <div class="card-label"><span>${e.bank}</span>${isNext ? '<span class="tier-tag tier-event">NEXT</span>' : ''}</div>
+      <div class="card-value" style="font-size:18px;">${e.dateRange.replace(/_/g,'–')}</div>
+      <div class="card-meta">current rate: ${e.rate || '—'}</div>
+    </div>`;
+  }).join('');
+
   // ---- Global Systemic Risk ----
   const gsys = data.global_systemic || {};
+  const ust10 = g.ust_10y.value, ust2 = g.ust_2y.value;
+  const spread2s10s = (ust10 !== null && ust2 !== null) ? Math.round((ust10 - ust2) * 100) / 100 : null;
+  const spreadEntry = {value: spread2s10s, unit: 'pp', as_of: g.ust_10y.as_of, source: 'derived: FRED:DGS10 − FRED:DGS2', tier: (g.ust_10y.tier==='live-api' && g.ust_2y.tier==='live-api') ? 'live-api' : 'seed'};
   document.getElementById('globalSystemicGrid').innerHTML = [
     card('Dollar Index (DXY proxy)', gsys.dxy || {}, {thresholdKey: 'dxy'}),
     card('US HY Credit Spread', gsys.us_hy_credit_spread || {}, {thresholdKey: 'us_hy_credit_spread'}),
     card('WTI Oil', gsys.wti_oil || {}, {thresholdKey: 'wti_oil'}),
+    card('Fed RRP (overnight)', gsys.rrp || {}, {thresholdKey: 'rrp'}),
+    card('2s10s Yield Curve', spreadEntry, {thresholdKey: 'ust_2s10s'}),
   ].join('');
+  if (spread2s10s !== null && spread2s10s < 0) {
+    document.getElementById('globalSystemicGrid').insertAdjacentHTML('afterend',
+      `<div class="note-block callout-danger">2s10s currently INVERTED at ${spread2s10s}pp (10Y below 2Y) — historically a recession signal, though with a long and variable lag.</div>`);
+  }
 
   document.getElementById('footerSources').innerHTML =
     'US/Global: FRED (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +

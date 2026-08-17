@@ -137,6 +137,11 @@ def get_oil():
     return {"value": p["value"], "unit": "USD/bbl", "as_of": p["date"], "source": "FRED:DCOILWTICO (WTI spot)"}
 
 
+def get_rrp():
+    p = fred_point("RRPONTSYD")
+    return {"value": p["value"], "unit": "USD bn", "as_of": p["date"], "source": "FRED:RRPONTSYD (Fed overnight reverse repo, daily)"}
+
+
 def get_buffett_indicator():
     # FRED discontinued the Wilshire 5000 series (WILL5000INDFC) on 2024-06-03
     # (Wilshire Associates pulled licensing). Use the Fed's own Z.1 flow-of-funds
@@ -272,6 +277,7 @@ def main():
             "dxy": safe_fetch("dxy", lambda: get_dxy(), {"value": None, "unit": ""}),
             "us_hy_credit_spread": safe_fetch("hy_spread", lambda: get_hy_credit_spread(), {"value": None, "unit": "%"}),
             "wti_oil": safe_fetch("oil", lambda: get_oil(), {"value": None, "unit": "USD/bbl"}),
+            "rrp": safe_fetch("rrp", lambda: get_rrp(), {"value": None, "unit": "USD bn"}),
         },
     }
 
