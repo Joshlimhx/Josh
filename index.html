@@ -57,6 +57,11 @@
   .card-unit{ font-size: 13px; color: var(--paper-dim); margin-left: 4px; }
   .card-meta{ font-size: 11px; color: var(--paper-dim); margin-top: 6px; }
   .tier-tag{ font-family: var(--mono); font-size: 9px; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .zone-chip{ font-family: var(--mono); font-size: 9.5px; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; cursor: default; }
+  .zone-chip.status-normal{ background: rgba(106,156,124,0.16); color: var(--sage); }
+  .zone-chip.status-watch{ background: rgba(201,138,61,0.16); color: var(--amber); }
+  .zone-chip.status-danger{ background: rgba(181,83,58,0.18); color: var(--rust); }
+  .zone-chip.zone-nodata{ background: rgba(168,162,148,0.14); color: var(--paper-dim); }
   .tier-live{ background: rgba(106,156,124,0.18); color: var(--sage); }
   .tier-event{ background: rgba(127,163,200,0.18); color: var(--steel-bright); }
   .tier-seed, .tier-stale{ background: rgba(201,138,61,0.18); color: var(--amber); }
@@ -169,12 +174,30 @@
 <script>
 const fmt = (v, unit) => v === null || v === undefined ? '—' : `${v}${unit ? ' ' + unit : ''}`;
 
+let THRESHOLDS = {}; // populated from manual.risk_thresholds once data loads
+
 function tierTag(tier){
   const map = {'live-api':['tier-live','LIVE'], 'event-driven':['tier-event','EVENT'], 'seed':['tier-seed','SEED'], 'stale':['tier-stale','STALE']};
   const [cls,label] = map[tier] || ['tier-seed','?'];
   return `<span class="tier-tag ${cls}">${label}</span>`;
 }
 
+function zoneFor(value, band){
+  if (value === null || value === undefined || !band || band.normal_max === undefined) return null;
+  if (band.watch_max !== undefined && value > band.watch_max) return 'danger';
+  if (value > band.normal_max) return 'watch';
+  return 'normal';
+}
+
+function zoneChip(zone, band){
+  if (!zone) return '';
+  const map = {normal: ['status-normal','NORMAL'], watch: ['status-watch','WATCH'], danger: ['status-danger','DANGER']};
+  const [cls, label] = map[zone];
+  const title = band && band.danger ? ` title="${band.danger.replace(/"/g,'&quot;')}"` : '';
+  return `<span class="zone-chip ${cls}"${title}>${label}</span>`;
+}
+
+// Backward-compatible helper for the few call sites still passing explicit bands directly
 function statusFor(value, bands){
   if (value === null || value === undefined || !bands) return '';
   if (bands.danger_min !== undefined && value >= bands.danger_min) return 'status-danger';
@@ -183,11 +206,23 @@ function statusFor(value, bands){
 }
 
 function card(label, entry, opts={}){
-  const cls = statusFor(entry.value, opts.bands);
+  let cls = '', chip = '';
+  const thresholdKey = opts.thresholdKey;
+  const band = thresholdKey ? THRESHOLDS[thresholdKey] : null;
+  if (band && band.normal_max !== undefined) {
+    const zone = zoneFor(entry.value, band);
+    cls = zone ? `status-${zone}` : '';
+    chip = zoneChip(zone, band);
+  } else if (opts.bands) {
+    cls = statusFor(entry.value, opts.bands);
+  } else if (band && band.note) {
+    chip = `<span class="zone-chip zone-nodata" title="${band.note.replace(/"/g,'&quot;')}">NO BAND YET</span>`;
+  }
   return `<div class="card">
     <div class="card-label"><span>${label}</span>${tierTag(entry.tier)}</div>
     <div class="card-value ${cls}">${fmt(entry.value)}<span class="card-unit">${entry.unit||''}</span></div>
     <div class="card-meta">as of ${entry.as_of||'—'} · ${entry.source||''}</div>
+    ${chip ? `<div style="margin-top:6px;">${chip}</div>` : ''}
   </div>`;
 }
 
@@ -207,6 +242,7 @@ async function load(){
   const res = await fetch('./data.json', {cache: 'no-store'});
   data = await res.json();
   manual = data.manual || {};
+  THRESHOLDS = manual.risk_thresholds || {};
 
   document.getElementById('generatedAt').textContent =
     'Data generated: ' + new Date(data.generated_at).toLocaleString('zh-CN', {timeZone:'Asia/Kuala_Lumpur'}) + ' (MYT)' +
@@ -217,15 +253,15 @@ async function load(){
   const globalGrid = document.getElementById('globalGrid');
   globalGrid.innerHTML = [
     card('Fed Funds Rate', g.fed_funds_rate),
-    card('10Y Treasury', g.ust_10y),
-    card('30Y Treasury', g.ust_30y),
+    card('10Y Treasury', g.ust_10y, {thresholdKey: 'ust_10y'}),
+    card('30Y Treasury', g.ust_30y, {thresholdKey: 'ust_30y'}),
     card('2Y Treasury', g.ust_2y),
-    card('CPI (YoY)', g.cpi_yoy),
-    card('Unemployment', g.unemployment),
-    card('Debt / GDP', g.debt_to_gdp),
-    card('VIX', g.vix),
-    card('Buffett Indicator', g.buffett_indicator),
-    card('Shiller CAPE', g.shiller_cape),
+    card('CPI (YoY)', g.cpi_yoy, {thresholdKey: 'cpi_yoy'}),
+    card('Unemployment', g.unemployment, {thresholdKey: 'unemployment'}),
+    card('Debt / GDP', g.debt_to_gdp, {thresholdKey: 'debt_to_gdp'}),
+    card('VIX', g.vix, {thresholdKey: 'vix'}),
+    card('Buffett Indicator', g.buffett_indicator, {thresholdKey: 'buffett_indicator'}),
+    card('Shiller CAPE', g.shiller_cape, {thresholdKey: 'shiller_cape'}),
     card('Bitcoin', g.bitcoin),
     card('Gold', g.gold),
   ].join('');
@@ -256,10 +292,11 @@ async function load(){
 
   const japanGrid = document.getElementById('japanGrid');
   japanGrid.innerHTML = [
-    card('USD/JPY', j.usdjpy, {bands: th.usdjpy ? {watch_min: th.usdjpy.normal_max, danger_min: th.usdjpy.watch_max} : null}),
-    card('10Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['10Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {bands: th.jgb_10y ? {watch_min:th.jgb_10y.normal_max, danger_min:th.jgb_10y.watch_max} : null}),
-    card('30Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['30Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {bands: th.jgb_30y ? {watch_min:th.jgb_30y.normal_max, danger_min:th.jgb_30y.watch_max} : null}),
-    card('BOJ Policy Rate', boj, {bands: th.boj_rate ? {watch_min:th.boj_rate.normal_max, danger_min:th.boj_rate.watch_max} : null}),
+    card('USD/JPY', j.usdjpy, {thresholdKey: 'usdjpy'}),
+    card('10Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['10Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_10y'}),
+    card('30Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['30Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_30y'}),
+    card('40Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['40Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_40y'}),
+    card('BOJ Policy Rate', boj, {thresholdKey: 'boj_rate'}),
   ].join('');
 
   // JGB curve strip
@@ -358,9 +395,9 @@ async function load(){
   // ---- Global Systemic Risk ----
   const gsys = data.global_systemic || {};
   document.getElementById('globalSystemicGrid').innerHTML = [
-    card('Dollar Index (DXY proxy)', gsys.dxy || {}),
-    card('US HY Credit Spread', gsys.us_hy_credit_spread || {}, {bands: {watch_min: 4, danger_min: 6}}),
-    card('WTI Oil', gsys.wti_oil || {}),
+    card('Dollar Index (DXY proxy)', gsys.dxy || {}, {thresholdKey: 'dxy'}),
+    card('US HY Credit Spread', gsys.us_hy_credit_spread || {}, {thresholdKey: 'us_hy_credit_spread'}),
+    card('WTI Oil', gsys.wti_oil || {}, {thresholdKey: 'wti_oil'}),
   ].join('');
 
   document.getElementById('footerSources').innerHTML =
