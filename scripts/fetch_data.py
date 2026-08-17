@@ -128,17 +128,20 @@ def get_buffett_indicator():
     # series instead: Nonfinancial Corporate Business Equities, Liability Level
     # (NCBEILQ027S) — quarterly, official, and arguably closer to what Buffett's
     # original formulation meant than the Wilshire proxy anyway.
-    equities = fred_point("NCBEILQ027S")  # $ billions
+    equities = fred_point("NCBEILQ027S")  # $ millions
     gdp_obs = fred_latest("GDP", n=4)
     gdp_date, gdp_val = gdp_obs[0]
-    ratio = (equities["value"] / float(gdp_val)) * 100
+    # NCBEILQ027S is reported in $ millions; FRED's GDP series is in $ billions.
+    # Convert equities to billions before dividing, or the ratio comes out ~1000x too high.
+    equities_billions = equities["value"] / 1000
+    ratio = (equities_billions / float(gdp_val)) * 100
     return {
         "value": round(ratio, 1),
         "unit": "%",
         "as_of": equities["date"],
         "source": "FRED:NCBEILQ027S / FRED:GDP (Fed Z.1 corporate equities-to-GDP)",
         "note": "Methodology changed 2026-08 after FRED discontinued Wilshire 5000 data in 2024. This series covers nonfinancial corporate equities only (excludes financials), so it will likely read structurally LOWER than the classic Wilshire-based Buffett print (~190-240% range). Treat the first live reading as a new baseline, not a direct continuation of the old seed number (235.7%) — check the level makes sense before trusting the Valuation Heat score, which was calibrated against the old series.",
-        "components": {"corp_equities_billion": equities["value"], "gdp_billion": float(gdp_val), "gdp_as_of": gdp_date},
+        "components": {"corp_equities_billion": equities_billions, "gdp_billion": float(gdp_val), "gdp_as_of": gdp_date},
     }
 
 
