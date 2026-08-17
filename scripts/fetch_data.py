@@ -123,16 +123,22 @@ def get_vix():
 
 
 def get_buffett_indicator():
-    wilshire = fred_point("WILL5000INDFC")
+    # FRED discontinued the Wilshire 5000 series (WILL5000INDFC) on 2024-06-03
+    # (Wilshire Associates pulled licensing). Use the Fed's own Z.1 flow-of-funds
+    # series instead: Nonfinancial Corporate Business Equities, Liability Level
+    # (NCBEILQ027S) — quarterly, official, and arguably closer to what Buffett's
+    # original formulation meant than the Wilshire proxy anyway.
+    equities = fred_point("NCBEILQ027S")  # $ billions
     gdp_obs = fred_latest("GDP", n=4)
     gdp_date, gdp_val = gdp_obs[0]
-    ratio = (wilshire["value"] / float(gdp_val)) * 100
+    ratio = (equities["value"] / float(gdp_val)) * 100
     return {
         "value": round(ratio, 1),
         "unit": "%",
-        "as_of": wilshire["date"],
-        "source": "FRED:WILL5000INDFC / FRED:GDP (Wilshire-5000-to-GDP proxy method)",
-        "components": {"wilshire5000": wilshire["value"], "gdp_billion": float(gdp_val), "gdp_as_of": gdp_date},
+        "as_of": equities["date"],
+        "source": "FRED:NCBEILQ027S / FRED:GDP (Fed Z.1 corporate equities-to-GDP)",
+        "note": "Methodology changed 2026-08 after FRED discontinued Wilshire 5000 data in 2024. This series covers nonfinancial corporate equities only (excludes financials), so it will likely read structurally LOWER than the classic Wilshire-based Buffett print (~190-240% range). Treat the first live reading as a new baseline, not a direct continuation of the old seed number (235.7%) — check the level makes sense before trusting the Valuation Heat score, which was calibrated against the old series.",
+        "components": {"corp_equities_billion": equities["value"], "gdp_billion": float(gdp_val), "gdp_as_of": gdp_date},
     }
 
 
@@ -163,6 +169,7 @@ def get_gold():
 # ---------------------------------------------------------------------------
 
 def get_jgb_curve():
+    import re
     raw = http_get("https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/jgbcme.csv")
     text = raw.decode("shift_jis", errors="replace")
     reader = list(csv.reader(io.StringIO(text)))
@@ -174,7 +181,18 @@ def get_jgb_curve():
     if header_row is None:
         raise RuntimeError("could not find header row in MOF CSV")
     start_idx = reader.index(header_row) + 1
-    data_rows = [r for r in reader[start_idx:] if r and r[0].strip()]
+    date_pattern = re.compile(r"^\d{4}[/-]\d{1,2}[/-]\d{1,2}$")
+    # Only accept rows whose first cell is an actual date AND that have at
+    # least as many columns as the header — this excludes the trailing
+    # disclaimer/footer text MOF appends to the file (e.g. "if you cannot
+    # download the latest csv data, please clear your browser's cache..."),
+    # which previously got picked up as if it were the last data row.
+    data_rows = [
+        r for r in reader[start_idx:]
+        if r and date_pattern.match(r[0].strip()) and len(r) >= len(header_row)
+    ]
+    if not data_rows:
+        raise RuntimeError("no valid dated rows found in MOF CSV after filtering")
     last = data_rows[-1]
     cols = [c.strip() for c in header_row]
     values = dict(zip(cols, last))
