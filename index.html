@@ -158,6 +158,11 @@
     <div class="note-block" id="factCheckNote"></div>
   </section>
 
+  <section id="section-global-systemic">
+    <h2>04 — Global Systemic Risk <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— cross-asset gauges, not tied to one country</span></h2>
+    <div class="grid" id="globalSystemicGrid"></div>
+  </section>
+
   <footer id="footerSources">Sources loading…</footer>
 </div>
 
@@ -349,6 +354,14 @@ async function load(){
     `<strong style="color:var(--sage)">Checked and accurate:</strong> ${(fc.checked_and_accurate||[]).join(' · ')}<br><br>` +
     `<strong style="color:var(--amber)">Flagged as overstated:</strong><br>` +
     (fc.flagged_as_overstated||[]).map(f => `— "${f.claim}": ${f.issue}`).join('<br>');
+
+  // ---- Global Systemic Risk ----
+  const gsys = data.global_systemic || {};
+  document.getElementById('globalSystemicGrid').innerHTML = [
+    card('Dollar Index (DXY proxy)', gsys.dxy || {}),
+    card('US HY Credit Spread', gsys.us_hy_credit_spread || {}, {bands: {watch_min: 4, danger_min: 6}}),
+    card('WTI Oil', gsys.wti_oil || {}),
+  ].join('');
 
   document.getElementById('footerSources').innerHTML =
     'US/Global: FRED (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +
