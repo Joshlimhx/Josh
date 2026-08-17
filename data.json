@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T17:05:39.989833+00:00",
+  "generated_at": "2026-08-17T17:15:33.066711+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.63,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 64048,
+      "value": 63959,
       "unit": "USD",
       "as_of": "2026-08-17",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 4425.799805,
+      "value": 4424.399902,
       "unit": "USD/oz",
       "as_of": "2026-08-17",
       "source": "gold-api.com",
@@ -309,6 +309,12 @@
         "watch_max": 100,
         "danger": ">100 — energy-shock inflation risk, directly feeds Japan's import-price channel",
         "note": "this band only covers the high side (inflation-shock risk). A fast drop below ~$50 is a different signal — demand-destruction/recession — not captured by this band."
+      },
+      "rrp": {
+        "note": "No fixed danger level — what matters is the TREND. RRP near-zero (parked cash mostly drained) means less spare liquidity cushion in the system; a level under ~$50bn after being much higher is the thing to watch, not a specific number."
+      },
+      "ust_2s10s": {
+        "note": "Danger isn't a level, it's the SIGN: negative (inverted, short rates above long rates) has preceded most US recessions historically, though with a long and variable lag (often 12-24 months). A positive-but-narrowing spread deserves attention too."
       }
     },
     "real_economy_stress": {
@@ -363,6 +369,45 @@
         },
         "note": "370 yen in Jan 2026 was a record high on the post-2026-rebase methodology. Series underwent a base-year revision in 2026 — pre-2026 figures (e.g. 2025 readings in the 390s-400s) are NOT directly comparable to 2026 figures on a like-for-like basis. Treat this as a directional/momentum indicator, not a clean YoY series, until both sides of the rebase are reconciled.",
         "source": "Teikoku Databank monthly カレーライス物価指数 releases, tdb.co.jp"
+      }
+    },
+    "central_bank_calendar": {
+      "_purpose": "Remaining scheduled meetings for 2026, sourced directly from each central bank's own published calendar (not aggregators). Add new dates here once each bank publishes its 2027 schedule.",
+      "fed": {
+        "current_rate": "3.50-3.75%",
+        "remaining_2026": [
+          "2026-09-15_16",
+          "2026-10-27_28",
+          "2026-12-08_09"
+        ],
+        "source": "federalreserve.gov, FOMC calendar"
+      },
+      "ecb": {
+        "current_rate_deposit_facility": "2.25%",
+        "remaining_2026": [
+          "2026-09-09_10",
+          "2026-10-28_29",
+          "2026-12-16_17"
+        ],
+        "source": "ecb.europa.eu/press/calendars/mgcgc"
+      },
+      "boj": {
+        "current_rate": "1.00%",
+        "remaining_2026": [
+          "2026-09-17_18",
+          "2026-10-29_30",
+          "2026-12-17_18"
+        ],
+        "source": "boj.or.jp/en/mopo/mpmsche_minu — official 2026 MPM schedule"
+      },
+      "boe": {
+        "current_rate": "3.75%",
+        "remaining_2026": [
+          "2026-09-17",
+          "2026-11-05",
+          "2026-12-17"
+        ],
+        "source": "bankofengland.co.uk/monetary-policy/upcoming-mpc-dates"
       }
     },
     "media_fact_checks": {
