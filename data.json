@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-08-01T00:00:00+00:00",
+  "_note": "Seed snapshot from manual research on 2026-08-01, pending the first GitHub Actions run. Tagged 'seed' rather than 'live-api' so the frontend is honest about provenance until the workflow takes over.",
+  "us_global": {
+    "fed_funds_rate": {"value": 4.25, "unit": "%", "as_of": "2026-07-30", "source": "seed (verify on first run)", "tier": "seed"},
+    "ust_10y": {"value": 4.75, "unit": "%", "as_of": "2026-07-31", "source": "seed", "tier": "seed"},
+    "ust_30y": {"value": 5.28, "unit": "%", "as_of": "2026-07-31", "source": "seed", "tier": "seed"},
+    "ust_2y": {"value": 4.28, "unit": "%", "as_of": "2026-07-31", "source": "seed", "tier": "seed"},
+    "cpi_yoy": {"value": null, "unit": "% YoY", "as_of": null, "source": "seed — will populate on first run", "tier": "seed"},
+    "unemployment": {"value": 4.2, "unit": "%", "as_of": "2026-06", "source": "seed", "tier": "seed"},
+    "debt_to_gdp": {"value": null, "unit": "%", "as_of": null, "source": "seed — will populate on first run", "tier": "seed"},
+    "vix": {"value": 18.58, "unit": "", "as_of": "2026-07-30", "source": "seed", "tier": "seed"},
+    "buffett_indicator": {"value": 235.7, "unit": "%", "as_of": "2026-07", "source": "seed", "tier": "seed"},
+    "shiller_cape": {"value": 41.37, "unit": "x", "as_of": "2026-07", "source": "seed", "tier": "seed"},
+    "bitcoin": {"value": null, "unit": "USD", "as_of": null, "source": "seed — will populate on first run", "tier": "seed"},
+    "gold": {"value": null, "unit": "USD/oz", "as_of": null, "source": "seed — will populate on first run", "tier": "seed"}
+  },
+  "japan": {
+    "jgb_curve": {
+      "value": 2.78,
+      "curve": {"2Y": 1.44, "10Y": 2.78, "20Y": 3.75, "30Y": 3.98, "40Y": 3.86},
+      "unit": "%",
+      "as_of": "2026-07-31",
+      "source": "seed — will populate on first run from MOF jgbcme.csv",
+      "tier": "seed"
+    },
+    "usdjpy": {"value": 159.4, "unit": "JPY per USD", "as_of": "2026-08-14", "source": "TradingEconomics (verified 2026-08-17)", "tier": "seed"}
+  },
+  "manual": {}
+}

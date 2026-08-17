@@ -1,0 +1,151 @@
+{
+  "_readme": "Hand-maintained. Edit this file directly in the repo whenever a real event happens (BOJ decision, new budget, confirmed intervention, election/fiscal news). Everything here is tagged tier='event-driven' on the frontend — it is correct-as-of its own date, not daily-live, because the underlying real-world thing itself doesn't change daily.",
+
+  "boj_policy_rate": {
+    "value": 1.0,
+    "unit": "%",
+    "as_of": "2026-07-31",
+    "context": "Held at 1.00% on an 8-1 vote (Takata dissented, proposed 1.25%). Hiked from 0.75% to 1.00% in June 2026. Ueda flagged possible move as early as September/October. Update 2026-08-13: BOJ's Summary of Opinions from the July meeting flagged growing inflation risk, with one board member suggesting the pace of hikes could accelerate.",
+    "next_meeting": "2026-09 (date TBC)",
+    "source": "BOJ statement / Reuters / Bloomberg, 2026-07-31",
+    "tier": "event-driven"
+  },
+
+  "debt_service_ratio": {
+    "fiscal_year": "FY2026 (令和8年度) government budget",
+    "total_expenditure_jpy_tn": 122.3,
+    "kokusaihi_total_jpy_tn": 31.3,
+    "kokusaihi_breakdown": {
+      "interest_only_jpy_tn": 13.04,
+      "debt_redemption_jpy_tn": 18.21,
+      "note": "利払費(interest) vs 債務償還費(principal redemption, rolled over via new issuance) — these are NOT the same burden. Use interest_only for a true sustainability read."
+    },
+    "tax_revenue_jpy_tn": 83.7,
+    "ratio_interest_only_pct": 15.6,
+    "ratio_total_kokusaihi_pct": 37.4,
+    "budget_assumed_rate_pct": 3.0,
+    "budget_assumed_rate_prior_pct": 2.0,
+    "context": "Interest-only ratio (15.6%) sits in Normal zone. Gross kokusaihi-to-revenue (37.4%) sits in Danger zone by the >30% threshold — the two tell different stories, which is why both are shown rather than collapsed into one number.",
+    "source": "Japan MOF FY2026 budget documents, Dec 2025 / Feb 2026",
+    "tier": "event-driven"
+  },
+
+  "intervention_log": [
+    {
+      "date": "2026-07-31",
+      "type": "Coordinated US-Japan intervention — first joint operation in ~30 years",
+      "estimated_jpy_tn": null,
+      "estimated_usd_bn": null,
+      "usdjpy_before": 164.0,
+      "usdjpy_after": 157.0,
+      "mechanism": "Unusual funding: NY Fed sold EUROS (not USD) to buy JPY, via Goldman Sachs/Morgan Stanley, per FT. Treasury Sec. Bessent confirmed on 2026-08-03. A trader's notepad photographed at Camp David read 'Buy JPY $5-10bn'.",
+      "why_it_matters": "Analysts (Setser/CFR, Brooks/Brookings) read this as more about protecting the UST market than the yen itself — funding via EUR avoids forcing Japan to sell Treasuries to raise USD, which would have pushed UST yields up. This is the US actively managing the 'Japan capital repatriation -> UST selling' tail risk from the carry-trade chain.",
+      "confidence": "confirmed by Treasury Secretary, amounts not officially disclosed",
+      "source": "CFR / CNBC / FT / Axios / OMFIF, 2026-08-01 to 2026-08-07"
+    },
+    {
+      "date": "2026-07-30",
+      "type": "Japan solo intervention",
+      "estimated_jpy_tn": 8.45,
+      "estimated_usd_bn": 53,
+      "usdjpy_before": 164.0,
+      "usdjpy_after": 157.96,
+      "confidence": "estimate — inferred from BOJ account data, not officially confirmed by MOF (official quarterly breakdown lags ~3 months)",
+      "source": "Bloomberg / Reuters, 2026-07-31"
+    },
+    {
+      "date": "2026-05-01",
+      "estimated_jpy_tn": 5.48,
+      "estimated_usd_bn": 35,
+      "confidence": "estimate",
+      "source": "Reuters, 2026-05-01"
+    },
+    {
+      "date": "2026-04-26_to_2026-05-27",
+      "estimated_jpy_tn": 11.7349,
+      "estimated_usd_bn": 74.2,
+      "confidence": "MOF period total",
+      "source": "MOF / TradingEconomics"
+    }
+  ],
+
+  "fiscal_political_calendar": [
+    {
+      "event": "PM Takaichi ¥10tn/year fiscal expansion pledge",
+      "date": "2026-01",
+      "note": "Primary driver of the 2026 JGB long-end selloff — a fiscal/political story more than a pure BOJ-normalization story."
+    },
+    {
+      "event": "Snap election called, consumption tax cut on food pledged",
+      "date": "2026-01-20",
+      "note": "30Y JGB jumped 42bp in two sessions on this announcement."
+    },
+    {
+      "event": "Supplementary budget (~$19bn)",
+      "date": "2026-05-25",
+      "note": "Bond issuance held flat vs plan — a deliberate signal to bond markets."
+    },
+    {
+      "event": "Bessent confirms coordinated intervention; calls for FIMA repo facility expansion",
+      "date": "2026-08-03",
+      "note": "Bessent publicly said intervention 'can send a market signal, but Japan also needs to deliver policies that support the currency' — i.e. the US framed this as buying time, not a fix. Japan's FinMin said future dollar-raising would prioritize the FIMA repo facility (borrow USD against JGB collateral) over selling Treasuries outright."
+    },
+    {
+      "event": "Intervention effect fades — USDJPY retraces ~half the move",
+      "date": "2026-08-17",
+      "note": "USDJPY at ~159.4 (Aug 14 close), down ~1% on the week, having given back roughly half of the late-July/early-Aug intervention gain with no follow-up intervention. OMFIF's read: yen weakness is now openly a political issue domestically (real incomes, inflation), and intervention 'checks the box on being seen as doing something' rather than fixing the underlying rate differential."
+    }
+  ],
+
+  "risk_thresholds": {
+    "note": "These are Josh's own risk bands from the Japan Macro Crisis Map analysis, not universal constants — shown so the frontend can flag when a live-api reading crosses into Watch/Danger.",
+    "usdjpy": {"normal_max": 150, "watch_max": 165, "danger": ">165 sustained"},
+    "jgb_10y": {"normal_max": 2.0, "watch_max": 3.0, "danger": ">3% sustained"},
+    "jgb_30y": {"normal_max": 3.0, "watch_max": 4.0, "danger": ">4% sustained"},
+    "boj_rate": {"normal_max": 1.0, "watch_max": 1.5, "danger": ">1.5% rapid hikes"},
+    "debt_service_interest_only_ratio": {"normal_max": 20, "watch_max": 30, "danger": ">30%"},
+    "debt_service_gross_ratio": {"note": "no separate band defined yet — currently reads as Danger under the same >30% line, flagged as a methodology question, not a confirmed verdict"}
+  },
+
+  "real_economy_stress": {
+    "_purpose": "The financial-market indicators above (JGB, USDJPY, BOJ rate) don't show the political constraint on how far BOJ can hike or how long yen weakness can be tolerated. This section tracks that constraint directly: how currency weakness + inflation are showing up as real corporate failures, which is the pressure limiting policy options.",
+
+    "corporate_bankruptcies_h1_2026": {
+      "tsr_count": 5346, "tsr_yoy_pct": 7.1,
+      "tdb_count": 5335, "tdb_yoy_pct": 6.6,
+      "note": "Two independent credit research firms (Tokyo Shoko Research and Teikoku Databank), close but not identical counts — normal given differing methodology. Both confirm: first time above 5,000 in H1 in 12 years (since 2014's 5,073 by TSR's count).",
+      "monthly": {"2026-06": 1021, "2026-07": 1028, "note": "TSR headline confirms June crossed 1,000 for first time in 2 years 1 month; exact monthly digits sourced from a TV broadcast graphic, not independently re-verified against TSR's monthly release."},
+      "by_cause": {
+        "labor_shortage_related": {"count": 237, "note": "record high for a first half"},
+        "of_which_wage_cost_surge": {"count": 120, "yoy_change": "+140% (2.4x)", "note": "TSR: 賃上げが重荷に — wage increases becoming a bankruptcy driver, confirmed"},
+        "price_hike_type": {"count": 439, "yoy_change": "+27.6%", "note": "sourced from TV graphic, directionally consistent with TSR's 物価高倒産 category but not independently re-verified digit-by-digit"}
+      },
+      "sme_concentration": {"pct_under_10_employees": 90.6, "note": "sourced from TV graphic — plausible given TSR's own H1 report shows 77% of all bankruptcies have liabilities under ¥100mn, i.e. concentrated in small/micro firms, though the exact 90.6% employee-count cut wasn't independently found in the TSR/TDB source documents reviewed"},
+      "source": "Tokyo Shoko Research (tsr-net.co.jp), Teikoku Databank (tdb.co.jp), both published 2026-07-08"
+    },
+
+    "ppi_import_price_passthrough": {
+      "cgpi_yoy_pct": 7.2, "cgpi_month": "2026-07",
+      "cgpi_trend": "Feb +2.1% -> Mar +2.8% -> Apr +5.3% -> May +6.3% -> Jun +7.3% -> Jul +7.2% (second straight month above 7%, first time above 7% since around 2023)",
+      "import_price_yoy_pct": 29.1, "import_price_month": "2026-07",
+      "note": "BOJ's own data (published 2026-08-13). This is the real-economy transmission channel for a weak yen: import costs -> corporate input costs -> either passed to consumers (inflation) or absorbed (margin/bankruptcy pressure) — both outcomes visible in the bankruptcy-by-cause data above.",
+      "source": "Bank of Japan CGPI release, Nikkei, 2026-08-13"
+    },
+
+    "curry_price_index_tdb": {
+      "_purpose": "Teikoku Databank's household-cost-of-living proxy — tracks cost to cook curry rice at home, updated monthly, faster and more visceral than headline CPI.",
+      "series_jpy_per_serving": {"2026-01": 370, "2026-04_est": 361},
+      "note": "370 yen in Jan 2026 was a record high on the post-2026-rebase methodology. Series underwent a base-year revision in 2026 — pre-2026 figures (e.g. 2025 readings in the 390s-400s) are NOT directly comparable to 2026 figures on a like-for-like basis. Treat this as a directional/momentum indicator, not a clean YoY series, until both sides of the rebase are reconciled.",
+      "source": "Teikoku Databank monthly カレーライス物価指数 releases, tdb.co.jp"
+    }
+  },
+
+  "media_fact_checks": {
+    "_purpose": "Claims sourced from a TV news graphic (2026-08-15) that were checked against primary sources — most held up; two didn't and are flagged rather than silently corrected.",
+    "checked_and_accurate": ["PPI +7.2% YoY July 2026", "Import price +29.1% YoY July 2026", "H1 2026 bankruptcies 5,346 (+7.1%), 12-year high", "Labor-shortage bankruptcies 237 (record), wage-cost-surge 120 (+140%/2.4x)", "Curry price index ~370 yen Jan 2026 record high"],
+    "flagged_as_overstated": [
+      {"claim": "PPI at a '44-year high'", "issue": "The YoY growth RATE was higher as recently as Dec 2022 (~+10.6%) during the post-Ukraine energy shock. 7.2% is a genuine 2-year-high and the 2nd straight month above 7%, but not the highest print in living memory — the '44-year' framing looks like broadcast-headline embellishment, not an official BOJ characterization."},
+      {"claim": "Japan holds '1.4 trillion USD' in US Treasuries", "issue": "Official US Treasury TIC data shows Japan's holdings around $1.14-1.23tn through mid-2026 (e.g. $1,225.3bn Jan 2026, $1,143.1bn May 2026) — real, still the largest foreign holder, but roughly $150-250bn below the figure quoted."}
+    ]
+  }
+}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Josh Macro Playbook — Live Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --ink: #10141b;
+    --panel: #161b24;
+    --panel-line: #262e3a;
+    --paper: #e9e4d8;
+    --paper-dim: #a8a294;
+    --steel: #5b7b9e;
+    --steel-bright: #7fa3c8;
+    --amber: #c98a3d;
+    --rust: #b5533a;
+    --sage: #6a9c7c;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0; background: var(--ink); color: var(--paper);
+    font-family: var(--sans); padding: 32px 16px 80px;
+  }
+  .sheet{ max-width: 980px; margin: 0 auto; }
+  .eyebrow{
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--steel-bright); margin-bottom: 6px;
+  }
+  h1{ font-family: var(--serif); font-weight: 700; font-size: 30px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2{ font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 0 0 14px; color: var(--paper); }
+  .subline{
+    font-size: 13px; color: var(--paper-dim); display:flex; align-items:center;
+    justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--panel-line);
+  }
+  .legend{ display:flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; }
+  .legend-item{ display:flex; align-items:center; gap: 6px; }
+  .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot.live{ background: var(--sage); }
+  .dot.event{ background: var(--steel-bright); }
+  .dot.seed, .dot.stale{ background: var(--amber); }
+
+  section{ margin-bottom: 40px; }
+  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .card{
+    background: var(--panel); border: 1px solid var(--panel-line); border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .card-label{ font-family: var(--mono); font-size: 11px; color: var(--paper-dim); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display:flex; justify-content: space-between; align-items:center; }
+  .card-value{ font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--paper); }
+  .card-unit{ font-size: 13px; color: var(--paper-dim); margin-left: 4px; }
+  .card-meta{ font-size: 11px; color: var(--paper-dim); margin-top: 6px; }
+  .tier-tag{ font-family: var(--mono); font-size: 9px; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tier-live{ background: rgba(106,156,124,0.18); color: var(--sage); }
+  .tier-event{ background: rgba(127,163,200,0.18); color: var(--steel-bright); }
+  .tier-seed, .tier-stale{ background: rgba(201,138,61,0.18); color: var(--amber); }
+
+  .status-normal{ color: var(--sage); }
+  .status-watch{ color: var(--amber); }
+  .status-danger{ color: var(--rust); }
+
+  .score-row{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; margin-top: 12px; }
+  .score-card{ background: var(--panel); border: 1px solid var(--panel-line); border-radius:6px; padding:16px; }
+  .score-title{ font-family: var(--serif); font-size:15px; margin-bottom:8px; }
+  .score-bar-track{ height:8px; background:#232a36; border-radius:4px; overflow:hidden; margin: 8px 0; }
+  .score-bar-fill{ height:100%; border-radius:4px; }
+  .score-formula{ font-family: var(--mono); font-size:10.5px; color: var(--paper-dim); line-height:1.5; }
+
+  table{ width:100%; border-collapse: collapse; font-size: 13px; }
+  th, td{ text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--panel-line); }
+  th{ font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--paper-dim); letter-spacing: 0.04em; }
+  td{ font-family: var(--mono); }
+
+  .curve-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .curve-point{ flex: 1 1 70px; background: var(--panel); border:1px solid var(--panel-line); border-radius:6px; padding:10px; text-align:center; }
+  .curve-tenor{ font-family: var(--mono); font-size:10px; color: var(--paper-dim); }
+  .curve-yield{ font-family: var(--mono); font-size:18px; font-weight:600; margin-top:4px; }
+
+  .note-block{ background: var(--panel); border-left: 3px solid var(--steel); border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13px; color: var(--paper-dim); margin-top: 14px; }
+  .callout-danger{ border-left-color: var(--rust); }
+
+  ul.log{ list-style:none; padding:0; margin:0; }
+  ul.log li{ padding: 10px 0; border-bottom: 1px solid var(--panel-line); font-size: 13px; }
+  ul.log li:last-child{ border-bottom: none; }
+  .log-date{ font-family: var(--mono); color: var(--steel-bright); margin-right: 8px; }
+
+  footer{ margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--panel-line); font-size: 11px; color: var(--paper-dim); font-family: var(--mono); }
+
+  @media (max-width: 600px){
+    h1{ font-size: 24px; }
+    .grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="eyebrow">Macro Playbook — Live Instrument Panel</div>
+  <h1>Josh Macro Dashboard</h1>
+  <div class="subline">
+    <span id="generatedAt">Loading…</span>
+    <span class="legend">
+      <span class="legend-item"><span class="dot live"></span>Live-API</span>
+      <span class="legend-item"><span class="dot event"></span>Event-driven</span>
+      <span class="legend-item"><span class="dot seed"></span>Seed / Stale</span>
+    </span>
+  </div>
+
+  <section id="section-global">
+    <h2>01 — US &amp; Global</h2>
+    <div class="grid" id="globalGrid"></div>
+
+    <div class="score-row" id="globalScores"></div>
+  </section>
+
+  <section id="section-japan">
+    <h2>02 — Japan Fiscal &amp; Currency Stress</h2>
+
+    <div class="grid" id="japanGrid"></div>
+
+    <h2 style="margin-top:24px; font-size:16px;">JGB Yield Curve</h2>
+    <div class="curve-row" id="jgbCurve"></div>
+    <div class="note-block" id="jgbNote"></div>
+
+    <div class="score-row" id="japanScores"></div>
+
+    <h2 style="margin-top:28px; font-size:16px;">Debt Service Cost — two readings, not one</h2>
+    <table id="debtServiceTable"></table>
+
+    <h2 style="margin-top:28px; font-size:16px;">Intervention Log</h2>
+    <ul class="log" id="interventionLog"></ul>
+
+    <h2 style="margin-top:28px; font-size:16px;">Fiscal / Political Calendar</h2>
+    <ul class="log" id="fiscalCalendar"></ul>
+  </section>
+
+  <section id="section-real-economy">
+    <h2>03 — Real Economy Stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— the political constraint on how far BOJ can hike</span></h2>
+    <div class="grid" id="bankruptcyGrid"></div>
+    <div class="note-block" id="bankruptcyByCauseNote"></div>
+
+    <h2 style="margin-top:24px; font-size:16px;">PPI → Import Price Passthrough</h2>
+    <div class="grid" id="ppiGrid"></div>
+
+    <h2 style="margin-top:24px; font-size:16px;">Curry Price Index (household cost-of-living proxy, TDB)</h2>
+    <div class="curve-row" id="curryCurve"></div>
+    <div class="note-block" id="curryNote"></div>
+  </section>
+
+  <section id="section-factcheck">
+    <h2>Media Fact-Check Log</h2>
+    <div class="note-block" id="factCheckNote"></div>
+  </section>
+
+  <footer id="footerSources">Sources loading…</footer>
+</div>
+
+<script>
+const fmt = (v, unit) => v === null || v === undefined ? '—' : `${v}${unit ? ' ' + unit : ''}`;
+
+function tierTag(tier){
+  const map = {'live-api':['tier-live','LIVE'], 'event-driven':['tier-event','EVENT'], 'seed':['tier-seed','SEED'], 'stale':['tier-stale','STALE']};
+  const [cls,label] = map[tier] || ['tier-seed','?'];
+  return `<span class="tier-tag ${cls}">${label}</span>`;
+}
+
+function statusFor(value, bands){
+  if (value === null || value === undefined || !bands) return '';
+  if (bands.danger_min !== undefined && value >= bands.danger_min) return 'status-danger';
+  if (bands.watch_min !== undefined && value >= bands.watch_min) return 'status-watch';
+  return 'status-normal';
+}
+
+function card(label, entry, opts={}){
+  const cls = statusFor(entry.value, opts.bands);
+  return `<div class="card">
+    <div class="card-label"><span>${label}</span>${tierTag(entry.tier)}</div>
+    <div class="card-value ${cls}">${fmt(entry.value)}<span class="card-unit">${entry.unit||''}</span></div>
+    <div class="card-meta">as of ${entry.as_of||'—'} · ${entry.source||''}</div>
+  </div>`;
+}
+
+function scoreCard(title, pct, formula, color){
+  return `<div class="score-card">
+    <div class="score-title">${title}</div>
+    <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%; background:${color}"></div></div>
+    <div style="font-family: var(--mono); font-size:20px; margin-bottom:8px;">${Math.round(pct)}<span style="font-size:12px; color:var(--paper-dim)"> / 100</span></div>
+    <div class="score-formula">${formula}</div>
+  </div>`;
+}
+
+function clamp01(x){ return Math.max(0, Math.min(100, x)); }
+
+async function load(){
+  let data, manual;
+  const res = await fetch('./data.json', {cache: 'no-store'});
+  data = await res.json();
+  manual = data.manual || {};
+
+  document.getElementById('generatedAt').textContent =
+    'Data generated: ' + new Date(data.generated_at).toLocaleString('zh-CN', {timeZone:'Asia/Kuala_Lumpur'}) + ' (MYT)' +
+    (data._note ? '  ·  ' + data._note : '');
+
+  // ---- Global grid ----
+  const g = data.us_global;
+  const globalGrid = document.getElementById('globalGrid');
+  globalGrid.innerHTML = [
+    card('Fed Funds Rate', g.fed_funds_rate),
+    card('10Y Treasury', g.ust_10y),
+    card('30Y Treasury', g.ust_30y),
+    card('2Y Treasury', g.ust_2y),
+    card('CPI (YoY)', g.cpi_yoy),
+    card('Unemployment', g.unemployment),
+    card('Debt / GDP', g.debt_to_gdp),
+    card('VIX', g.vix),
+    card('Buffett Indicator', g.buffett_indicator),
+    card('Shiller CAPE', g.shiller_cape),
+    card('Bitcoin', g.bitcoin),
+    card('Gold', g.gold),
+  ].join('');
+
+  // Valuation Heat: normalize CAPE + Buffett Indicator against long-run
+  // average vs historical extreme. Anchors documented inline, not hidden.
+  const capeVal = g.shiller_cape.value, buffVal = g.buffett_indicator.value;
+  const capeSub = capeVal ? clamp01((capeVal - 17) / (44.2 - 17) * 100) : null;
+  const buffSub = buffVal ? clamp01((buffVal - 100) / (240 - 100) * 100) : null;
+  const heat = (capeSub!==null && buffSub!==null) ? (capeSub+buffSub)/2 : (capeSub ?? buffSub ?? 0);
+
+  // Complacency: VIX inverted against a 10 (calm) – 40 (panic) band.
+  const vixVal = g.vix.value;
+  const complacency = vixVal ? clamp01((40 - vixVal) / (40 - 10) * 100) : 0;
+
+  document.getElementById('globalScores').innerHTML =
+    scoreCard('Valuation Heat', heat,
+      `(CAPE−17)/(44.2−17) avg with (Buffett−100)/(240−100). CAPE ${fmt(capeVal,'x')}, Buffett ${fmt(buffVal,'%')}. Anchors: 17x/100% = long-run average · 44.2x/240% ≈ historical extreme.`,
+      heat>66?'var(--rust)':heat>40?'var(--amber)':'var(--sage)') +
+    scoreCard('Complacency', complacency,
+      `(40−VIX)/(40−10)×100. VIX ${fmt(vixVal)}. Low VIX while Valuation Heat is high is the combination worth watching, not either number alone.`,
+      complacency>66?'var(--rust)':complacency>40?'var(--amber)':'var(--sage)');
+
+  // ---- Japan grid ----
+  const j = data.japan;
+  const th = (manual.risk_thresholds || {});
+  const boj = manual.boj_policy_rate || {value:null, unit:'%', as_of:null, source:'', tier:'event-driven'};
+
+  const japanGrid = document.getElementById('japanGrid');
+  japanGrid.innerHTML = [
+    card('USD/JPY', j.usdjpy, {bands: th.usdjpy ? {watch_min: th.usdjpy.normal_max, danger_min: th.usdjpy.watch_max} : null}),
+    card('10Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['10Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {bands: th.jgb_10y ? {watch_min:th.jgb_10y.normal_max, danger_min:th.jgb_10y.watch_max} : null}),
+    card('30Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['30Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {bands: th.jgb_30y ? {watch_min:th.jgb_30y.normal_max, danger_min:th.jgb_30y.watch_max} : null}),
+    card('BOJ Policy Rate', boj, {bands: th.boj_rate ? {watch_min:th.boj_rate.normal_max, danger_min:th.boj_rate.watch_max} : null}),
+  ].join('');
+
+  // JGB curve strip
+  const curve = j.jgb_curve.curve || {};
+  const order = ['2Y','10Y','20Y','30Y','40Y'];
+  document.getElementById('jgbCurve').innerHTML = order.filter(t=>curve[t]!==undefined).map(t=>{
+    let cls = '';
+    if (t==='10Y' && th.jgb_10y) cls = curve[t] >= th.jgb_10y.watch_max ? 'status-danger' : curve[t] >= th.jgb_10y.normal_max ? 'status-watch' : 'status-normal';
+    if (t==='30Y' && th.jgb_30y) cls = curve[t] >= th.jgb_30y.watch_max ? 'status-danger' : curve[t] >= th.jgb_30y.normal_max ? 'status-watch' : 'status-normal';
+    return `<div class="curve-point"><div class="curve-tenor">${t}</div><div class="curve-yield ${cls}">${curve[t]}%</div></div>`;
+  }).join('');
+
+  const jgb30 = curve['30Y'];
+  if (th.jgb_30y && jgb30 !== undefined && jgb30 >= th.jgb_30y.watch_max){
+    document.getElementById('jgbNote').outerHTML =
+      `<div class="note-block callout-danger">30Y JGB at ${jgb30}% is inside the Danger band (>${th.jgb_30y.watch_max}%) on Josh's own threshold. This is not automatically a crisis, but it means the "not yet red alert" read needs re-checking against this number specifically, not the narrative alone.</div>`;
+  } else {
+    document.getElementById('jgbNote').outerHTML = `<div class="note-block">30Y JGB currently below the Danger threshold.</div>`;
+  }
+
+  // Japan Fiscal Stress score: blend of 30Y JGB position, USDJPY position, BOJ rate position
+  function bandPct(value, normalMax, watchMax){
+    if (value === undefined || value === null || !normalMax || !watchMax) return null;
+    return clamp01((value - normalMax) / (watchMax - normalMax) * 100);
+  }
+  const s30 = th.jgb_30y ? bandPct(curve['30Y'], th.jgb_30y.normal_max, th.jgb_30y.watch_max) : null;
+  const sFx = th.usdjpy ? bandPct(j.usdjpy.value, th.usdjpy.normal_max, th.usdjpy.watch_max) : null;
+  const sBoj = th.boj_rate ? bandPct(boj.value, th.boj_rate.normal_max, th.boj_rate.watch_max) : null;
+  const parts = [s30, sFx, sBoj].filter(x => x !== null);
+  const fiscalStress = parts.length ? parts.reduce((a,b)=>a+b,0)/parts.length : 0;
+
+  document.getElementById('japanScores').innerHTML = scoreCard(
+    'Japan Fiscal Stress',
+    fiscalStress,
+    `Average of position-within-band for 30Y JGB (${fmt(curve['30Y'],'%')}), USD/JPY (${fmt(j.usdjpy.value)}), BOJ rate (${fmt(boj.value,'%')}), each scaled 0 at Normal-ceiling to 100 at Watch-ceiling. This is Josh's own band definition, not a market-standard index — treat as a compass, not a verdict.`,
+    fiscalStress>66?'var(--rust)':fiscalStress>33?'var(--amber)':'var(--sage)'
+  );
+
+  // Debt service table
+  const ds = manual.debt_service_ratio || {};
+  document.getElementById('debtServiceTable').innerHTML = `
+    <tr><th>Reading</th><th>Formula</th><th>Value</th><th>Zone</th></tr>
+    <tr><td>Interest-only burden</td><td>利払費 ¥${ds.kokusaihi_breakdown?.interest_only_jpy_tn}tn / 税収 ¥${ds.tax_revenue_jpy_tn}tn</td><td>${ds.ratio_interest_only_pct}%</td><td class="status-normal">Normal</td></tr>
+    <tr><td>Gross debt service</td><td>国債費(利払+償還) ¥${ds.kokusaihi_total_jpy_tn}tn / 税収 ¥${ds.tax_revenue_jpy_tn}tn</td><td>${ds.ratio_total_kokusaihi_pct}%</td><td class="status-danger">Danger (methodology flag — see note below)</td></tr>
+  `;
+
+  // Intervention log
+  document.getElementById('interventionLog').innerHTML = (manual.intervention_log || []).map(e => {
+    const amount = (e.estimated_jpy_tn !== null && e.estimated_jpy_tn !== undefined)
+      ? `~¥${e.estimated_jpy_tn}tn / $${e.estimated_usd_bn}bn ` : '';
+    const fx = e.usdjpy_before ? `(USDJPY ${e.usdjpy_before}→${e.usdjpy_after}) ` : '';
+    return `<li><span class="log-date">${e.date}</span>${e.type ? `<strong>${e.type}</strong> — ` : ''}${amount}${fx}
+    ${e.mechanism ? `<div class="card-meta">Mechanism: ${e.mechanism}</div>` : ''}
+    ${e.why_it_matters ? `<div class="card-meta">Why it matters: ${e.why_it_matters}</div>` : ''}
+    <div class="card-meta">${e.confidence} · ${e.source}</div></li>`;
+  }).join('') || '<li>No entries yet.</li>';
+
+  // Fiscal calendar
+  document.getElementById('fiscalCalendar').innerHTML = (manual.fiscal_political_calendar || []).map(e => `
+    <li><span class="log-date">${e.date}</span>${e.event}
+    <div class="card-meta">${e.note}</div></li>
+  `).join('') || '<li>No entries yet.</li>';
+
+  // ---- Real Economy Stress ----
+  const resStress = manual.real_economy_stress || {};
+  const bk = resStress.corporate_bankruptcies_h1_2026 || {};
+  document.getElementById('bankruptcyGrid').innerHTML = [
+    `<div class="card"><div class="card-label">H1 2026 Bankruptcies (TSR)<span class="tier-tag tier-event">EVENT</span></div><div class="card-value">${fmt(bk.tsr_count)}<span class="card-unit">+${bk.tsr_yoy_pct}% YoY</span></div><div class="card-meta">12-yr high for a first half</div></div>`,
+    `<div class="card"><div class="card-label">H1 2026 Bankruptcies (TDB)<span class="tier-tag tier-event">EVENT</span></div><div class="card-value">${fmt(bk.tdb_count)}<span class="card-unit">+${bk.tdb_yoy_pct}% YoY</span></div><div class="card-meta">Independent second source</div></div>`,
+    `<div class="card"><div class="card-label">June / July monthly</div><div class="card-value" style="font-size:18px;">${bk.monthly ? bk.monthly['2026-06'] : '—'} / ${bk.monthly ? bk.monthly['2026-07'] : '—'}</div><div class="card-meta">First back-to-back >1,000 months in 2+ yrs</div></div>`,
+  ].join('');
+
+  const cause = bk.by_cause || {};
+  document.getElementById('bankruptcyByCauseNote').innerHTML =
+    `By cause: labor-shortage-related ${cause.labor_shortage_related?.count ?? '—'} (record high for a H1), of which wage-cost-surge ${cause.of_which_wage_cost_surge?.count ?? '—'} (${cause.of_which_wage_cost_surge?.yoy_change ?? '—'}); price-hike-type ${cause.price_hike_type?.count ?? '—'} (${cause.price_hike_type?.yoy_change ?? '—'}). ${bk.sme_concentration ? `${bk.sme_concentration.pct_under_10_employees}% of failing firms have under 10 employees.` : ''} This is the real-world cost of the "hike rates to save the yen" option — it's not free, and it's concentrated on Japan's smallest businesses.`;
+
+  const ppi = resStress.ppi_import_price_passthrough || {};
+  document.getElementById('ppiGrid').innerHTML = [
+    `<div class="card"><div class="card-label">CGPI (Producer Prices) YoY</div><div class="card-value">${fmt(ppi.cgpi_yoy_pct,'%')}</div><div class="card-meta">${ppi.cgpi_month || ''}</div></div>`,
+    `<div class="card"><div class="card-label">Import Price Index YoY</div><div class="card-value status-watch">${fmt(ppi.import_price_yoy_pct,'%')}</div><div class="card-meta">${ppi.import_price_month || ''}</div></div>`,
+  ].join('');
+
+  const curry = resStress.curry_price_index_tdb || {};
+  const currySeries = curry.series_jpy_per_serving || {};
+  document.getElementById('curryCurve').innerHTML = Object.entries(currySeries).map(([k,v]) =>
+    `<div class="curve-point"><div class="curve-tenor">${k}</div><div class="curve-yield">¥${v}</div></div>`
+  ).join('');
+  document.getElementById('curryNote').innerHTML = curry.note || '';
+
+  const fc = manual.media_fact_checks || {};
+  document.getElementById('factCheckNote').innerHTML =
+    `<strong style="color:var(--sage)">Checked and accurate:</strong> ${(fc.checked_and_accurate||[]).join(' · ')}<br><br>` +
+    `<strong style="color:var(--amber)">Flagged as overstated:</strong><br>` +
+    (fc.flagged_as_overstated||[]).map(f => `— "${f.claim}": ${f.issue}`).join('<br>');
+
+  document.getElementById('footerSources').innerHTML =
+    'US/Global: FRED (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +
+    'Japan: MOF 国債金利情報 (JGB curve), Frankfurter/ECB (USDJPY). Event-driven fields hand-maintained in manual.json. ' +
+    'Auto-updated daily via GitHub Actions — see README for setup.';
+}
+
+load().catch(e => {
+  document.getElementById('generatedAt').textContent = 'Failed to load data.json — ' + e.message;
+});
+</script>
+</body>
+</html>
