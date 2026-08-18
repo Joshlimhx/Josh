@@ -297,14 +297,20 @@ def main():
     # merging against the previous data.json if present.
     out_path = os.path.join(os.path.dirname(__file__), "..", "data.json")
     if os.path.exists(out_path):
-        with open(out_path) as f:
-            prev = json.load(f)
-        for section in ("us_global", "japan", "global_systemic"):
-            for k, v in data.get(section, {}).items():
-                if v.get("tier") == "stale" and section in prev and k in prev[section]:
-                    prev_entry = prev[section][k]
-                    if prev_entry.get("value") is not None:
-                        data[section][k] = {**prev_entry, "tier": "stale", "error": v.get("error")}
+        try:
+            with open(out_path) as f:
+                prev = json.load(f)
+            for section in ("us_global", "japan", "global_systemic"):
+                for k, v in data.get(section, {}).items():
+                    if not isinstance(v, dict):
+                        continue  # skip non-metric entries like "_purpose" descriptive strings
+                    if v.get("tier") == "stale" and section in prev and isinstance(prev.get(section), dict) and k in prev[section]:
+                        prev_entry = prev[section][k]
+                        if isinstance(prev_entry, dict) and prev_entry.get("value") is not None:
+                            data[section][k] = {**prev_entry, "tier": "stale", "error": v.get("error")}
+        except Exception as e:
+            # Never let the stale-preservation step block writing fresh data.
+            print(f"[warn] stale-value merge skipped due to error: {e}", file=sys.stderr)
 
     with open(out_path, "w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
