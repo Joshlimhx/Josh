@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Josh Macro Playbook — Live Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap');
 
@@ -169,6 +172,18 @@
 
     <h2 style="margin-top:24px; font-size:16px;">Central Bank Calendar — remaining 2026</h2>
     <div class="grid" id="cbCalendarGrid"></div>
+  </section>
+
+  <section id="section-history">
+    <h2>05 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="font-family:var(--mono); font-size:11px; color:var(--paper-dim);" id="historyMeta">Loading history…</div>
+      <button id="resetZoomBtn" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--steel-bright); border:1px solid var(--panel-line); border-radius:5px; padding:6px 10px; cursor:pointer;">Reset zoom</button>
+    </div>
+    <div style="background:var(--panel); border:1px solid var(--panel-line); border-radius:6px; padding:12px;">
+      <canvas id="jgbHistoryChart" height="110"></canvas>
+    </div>
+    <div class="card-meta" style="margin-top:8px;">Scroll/pinch to zoom, drag to pan. Source: MOF Japan 国債金利情報 全期間データ.</div>
   </section>
 
   <footer id="footerSources">Sources loading…</footer>
@@ -440,9 +455,71 @@ async function load(){
     'Auto-updated daily via GitHub Actions — see README for setup.';
 }
 
+async function loadHistoryChart(){
+  const metaEl = document.getElementById('historyMeta');
+  try {
+    const res = await fetch('./jgb_history.json', {cache: 'no-store'});
+    if (!res.ok) throw new Error('jgb_history.json not found yet — run the workflow once to generate it');
+    const hist = await res.json();
+    const toPoints = (arr) => arr.map(([d, v]) => ({x: new Date(d).getTime(), y: v}));
+    const points10 = toPoints(hist['10y'] || []);
+    const points30 = toPoints(hist['30y'] || []);
+
+    const fmtDate = (ms) => new Date(ms).toISOString().slice(0,10);
+
+    const ctx = document.getElementById('jgbHistoryChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {label: '10Y JGB', data: points10, borderColor: '#7fa3c8', backgroundColor: 'transparent', pointRadius: 0, borderWidth: 1.5, tension: 0},
+          {label: '30Y JGB', data: points30, borderColor: '#b5533a', backgroundColor: 'transparent', pointRadius: 0, borderWidth: 1.5, tension: 0},
+        ]
+      },
+      options: {
+        animation: false,
+        responsive: true,
+        interaction: {mode: 'index', intersect: false},
+        scales: {
+          x: {
+            type: 'linear',
+            ticks: { color: '#a8a294', font: {family: 'IBM Plex Mono', size: 10}, callback: (v) => fmtDate(v).slice(0,4) },
+            grid: { color: '#262e3a' },
+          },
+          y: {
+            ticks: { color: '#a8a294', font: {family: 'IBM Plex Mono', size: 10}, callback: (v) => v + '%' },
+            grid: { color: '#262e3a' },
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#e9e4d8', font: {family: 'IBM Plex Mono', size: 11} } },
+          tooltip: {
+            callbacks: {
+              title: (items) => items[0] ? fmtDate(items[0].parsed.x) : '',
+              label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
+            }
+          },
+          zoom: {
+            pan: { enabled: true, mode: 'x' },
+            zoom: { wheel: {enabled: true}, pinch: {enabled: true}, mode: 'x' }
+          }
+        }
+      }
+    });
+
+    document.getElementById('resetZoomBtn').addEventListener('click', () => chart.resetZoom());
+
+    const lastPoint10 = hist['10y'] && hist['10y'][hist['10y'].length - 1];
+    metaEl.textContent = `${points10.length.toLocaleString()} daily points since ${hist['10y'][0][0]} · last: ${lastPoint10 ? lastPoint10[0] : '—'}`;
+  } catch(e) {
+    metaEl.textContent = 'History not available yet: ' + e.message;
+  }
+}
+
 load().catch(e => {
   document.getElementById('generatedAt').textContent = 'Failed to load data.json — ' + e.message;
 });
+loadHistoryChart();
 </script>
 </body>
 </html>
