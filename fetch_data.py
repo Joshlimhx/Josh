@@ -142,6 +142,83 @@ def get_rrp():
     return {"value": p["value"], "unit": "USD bn", "as_of": p["date"], "source": "FRED:RRPONTSYD (Fed overnight reverse repo, daily)"}
 
 
+# ---------------------------------------------------------------------------
+# JGB full history (1974-present) — for the historical context chart.
+# MOF's all-history file uses Japanese era dates (S=Showa, H=Heisei, R=Reiwa)
+# and "N" (年) column suffixes instead of the English file's "Y" suffixes.
+# Written to a SEPARATE file (jgb_history.json) so data.json stays lean.
+# ---------------------------------------------------------------------------
+
+ERA_START_YEAR = {"S": 1925, "H": 1988, "R": 2018}  # add era_number to get Gregorian year
+
+
+def era_date_to_iso(era_str):
+    """Convert 'R8.4.1' style Japanese-era date to '2026-04-01'."""
+    import re
+    m = re.match(r"^([SHR])(\d+)\.(\d+)\.(\d+)$", era_str.strip())
+    if not m:
+        return None
+    era, era_year, month, day = m.groups()
+    year = ERA_START_YEAR[era] + int(era_year)
+    return f"{year:04d}-{int(month):02d}-{int(day):02d}"
+
+
+def get_jgb_history():
+    raw = http_get("https://www.mof.go.jp/jgbs/reference/interest_rate/data/jgbcm_all.csv")
+    text = raw.decode("shift_jis", errors="replace")
+    reader = list(csv.reader(io.StringIO(text)))
+    header_row = None
+    header_idx = None
+    for i, row in enumerate(reader):
+        # This file's header row has a BLANK first cell (unlike jgbcme.csv,
+        # which labels it "Date") — detect it instead by the tenor columns
+        # themselves, e.g. "10N"/"10Y" appearing in the row.
+        if row and len(row) > 1 and row[1].strip() in ("1N", "1Y"):
+            header_row = row
+            header_idx = i
+            break
+    if header_row is None:
+        raise RuntimeError("could not find header row in MOF full-history CSV")
+    start_idx = header_idx + 1
+    cols = [c.strip() for c in header_row]
+    # Japanese file labels tenor columns like "10N", "30N" (English uses "10Y","30Y")
+    col_10y = next((c for c in cols if c in ("10N", "10Y")), None)
+    col_30y = next((c for c in cols if c in ("30N", "30Y")), None)
+    if not col_10y or not col_30y:
+        raise RuntimeError(f"could not find 10Y/30Y columns in header: {cols}")
+    idx_10y, idx_30y = cols.index(col_10y), cols.index(col_30y)
+
+    series_10y, series_30y = [], []
+    for row in reader[start_idx:]:
+        if not row or not row[0].strip():
+            continue
+        iso_date = era_date_to_iso(row[0])
+        if not iso_date:
+            continue
+        v10 = row[idx_10y].strip() if len(row) > idx_10y else ""
+        v30 = row[idx_30y].strip() if len(row) > idx_30y else ""
+        if v10 and v10 != "-":
+            try:
+                series_10y.append([iso_date, float(v10)])
+            except ValueError:
+                pass
+        if v30 and v30 != "-":
+            try:
+                series_30y.append([iso_date, float(v30)])
+            except ValueError:
+                pass
+
+    if not series_10y:
+        raise RuntimeError("parsed zero valid 10Y rows from MOF full-history CSV")
+
+    return {
+        "10y": series_10y,
+        "30y": series_30y,
+        "source": "MOF Japan — 国債金利情報 全期間データ (jgbcm_all.csv), 1974-present",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def get_buffett_indicator():
     # FRED discontinued the Wilshire 5000 series (WILL5000INDFC) on 2024-06-03
     # (Wilshire Associates pulled licensing). Use the Fed's own Z.1 flow-of-funds
@@ -317,6 +394,17 @@ def main():
 
     print(f"Wrote {out_path}")
 
+    # ---- JGB full history (separate file, only refetched successfully — ----
+    # ---- on failure, leave whatever history file already exists alone) ----
+    history_path = os.path.join(os.path.dirname(__file__), "..", "jgb_history.json")
+    try:
+        history = get_jgb_history()
+        with open(history_path, "w") as f:
+            json.dump(history, f, separators=(",", ":"))  # compact — this file can get large
+        print(f"Wrote {history_path} ({len(history['10y'])} points)")
+    except Exception as e:
+        print(f"[warn] jgb_history fetch failed, leaving existing file untouched: {e}", file=sys.stderr)
+
 
 if __name__ == "__main__":
-    main()
+    main()  
