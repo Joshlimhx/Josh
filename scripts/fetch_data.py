@@ -411,6 +411,78 @@ def build_world():
     return w
 
 
+# ---------------------------------------------------------------------------
+# Cross-asset long history (FRED) -> history_us.json, for the dropdown chart.
+# ---------------------------------------------------------------------------
+HISTORY_SPECS = [
+    # key, FRED id, label, unit, transform
+    ("ust_10y", "DGS10", "US 10Y Treasury yield", "%", None),
+    ("ust_2s10s", "T10Y2Y", "US 2s10s yield curve (10Y − 2Y)", "pp", None),
+    ("fed_funds", "FEDFUNDS", "Fed Funds rate", "%", None),
+    ("us_hy_credit_spread", "BAMLH0A0HYM2", "US High Yield credit spread", "%", None),
+    ("vix", "VIXCLS", "VIX", "", None),
+    ("usdjpy", "DEXJPUS", "USD/JPY", "JPY", None),
+    ("wti_oil", "DCOILWTICO", "WTI crude oil", "USD/bbl", None),
+    ("dxy", "DTWEXBGS", "Dollar index (broad, trade-weighted)", "", None),
+    ("cpi_yoy", "CPIAUCSL", "US CPI inflation (YoY)", "%", "yoy"),
+    ("unemployment", "UNRATE", "US unemployment rate", "%", None),
+    ("nfci", "NFCI", "Financial conditions (NFCI, >0 = tight)", "", None),
+    ("em_corp_oas", "BAMLEMCBPIOAS", "EM corporate credit spread", "%", None),
+]
+
+
+def fred_full(series_id):
+    url = (f"{FRED_BASE}?series_id={series_id}&api_key={FRED_API_KEY}"
+           f"&file_type=json&sort_order=asc&observation_start=1950-01-01")
+    obs = json.loads(http_get(url, timeout=60))["observations"]
+    return [(o["date"], float(o["value"])) for o in obs if o["value"] != "."]
+
+
+def _weekly(points):
+    """Keep the last observation of each ISO week (shrinks daily series ~5x)."""
+    out, last_key = [], None
+    for d, v in points:
+        y, w, _ = datetime.fromisoformat(d).isocalendar()
+        key = (y, w)
+        if key == last_key:
+            out[-1] = (d, v)
+        else:
+            out.append((d, v)); last_key = key
+    return out
+
+
+def build_us_history():
+    if not FRED_API_KEY:
+        raise RuntimeError("FRED_API_KEY not set")
+    series = {}
+    for key, sid, label, unit, tf in HISTORY_SPECS:
+        try:
+            pts = fred_full(sid)
+            if tf == "yoy":
+                pts = [(pts[i][0], round((pts[i][1] / pts[i - 12][1] - 1) * 100, 2)) for i in range(12, len(pts))]
+            elif len(pts) > 5000:
+                pts = _weekly(pts)
+            series[key] = {"label": label, "unit": unit, "source": f"FRED:{sid}",
+                           "data": [[d, round(v, 4)] for d, v in pts]}
+        except Exception as e:
+            print(f"[warn] history {key} ({sid}) failed: {e}", file=sys.stderr)
+    # NBER recession periods from USREC (monthly 0/1)
+    recessions = []
+    try:
+        rec = fred_full("USREC")
+        start = None
+        for d, v in rec:
+            if v == 1 and start is None: start = d
+            if v == 0 and start is not None:
+                recessions.append([start, d]); start = None
+        if start is not None: recessions.append([start, rec[-1][0]])
+    except Exception as e:
+        print(f"[warn] recession bands failed: {e}", file=sys.stderr)
+    if not series:
+        raise RuntimeError("no history series fetched")
+    return {"generated_at": datetime.now(timezone.utc).isoformat(), "series": series, "recessions": recessions}
+
+
 def main():
     now = datetime.now(timezone.utc).isoformat()
 
@@ -495,6 +567,18 @@ def main():
         with open(status_path, "w") as f:
             f.write(traceback.format_exc())
 
+
+    # ---- Cross-asset history (FRED) ----
+    try:
+        us_hist = build_us_history()
+        with open(os.path.join(os.path.dirname(__file__), "..", "history_us.json"), "w") as f:
+            json.dump(us_hist, f, separators=(",", ":"))
+        print(f"Wrote history_us.json ({len(us_hist['series'])} series)")
+    except Exception as e:
+        print(f"[warn] history_us failed, leaving existing file untouched: {e}", file=sys.stderr)
+        import traceback
+        with open(os.path.join(os.path.dirname(__file__), "..", "history_us_error.txt"), "w") as f:
+            f.write(traceback.format_exc())
 
 if __name__ == "__main__":
     main()

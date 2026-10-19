@@ -203,6 +203,20 @@
     <div class="card-meta" style="margin-top:8px;">Scroll/pinch to zoom, drag to pan. Source: MOF Japan 国債金利情報 全期間データ.</div>
   </section>
 
+  <section id="section-history2">
+    <h2>07 — Cross-Asset History <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— pick an indicator; grey bands = US recessions, dashed lines = your Watch / Danger levels</span></h2>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+      <select id="h2Select" style="font-family:var(--mono); font-size:12px; background:var(--panel); color:var(--paper); border:1px solid var(--panel-line); border-radius:5px; padding:7px 10px;"></select>
+      <span id="h2Ranges"></span>
+      <button id="h2Reset" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--steel-bright); border:1px solid var(--panel-line); border-radius:5px; padding:6px 10px; cursor:pointer;">Reset zoom</button>
+    </div>
+    <div class="note-block" id="h2Stats" style="margin-bottom:10px;">Loading…</div>
+    <div style="background:var(--panel); border:1px solid var(--panel-line); border-radius:8px; padding:12px;">
+      <canvas id="h2Chart" height="110"></canvas>
+    </div>
+    <div style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); margin-top:8px;">Scroll/pinch to zoom, drag to pan. Daily series are shown weekly to keep the page fast. Source: FRED (St. Louis Fed); recession dates from NBER.</div>
+  </section>
+
   <footer id="footerSources">Sources loading…</footer>
 </div>
 
@@ -577,7 +591,95 @@ async function loadHistoryChart(){
   }
 }
 
-load().catch(e => {
+async function loadCrossHistory(){
+  const stats = document.getElementById('h2Stats');
+  try {
+    const res = await fetch('./history_us.json', {cache:'no-store'});
+    if (!res.ok) throw new Error('history_us.json not found yet — run the workflow once');
+    const H = await res.json();
+    const keys = Object.keys(H.series);
+    const sel = document.getElementById('h2Select');
+    sel.innerHTML = keys.map(k => `<option value="${k}">${H.series[k].label}</option>`).join('');
+    const recBands = (H.recessions||[]).map(([a,b]) => [new Date(a).getTime(), new Date(b).getTime()]);
+    const bandPlugin = {
+      id: 'recBands',
+      beforeDatasetsDraw(chart){
+        const {ctx, chartArea, scales:{x}} = chart; if(!chartArea) return;
+        ctx.save(); ctx.fillStyle = 'rgba(168,162,148,0.13)';
+        recBands.forEach(([a,b]) => {
+          const x0 = Math.max(chartArea.left, x.getPixelForValue(a)), x1 = Math.min(chartArea.right, x.getPixelForValue(b));
+          if (x1 > x0) ctx.fillRect(x0, chartArea.top, x1-x0, chartArea.bottom-chartArea.top);
+        });
+        ctx.restore();
+      }
+    };
+    const lines = (key) => {
+      const b = (THRESHOLDS||{})[key] || {}, out = [];
+      if (b.normal_max !== undefined) out.push({v:b.normal_max, color:'#c9a24a', name:'Watch above ' + b.normal_max});
+      if (b.watch_max !== undefined) out.push({v:b.watch_max, color:'#b5533a', name:'Danger above ' + b.watch_max});
+      return out;
+    };
+    const linePlugin = {
+      id: 'thrLines',
+      afterDatasetsDraw(chart){
+        const {ctx, chartArea, scales:{y}} = chart; if(!chartArea) return;
+        (chart.$lines||[]).forEach(l => {
+          const py = y.getPixelForValue(l.v); if (py < chartArea.top || py > chartArea.bottom) return;
+          ctx.save(); ctx.strokeStyle = l.color; ctx.setLineDash([5,4]); ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(chartArea.left, py); ctx.lineTo(chartArea.right, py); ctx.stroke();
+          ctx.setLineDash([]); ctx.fillStyle = l.color; ctx.font = '10px IBM Plex Mono, monospace';
+          ctx.fillText(l.name, chartArea.left + 6, py - 4); ctx.restore();
+        });
+      }
+    };
+    const fmtDate = ms => new Date(ms).toISOString().slice(0,10);
+    const chart = new Chart(document.getElementById('h2Chart').getContext('2d'), {
+      type:'line',
+      data:{datasets:[{label:'', data:[], borderColor:'#7fa3c8', backgroundColor:'transparent', pointRadius:0, borderWidth:1.5, tension:0}]},
+      options:{
+        animation:false, responsive:true, interaction:{mode:'index', intersect:false},
+        scales:{
+          x:{type:'linear', ticks:{color:'#a8a294', font:{family:'IBM Plex Mono', size:10}, callback:v=>fmtDate(v).slice(0,4)}, grid:{color:'#262e3a'}},
+          y:{ticks:{color:'#a8a294', font:{family:'IBM Plex Mono', size:10}}, grid:{color:'#262e3a'}}
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{title:i=>i[0]?fmtDate(i[0].parsed.x):'', label:i=>`${i.dataset.label}: ${i.parsed.y}`}},
+          zoom:{pan:{enabled:true, mode:'x'}, zoom:{wheel:{enabled:true}, pinch:{enabled:true}, mode:'x'}}
+        }
+      },
+      plugins:[bandPlugin, linePlugin]
+    });
+    let current = keys[0];
+    function show(key, years){
+      current = key;
+      const S = H.series[key], pts = S.data.map(([d,v]) => ({x:new Date(d).getTime(), y:v}));
+      chart.data.datasets[0].data = pts; chart.data.datasets[0].label = S.label + (S.unit ? ' ('+S.unit+')' : '');
+      chart.$lines = lines(key);
+      const last = pts[pts.length-1];
+      chart.options.scales.x.min = years ? last.x - years*365.25*864e5 : undefined;
+      chart.options.scales.x.max = undefined;
+      chart.update();
+      const vals = S.data.map(r => r[1]), sorted = [...vals].sort((a,b)=>a-b);
+      const rank = sorted.filter(v => v <= last.y).length / sorted.length * 100;
+      const mx = S.data.reduce((a,r)=> r[1]>a[1]?r:a), mn = S.data.reduce((a,r)=> r[1]<a[1]?r:a);
+      const thr = chart.$lines.length ? ' · bands: ' + chart.$lines.map(l=>l.name).join(', ') : ' · no fixed band (trend/sign matters more than level)';
+      stats.innerHTML = `<strong>${S.label}</strong>: latest <strong>${last.y}</strong>${S.unit?' '+S.unit:''} (${fmtDate(last.x)}) — higher than <strong>${Math.round(rank)}%</strong> of all readings since ${S.data[0][0].slice(0,4)}. ` +
+        `High ${mx[1]} (${mx[0].slice(0,7)}) · Low ${mn[1]} (${mn[0].slice(0,7)})${thr}.`;
+    }
+    const rangeBox = document.getElementById('h2Ranges');
+    rangeBox.innerHTML = [['All',0],['20Y',20],['10Y',10],['5Y',5],['1Y',1]].map(([t,y]) =>
+      `<button data-y="${y}" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--paper); border:1px solid var(--panel-line); border-radius:5px; padding:6px 9px; cursor:pointer; margin-right:4px;">${t}</button>`).join('');
+    rangeBox.addEventListener('click', e => { const y = e.target.dataset && e.target.dataset.y; if (y !== undefined) show(current, +y); });
+    sel.addEventListener('change', () => show(sel.value, 0));
+    document.getElementById('h2Reset').addEventListener('click', () => { chart.resetZoom(); show(current, 0); });
+    show(keys[0], 0);
+  } catch(e) {
+    stats.textContent = 'Cross-asset history not available yet: ' + e.message;
+  }
+}
+
+load().then(loadCrossHistory).catch(e => {
   document.getElementById('generatedAt').textContent = 'Failed to load data.json — ' + e.message;
 });
 loadHistoryChart();

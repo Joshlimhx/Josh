@@ -35,5 +35,7 @@ jobs:
           git add data.json
           if [ -f jgb_history.json ]; then git add jgb_history.json; fi
           if [ -f jgb_history_error.txt ]; then git add jgb_history_error.txt; fi
+          if [ -f history_us.json ]; then git add history_us.json; fi
+          if [ -f history_us_error.txt ]; then git add history_us_error.txt; fi
           git diff --cached --quiet && echo "No changes" || git commit -m "Auto-update: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push
