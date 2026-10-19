@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T09:07:20.237237+00:00",
+  "generated_at": "2026-10-19T09:14:32.705368+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 82761,
+      "value": 82718,
       "unit": "USD",
       "as_of": "2026-10-19",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 4172.899902,
+      "value": 4172.100098,
       "unit": "USD/oz",
       "as_of": "2026-10-19",
       "source": "gold-api.com",
@@ -125,6 +125,167 @@
       "unit": "JPY per USD",
       "as_of": "2026-10-16",
       "source": "Frankfurter (ECB reference rates)",
+      "tier": "live-api",
+      "error": null
+    }
+  },
+  "world": {
+    "_purpose": "Beyond US/Japan: sovereign spreads in Europe/UK, Asia & EM currency stress, EM credit, and US financial conditions — the channels through which a local problem becomes a global one.",
+    "de_10y": {
+      "value": 3.46952380952381,
+      "unit": "%",
+      "as_of": "2026-09-01",
+      "source": "FRED:IRLTLT01DEM156N (Germany 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fr_10y": {
+      "value": 4.4771,
+      "unit": "%",
+      "as_of": "2026-09-01",
+      "source": "FRED:IRLTLT01FRM156N (France 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "it_10y": {
+      "value": 3.986,
+      "unit": "%",
+      "as_of": "2026-08-01",
+      "source": "FRED:IRLTLT01ITM156N (Italy 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "uk_10y": {
+      "value": 5.2421,
+      "unit": "%",
+      "as_of": "2026-09-01",
+      "source": "FRED:IRLTLT01GBM156N (UK gilt 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_cny": {
+      "value": -1.25,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 6.692,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXCHUS (China yuan per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_krw": {
+      "value": -10.59,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 1342.13,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXKOUS (Korean won per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_twd": {
+      "value": -0.47,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 31.94,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXTAUS (Taiwan dollar per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_inr": {
+      "value": 1.47,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 96.73,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXINUS (Indian rupee per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_mxn": {
+      "value": 5.3,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 18.399,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXMXUS (Mexican peso per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fx_brl": {
+      "value": -2.46,
+      "unit": "% (+ = weaker vs USD, 3M)",
+      "level": 4.979,
+      "as_of": "2026-10-09",
+      "source": "FRED:DEXBZUS (Brazilian real per USD, daily; 3-month change)",
+      "tier": "live-api",
+      "error": null
+    },
+    "em_corp_oas": {
+      "value": 1.59,
+      "unit": "%",
+      "as_of": "2026-10-15",
+      "source": "FRED:BAMLEMCBPIOAS (ICE BofA EM corporate OAS)",
+      "tier": "live-api",
+      "error": null
+    },
+    "nfci": {
+      "value": -0.499,
+      "unit": "",
+      "as_of": "2026-10-09",
+      "source": "FRED:NFCI (Chicago Fed National Financial Conditions Index, weekly; >0 = tighter than average)",
+      "tier": "live-api",
+      "error": null
+    },
+    "jobless_claims": {
+      "value": 199000.0,
+      "unit": "claims",
+      "as_of": "2026-10-10",
+      "source": "FRED:ICSA (US initial jobless claims, weekly)",
+      "tier": "live-api",
+      "error": null
+    },
+    "breakeven_10y": {
+      "value": 2.35,
+      "unit": "%",
+      "as_of": "2026-10-16",
+      "source": "FRED:T10YIE (10Y breakeven inflation)",
+      "tier": "live-api",
+      "error": null
+    },
+    "real_yield_10y": {
+      "value": 2.78,
+      "unit": "%",
+      "as_of": "2026-10-15",
+      "source": "FRED:DFII10 (10Y TIPS real yield)",
+      "tier": "live-api",
+      "error": null
+    },
+    "fed_balance_sheet": {
+      "value": 6756.0,
+      "unit": "USD bn",
+      "as_of": "2026-10-14",
+      "source": "FRED:WALCL (Fed total assets, weekly)",
+      "tier": "live-api",
+      "error": null
+    },
+    "oat_bund_spread": {
+      "value": 101,
+      "unit": "bp",
+      "as_of": "2026-09-01",
+      "source": "derived: France 10Y − Germany 10Y (monthly data — lags 1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "btp_bund_spread": {
+      "value": 52,
+      "unit": "bp",
+      "as_of": "2026-08-01",
+      "source": "derived: Italy 10Y − Germany 10Y (monthly data — lags 1-2 months)",
+      "tier": "live-api",
+      "error": null
+    },
+    "em_stress_score": {
+      "value": 1,
+      "unit": "/ 7 flags",
+      "as_of": "2026-10-19",
+      "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5%",
       "tier": "live-api",
       "error": null
     }
@@ -350,7 +511,82 @@
       },
       "ust_2s10s": {
         "note": "Danger isn't a level, it's the SIGN: negative (inverted, short rates above long rates) has preceded most US recessions historically, though with a long and variable lag (often 12-24 months). A positive-but-narrowing spread deserves attention too."
-      }
+      },
+      "oat_bund_spread": {
+        "normal_max": 60,
+        "watch_max": 100,
+        "danger": ">100bp — French fiscal/political premium becoming systemic; ECB backstop (TPI) becomes the debate"
+      },
+      "btp_bund_spread": {
+        "normal_max": 150,
+        "watch_max": 250,
+        "danger": ">250bp — 2022 stress area; 2011-12 euro crisis peaked far higher"
+      },
+      "uk_10y": {
+        "normal_max": 4.5,
+        "watch_max": 5.5,
+        "danger": ">5.5% — gilt-market stress zone (Oct-2022 LDI episode context); fiscal-credibility risk"
+      },
+      "fx_cny": {
+        "normal_max": 2.0,
+        "watch_max": 5.0,
+        "danger": ">5% depreciation in 3M — managed currency, so a fast move implies policy stress"
+      },
+      "fx_krw": {
+        "normal_max": 3.0,
+        "watch_max": 6.0,
+        "danger": ">6% in 3M — risk-off / chip-cycle stress"
+      },
+      "fx_twd": {
+        "normal_max": 3.0,
+        "watch_max": 6.0,
+        "danger": ">6% in 3M — geopolitical or capital-flight signal"
+      },
+      "fx_inr": {
+        "normal_max": 2.0,
+        "watch_max": 4.0,
+        "danger": ">4% in 3M — oil/current-account stress"
+      },
+      "fx_mxn": {
+        "normal_max": 4.0,
+        "watch_max": 8.0,
+        "danger": ">8% in 3M — EM risk-off / US policy shock"
+      },
+      "fx_brl": {
+        "normal_max": 5.0,
+        "watch_max": 10.0,
+        "danger": ">10% in 3M — fiscal/EM stress"
+      },
+      "em_corp_oas": {
+        "normal_max": 3.5,
+        "watch_max": 5.0,
+        "danger": ">5% — EM credit stress; 2020 peak was far higher"
+      },
+      "em_stress_score": {
+        "normal_max": 1,
+        "watch_max": 3,
+        "danger": ">=4 of 7 flags — broad EM stress, not an idiosyncratic one"
+      },
+      "nfci": {
+        "normal_max": 0.0,
+        "watch_max": 0.5,
+        "danger": ">0.5 — financial conditions clearly tighter than average (0 = long-run average)"
+      },
+      "jobless_claims": {
+        "normal_max": 260000,
+        "watch_max": 320000,
+        "danger": ">320k sustained — labour market breaking, not just cooling"
+      },
+      "breakeven_10y": {
+        "note": "Market-implied inflation. Watch DIRECTION: a sharp rise alongside rising real yields means the bond market is repricing inflation AND the term premium."
+      },
+      "real_yield_10y": {
+        "note": "No single danger level. Real yields >2.5% historically squeeze equity multiples and EM; the rate of change matters more than the level."
+      },
+      "fed_balance_sheet": {
+        "note": "Direction, not level: balance-sheet shrinkage drains liquidity (QT); expansion adds it. Read together with RRP."
+      },
+      "_new_band_disclosure": "Bands for the Europe/UK/Asia/EM indicators are the analyst's proposed starting thresholds (historical-stress calibrated), not official limits — adjust to your own view."
     },
     "real_economy_stress": {
       "_purpose": "The financial-market indicators above (JGB, USDJPY, BOJ rate) don't show the political constraint on how far BOJ can hike or how long yen weakness can be tolerated. This section tracks that constraint directly: how currency weakness + inflation are showing up as real corporate failures, which is the pressure limiting policy options.",
@@ -464,6 +700,58 @@
           "issue": "Official US Treasury TIC data shows Japan's holdings around $1.14-1.23tn through mid-2026 (e.g. $1,225.3bn Jan 2026, $1,143.1bn May 2026) — real, still the largest foreign holder, but roughly $150-250bn below the figure quoted."
         }
       ]
+    },
+    "china_property": {
+      "_purpose": "China property/LGFV is the slow-burn channel: it hits global growth via commodities and banks, not via a daily price. No free daily API exists, so this is a CHECKLIST to verify against primary releases, not a live number.",
+      "tier": "seed",
+      "status": "NOT YET VERIFIED — values intentionally left blank rather than guessed",
+      "check_monthly": [
+        {
+          "item": "70-city new home prices (m/m, y/y)",
+          "primary_source": "National Bureau of Statistics of China (stats.gov.cn) monthly release",
+          "why": "Sustained m/m declines = collateral erosion for banks and LGFVs"
+        },
+        {
+          "item": "Property investment y/y and new starts",
+          "primary_source": "NBS monthly activity data",
+          "why": "Leading indicator for steel, copper, iron ore demand"
+        },
+        {
+          "item": "Developer distress (Vanke and other large developers): bond extensions, defaults",
+          "primary_source": "Company exchange filings / Caixin / Reuters",
+          "why": "Contagion to banks and trust products"
+        },
+        {
+          "item": "LGFV debt and bond spreads",
+          "primary_source": "PBoC / MoF statements; Wind/Bloomberg if available",
+          "why": "Local-government fiscal capacity"
+        }
+      ],
+      "danger_triggers": "Disorderly developer default affecting a state-linked entity; broad CNY depreciation >5% in 3M (see CNY card); policy-bank rescue announcements."
+    },
+    "taiwan_watch": {
+      "_purpose": "Taiwan is a supply-chain single point of failure (advanced semiconductors). It is a tail-risk tag, not a forecast, and has no price signal until it is too late.",
+      "tier": "seed",
+      "status": "NOT YET VERIFIED — qualitative tag; update from primary sources",
+      "indicators_to_watch": [
+        {
+          "item": "PLA aircraft/vessel counts around Taiwan",
+          "primary_source": "Taiwan Ministry of National Defense daily reports (mnd.gov.tw)"
+        },
+        {
+          "item": "Large named exercises / live-fire closure areas",
+          "primary_source": "PLA Eastern Theater Command announcements; Taiwan MND"
+        },
+        {
+          "item": "TWD and KOSPI/TAIEX stress (see TWD and KRW cards)",
+          "primary_source": "FRED H.10 daily"
+        },
+        {
+          "item": "Shipping insurance / Strait transit disruption",
+          "primary_source": "Lloyd's List / shipping-insurer notices"
+        }
+      ],
+      "escalation_ladder": "1) Elevated drills (routine) -> 2) Named exercise with blockade rehearsal -> 3) Quarantine/inspection regime -> 4) Kinetic. Markets typically price only from step 3; TWD and semiconductor equities move first."
     }
   }
 }
