@@ -174,8 +174,25 @@
     <div class="grid" id="cbCalendarGrid"></div>
   </section>
 
+  <section id="section-world">
+    <h2>05 — Europe, UK, Asia &amp; EM <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where a local problem becomes a global one</span></h2>
+    <h2 style="margin-top:8px; font-size:16px;">Europe &amp; UK sovereign stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(OECD monthly data — lags 1–2 months)</span></h2>
+    <div class="grid" id="europeGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Asia &amp; EM currencies vs USD <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(3-month move, + = weaker vs USD)</span></h2>
+    <div class="grid" id="emFxGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">EM credit &amp; composite stress</h2>
+    <div class="grid" id="emCreditGrid"></div>
+    <div class="note-block" id="emNote"></div>
+    <h2 style="margin-top:24px; font-size:16px;">US financial conditions &amp; liquidity</h2>
+    <div class="grid" id="conditionsGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">China property / LGFV <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— verification checklist, no live number</span></h2>
+    <div class="note-block" id="chinaNote"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Taiwan / supply-chain tail risk</h2>
+    <div class="note-block" id="taiwanNote"></div>
+  </section>
+
   <section id="section-history">
-    <h2>05 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
+    <h2>06 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <div style="font-family:var(--mono); font-size:11px; color:var(--paper-dim);" id="historyMeta">Loading history…</div>
       <button id="resetZoomBtn" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--steel-bright); border:1px solid var(--panel-line); border-radius:5px; padding:6px 10px; cursor:pointer;">Reset zoom</button>
@@ -449,8 +466,52 @@ async function load(){
       `<div class="note-block callout-danger">2s10s currently INVERTED at ${spread2s10s}pp (10Y below 2Y) — historically a recession signal, though with a long and variable lag.</div>`);
   }
 
+
+  // ---- World: Europe / UK / Asia-EM / conditions ----
+  const wd = data.world || {};
+  const pick = k => wd[k] || {};
+  document.getElementById('europeGrid').innerHTML = [
+    card('France–Germany (OAT–Bund)', pick('oat_bund_spread'), {thresholdKey:'oat_bund_spread'}),
+    card('Italy–Germany (BTP–Bund)', pick('btp_bund_spread'), {thresholdKey:'btp_bund_spread'}),
+    card('UK 10Y Gilt', pick('uk_10y'), {thresholdKey:'uk_10y'}),
+    card('Germany 10Y (Bund)', pick('de_10y')),
+    card('France 10Y (OAT)', pick('fr_10y')),
+    card('Italy 10Y (BTP)', pick('it_10y')),
+  ].join('');
+  document.getElementById('emFxGrid').innerHTML = [
+    card('China yuan (CNY)', pick('fx_cny'), {thresholdKey:'fx_cny'}),
+    card('Korean won (KRW)', pick('fx_krw'), {thresholdKey:'fx_krw'}),
+    card('Taiwan dollar (TWD)', pick('fx_twd'), {thresholdKey:'fx_twd'}),
+    card('Indian rupee (INR)', pick('fx_inr'), {thresholdKey:'fx_inr'}),
+    card('Mexican peso (MXN)', pick('fx_mxn'), {thresholdKey:'fx_mxn'}),
+    card('Brazilian real (BRL)', pick('fx_brl'), {thresholdKey:'fx_brl'}),
+  ].join('');
+  document.getElementById('emCreditGrid').innerHTML = [
+    card('EM Corporate Credit Spread', pick('em_corp_oas'), {thresholdKey:'em_corp_oas'}),
+    card('EM Stress Score', pick('em_stress_score'), {thresholdKey:'em_stress_score'}),
+  ].join('');
+  document.getElementById('emNote').innerHTML =
+    '<strong>How the EM Stress Score works:</strong> +1 for each of CNY, KRW, TWD, INR, MXN, BRL that lost more than 5% vs USD in 3 months, +1 if the EM corporate spread exceeds 5%. Score 0–7. Broad stress (4+) matters more than any single currency.';
+  document.getElementById('conditionsGrid').innerHTML = [
+    card('Financial Conditions (NFCI)', pick('nfci'), {thresholdKey:'nfci'}),
+    card('US Initial Jobless Claims', pick('jobless_claims'), {thresholdKey:'jobless_claims'}),
+    card('10Y Breakeven Inflation', pick('breakeven_10y'), {thresholdKey:'breakeven_10y'}),
+    card('10Y Real Yield (TIPS)', pick('real_yield_10y'), {thresholdKey:'real_yield_10y'}),
+    card('Fed Balance Sheet', pick('fed_balance_sheet'), {thresholdKey:'fed_balance_sheet'}),
+  ].join('');
+  const listHtml = (arr, f) => '<ul style="margin:6px 0 0 18px;">' + (arr||[]).map(f).join('') + '</ul>';
+  const cp = manual.china_property || {}, tw = manual.taiwan_watch || {};
+  document.getElementById('chinaNote').innerHTML =
+    `${tierTag(cp.tier)} <em>${cp.status||''}</em><br>${cp._purpose||''}` +
+    listHtml(cp.check_monthly, i => `<li><strong>${i.item}</strong> — ${i.primary_source}. <span style="color:var(--paper-dim)">${i.why}</span></li>`) +
+    `<br><strong>Danger triggers:</strong> ${cp.danger_triggers||'—'}`;
+  document.getElementById('taiwanNote').innerHTML =
+    `${tierTag(tw.tier)} <em>${tw.status||''}</em><br>${tw._purpose||''}` +
+    listHtml(tw.indicators_to_watch, i => `<li><strong>${i.item}</strong> — ${i.primary_source}</li>`) +
+    `<br><strong>Escalation ladder:</strong> ${tw.escalation_ladder||'—'}`;
+
   document.getElementById('footerSources').innerHTML =
-    'US/Global: FRED (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +
+    'US/Global/World: FRED incl. OECD sovereign yields, H.10 FX, ICE BofA EM OAS, NFCI (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +
     'Japan: MOF 国債金利情報 (JGB curve), Frankfurter/ECB (USDJPY). Event-driven fields hand-maintained in manual.json. ' +
     'Auto-updated daily via GitHub Actions — see README for setup.';
 }

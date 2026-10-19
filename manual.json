@@ -1,6 +1,5 @@
 {
   "_readme": "Hand-maintained. Edit this file directly in the repo whenever a real event happens (BOJ decision, new budget, confirmed intervention, election/fiscal news). Everything here is tagged tier='event-driven' on the frontend — it is correct-as-of its own date, not daily-live, because the underlying real-world thing itself doesn't change daily.",
-
   "boj_policy_rate": {
     "value": 1.0,
     "unit": "%",
@@ -10,7 +9,6 @@
     "source": "BOJ statement / Reuters / Bloomberg, 2026-07-31",
     "tier": "event-driven"
   },
-
   "debt_service_ratio": {
     "fiscal_year": "FY2026 (令和8年度) government budget",
     "total_expenditure_jpy_tn": 122.3,
@@ -29,7 +27,6 @@
     "source": "Japan MOF FY2026 budget documents, Dec 2025 / Feb 2026",
     "tier": "event-driven"
   },
-
   "intervention_log": [
     {
       "date": "2026-07-31",
@@ -68,7 +65,6 @@
       "source": "MOF / TradingEconomics"
     }
   ],
-
   "fiscal_political_calendar": [
     {
       "event": "PM Takaichi ¥10tn/year fiscal expansion pledge",
@@ -96,96 +92,338 @@
       "note": "USDJPY at ~159.4 (Aug 14 close), down ~1% on the week, having given back roughly half of the late-July/early-Aug intervention gain with no follow-up intervention. OMFIF's read: yen weakness is now openly a political issue domestically (real incomes, inflation), and intervention 'checks the box on being seen as doing something' rather than fixing the underlying rate differential."
     }
   ],
-
   "risk_thresholds": {
     "note": "These are Josh's own risk bands from the Japan Macro Crisis Map analysis, not universal constants — shown so the frontend can flag when a live-api reading crosses into Watch/Danger.",
-    "usdjpy": {"normal_max": 150, "watch_max": 165, "danger": ">165 sustained"},
-    "jgb_10y": {"normal_max": 2.0, "watch_max": 3.0, "danger": ">3% sustained"},
-    "jgb_30y": {"normal_max": 3.0, "watch_max": 4.0, "danger": ">4% sustained"},
-    "jgb_40y": {"normal_max": 4.0, "watch_max": 4.5, "danger": ">4.5% — insurers become forced sellers at this line, mechanical not sentiment-driven"},
-    "boj_rate": {"normal_max": 1.0, "watch_max": 1.5, "danger": ">1.5% rapid hikes"},
-    "debt_service_interest_only_ratio": {"normal_max": 20, "watch_max": 30, "danger": ">30%"},
-    "debt_service_gross_ratio": {"note": "no separate band defined yet — currently reads as Danger under the same >30% line, flagged as a methodology question, not a confirmed verdict"},
-
-    "ust_10y": {"normal_max": 4.5, "watch_max": 5.2, "danger": ">5.2% — discount-rate pressure on long-duration/AI-valuation assets"},
-    "ust_30y": {"normal_max": 5.0, "watch_max": 5.5, "danger": ">5.5% — highest since 2001 territory, already close as of Aug 2026"},
-    "cpi_yoy": {"normal_max": 3.0, "watch_max": 3.8, "danger": ">3.8% — would revive Fed-hawkish repricing"},
-    "debt_to_gdp": {"normal_max": 110, "watch_max": 130, "danger": ">130%"},
-    "vix": {"normal_max": 20, "watch_max": 30, "danger": ">30 — but watch this TOGETHER with Valuation Heat, a low VIX during high Valuation Heat is itself the warning, not just a high VIX alone"},
-    "shiller_cape": {"normal_max": 30, "watch_max": 38, "danger": ">38x, approaching the 44.2x historical extreme (Jan 2000)"},
-    "buffett_indicator": {"note": "methodology changed 2026-08 (Wilshire 5000 source discontinued by FRED in 2024, switched to Fed Z.1 nonfinancial-corporate-equities/GDP). Not enough history on the new series yet to set a real band — treat the number directionally only until we've watched it for a few months. Do not apply the old 235%-era intuition to this new number."},
-    "unemployment": {"note": "Sahm Rule, not a fixed level: Danger triggers when unemployment rate rises >=0.5 percentage points above its own trailing-12-month low. This needs the 12-month-low value tracked alongside the current rate to auto-flag — not yet wired up, treat manually for now."},
-
-    "dxy": {"normal_max": 100, "watch_max": 105, "danger": ">105 — dollar squeeze stresses global carry trades and EM/JPY funding"},
-    "us_hy_credit_spread": {"normal_max": 3.5, "watch_max": 5.0, "danger": ">5% — real credit-market stress, tends to show up before equity vol does"},
-    "wti_oil": {"normal_max": 80, "watch_max": 100, "danger": ">100 — energy-shock inflation risk, directly feeds Japan's import-price channel", "note": "this band only covers the high side (inflation-shock risk). A fast drop below ~$50 is a different signal — demand-destruction/recession — not captured by this band."},
-    "rrp": {"note": "No fixed danger level — what matters is the TREND. RRP near-zero (parked cash mostly drained) means less spare liquidity cushion in the system; a level under ~$50bn after being much higher is the thing to watch, not a specific number."},
-    "ust_2s10s": {"note": "Danger isn't a level, it's the SIGN: negative (inverted, short rates above long rates) has preceded most US recessions historically, though with a long and variable lag (often 12-24 months). A positive-but-narrowing spread deserves attention too."}
+    "usdjpy": {
+      "normal_max": 150,
+      "watch_max": 165,
+      "danger": ">165 sustained"
+    },
+    "jgb_10y": {
+      "normal_max": 2.0,
+      "watch_max": 3.0,
+      "danger": ">3% sustained"
+    },
+    "jgb_30y": {
+      "normal_max": 3.0,
+      "watch_max": 4.0,
+      "danger": ">4% sustained"
+    },
+    "jgb_40y": {
+      "normal_max": 4.0,
+      "watch_max": 4.5,
+      "danger": ">4.5% — insurers become forced sellers at this line, mechanical not sentiment-driven"
+    },
+    "boj_rate": {
+      "normal_max": 1.0,
+      "watch_max": 1.5,
+      "danger": ">1.5% rapid hikes"
+    },
+    "debt_service_interest_only_ratio": {
+      "normal_max": 20,
+      "watch_max": 30,
+      "danger": ">30%"
+    },
+    "debt_service_gross_ratio": {
+      "note": "no separate band defined yet — currently reads as Danger under the same >30% line, flagged as a methodology question, not a confirmed verdict"
+    },
+    "ust_10y": {
+      "normal_max": 4.5,
+      "watch_max": 5.2,
+      "danger": ">5.2% — discount-rate pressure on long-duration/AI-valuation assets"
+    },
+    "ust_30y": {
+      "normal_max": 5.0,
+      "watch_max": 5.5,
+      "danger": ">5.5% — highest since 2001 territory, already close as of Aug 2026"
+    },
+    "cpi_yoy": {
+      "normal_max": 3.0,
+      "watch_max": 3.8,
+      "danger": ">3.8% — would revive Fed-hawkish repricing"
+    },
+    "debt_to_gdp": {
+      "normal_max": 110,
+      "watch_max": 130,
+      "danger": ">130%"
+    },
+    "vix": {
+      "normal_max": 20,
+      "watch_max": 30,
+      "danger": ">30 — but watch this TOGETHER with Valuation Heat, a low VIX during high Valuation Heat is itself the warning, not just a high VIX alone"
+    },
+    "shiller_cape": {
+      "normal_max": 30,
+      "watch_max": 38,
+      "danger": ">38x, approaching the 44.2x historical extreme (Jan 2000)"
+    },
+    "buffett_indicator": {
+      "note": "methodology changed 2026-08 (Wilshire 5000 source discontinued by FRED in 2024, switched to Fed Z.1 nonfinancial-corporate-equities/GDP). Not enough history on the new series yet to set a real band — treat the number directionally only until we've watched it for a few months. Do not apply the old 235%-era intuition to this new number."
+    },
+    "unemployment": {
+      "note": "Sahm Rule, not a fixed level: Danger triggers when unemployment rate rises >=0.5 percentage points above its own trailing-12-month low. This needs the 12-month-low value tracked alongside the current rate to auto-flag — not yet wired up, treat manually for now."
+    },
+    "dxy": {
+      "normal_max": 100,
+      "watch_max": 105,
+      "danger": ">105 — dollar squeeze stresses global carry trades and EM/JPY funding"
+    },
+    "us_hy_credit_spread": {
+      "normal_max": 3.5,
+      "watch_max": 5.0,
+      "danger": ">5% — real credit-market stress, tends to show up before equity vol does"
+    },
+    "wti_oil": {
+      "normal_max": 80,
+      "watch_max": 100,
+      "danger": ">100 — energy-shock inflation risk, directly feeds Japan's import-price channel",
+      "note": "this band only covers the high side (inflation-shock risk). A fast drop below ~$50 is a different signal — demand-destruction/recession — not captured by this band."
+    },
+    "rrp": {
+      "note": "No fixed danger level — what matters is the TREND. RRP near-zero (parked cash mostly drained) means less spare liquidity cushion in the system; a level under ~$50bn after being much higher is the thing to watch, not a specific number."
+    },
+    "ust_2s10s": {
+      "note": "Danger isn't a level, it's the SIGN: negative (inverted, short rates above long rates) has preceded most US recessions historically, though with a long and variable lag (often 12-24 months). A positive-but-narrowing spread deserves attention too."
+    },
+    "oat_bund_spread": {
+      "normal_max": 60,
+      "watch_max": 100,
+      "danger": ">100bp — French fiscal/political premium becoming systemic; ECB backstop (TPI) becomes the debate"
+    },
+    "btp_bund_spread": {
+      "normal_max": 150,
+      "watch_max": 250,
+      "danger": ">250bp — 2022 stress area; 2011-12 euro crisis peaked far higher"
+    },
+    "uk_10y": {
+      "normal_max": 4.5,
+      "watch_max": 5.5,
+      "danger": ">5.5% — gilt-market stress zone (Oct-2022 LDI episode context); fiscal-credibility risk"
+    },
+    "fx_cny": {
+      "normal_max": 2.0,
+      "watch_max": 5.0,
+      "danger": ">5% depreciation in 3M — managed currency, so a fast move implies policy stress"
+    },
+    "fx_krw": {
+      "normal_max": 3.0,
+      "watch_max": 6.0,
+      "danger": ">6% in 3M — risk-off / chip-cycle stress"
+    },
+    "fx_twd": {
+      "normal_max": 3.0,
+      "watch_max": 6.0,
+      "danger": ">6% in 3M — geopolitical or capital-flight signal"
+    },
+    "fx_inr": {
+      "normal_max": 2.0,
+      "watch_max": 4.0,
+      "danger": ">4% in 3M — oil/current-account stress"
+    },
+    "fx_mxn": {
+      "normal_max": 4.0,
+      "watch_max": 8.0,
+      "danger": ">8% in 3M — EM risk-off / US policy shock"
+    },
+    "fx_brl": {
+      "normal_max": 5.0,
+      "watch_max": 10.0,
+      "danger": ">10% in 3M — fiscal/EM stress"
+    },
+    "em_corp_oas": {
+      "normal_max": 3.5,
+      "watch_max": 5.0,
+      "danger": ">5% — EM credit stress; 2020 peak was far higher"
+    },
+    "em_stress_score": {
+      "normal_max": 1,
+      "watch_max": 3,
+      "danger": ">=4 of 7 flags — broad EM stress, not an idiosyncratic one"
+    },
+    "nfci": {
+      "normal_max": 0.0,
+      "watch_max": 0.5,
+      "danger": ">0.5 — financial conditions clearly tighter than average (0 = long-run average)"
+    },
+    "jobless_claims": {
+      "normal_max": 260000,
+      "watch_max": 320000,
+      "danger": ">320k sustained — labour market breaking, not just cooling"
+    },
+    "breakeven_10y": {
+      "note": "Market-implied inflation. Watch DIRECTION: a sharp rise alongside rising real yields means the bond market is repricing inflation AND the term premium."
+    },
+    "real_yield_10y": {
+      "note": "No single danger level. Real yields >2.5% historically squeeze equity multiples and EM; the rate of change matters more than the level."
+    },
+    "fed_balance_sheet": {
+      "note": "Direction, not level: balance-sheet shrinkage drains liquidity (QT); expansion adds it. Read together with RRP."
+    },
+    "_new_band_disclosure": "Bands for the Europe/UK/Asia/EM indicators are the analyst's proposed starting thresholds (historical-stress calibrated), not official limits — adjust to your own view."
   },
-
   "real_economy_stress": {
     "_purpose": "The financial-market indicators above (JGB, USDJPY, BOJ rate) don't show the political constraint on how far BOJ can hike or how long yen weakness can be tolerated. This section tracks that constraint directly: how currency weakness + inflation are showing up as real corporate failures, which is the pressure limiting policy options.",
-
     "corporate_bankruptcies_h1_2026": {
-      "tsr_count": 5346, "tsr_yoy_pct": 7.1,
-      "tdb_count": 5335, "tdb_yoy_pct": 6.6,
+      "tsr_count": 5346,
+      "tsr_yoy_pct": 7.1,
+      "tdb_count": 5335,
+      "tdb_yoy_pct": 6.6,
       "note": "Two independent credit research firms (Tokyo Shoko Research and Teikoku Databank), close but not identical counts — normal given differing methodology. Both confirm: first time above 5,000 in H1 in 12 years (since 2014's 5,073 by TSR's count).",
-      "monthly": {"2026-06": 1021, "2026-07": 1028, "note": "TSR headline confirms June crossed 1,000 for first time in 2 years 1 month; exact monthly digits sourced from a TV broadcast graphic, not independently re-verified against TSR's monthly release."},
-      "by_cause": {
-        "labor_shortage_related": {"count": 237, "note": "record high for a first half"},
-        "of_which_wage_cost_surge": {"count": 120, "yoy_change": "+140% (2.4x)", "note": "TSR: 賃上げが重荷に — wage increases becoming a bankruptcy driver, confirmed"},
-        "price_hike_type": {"count": 439, "yoy_change": "+27.6%", "note": "sourced from TV graphic, directionally consistent with TSR's 物価高倒産 category but not independently re-verified digit-by-digit"}
+      "monthly": {
+        "2026-06": 1021,
+        "2026-07": 1028,
+        "note": "TSR headline confirms June crossed 1,000 for first time in 2 years 1 month; exact monthly digits sourced from a TV broadcast graphic, not independently re-verified against TSR's monthly release."
       },
-      "sme_concentration": {"pct_under_10_employees": 90.6, "note": "sourced from TV graphic — plausible given TSR's own H1 report shows 77% of all bankruptcies have liabilities under ¥100mn, i.e. concentrated in small/micro firms, though the exact 90.6% employee-count cut wasn't independently found in the TSR/TDB source documents reviewed"},
+      "by_cause": {
+        "labor_shortage_related": {
+          "count": 237,
+          "note": "record high for a first half"
+        },
+        "of_which_wage_cost_surge": {
+          "count": 120,
+          "yoy_change": "+140% (2.4x)",
+          "note": "TSR: 賃上げが重荷に — wage increases becoming a bankruptcy driver, confirmed"
+        },
+        "price_hike_type": {
+          "count": 439,
+          "yoy_change": "+27.6%",
+          "note": "sourced from TV graphic, directionally consistent with TSR's 物価高倒産 category but not independently re-verified digit-by-digit"
+        }
+      },
+      "sme_concentration": {
+        "pct_under_10_employees": 90.6,
+        "note": "sourced from TV graphic — plausible given TSR's own H1 report shows 77% of all bankruptcies have liabilities under ¥100mn, i.e. concentrated in small/micro firms, though the exact 90.6% employee-count cut wasn't independently found in the TSR/TDB source documents reviewed"
+      },
       "source": "Tokyo Shoko Research (tsr-net.co.jp), Teikoku Databank (tdb.co.jp), both published 2026-07-08"
     },
-
     "ppi_import_price_passthrough": {
-      "cgpi_yoy_pct": 7.2, "cgpi_month": "2026-07",
+      "cgpi_yoy_pct": 7.2,
+      "cgpi_month": "2026-07",
       "cgpi_trend": "Feb +2.1% -> Mar +2.8% -> Apr +5.3% -> May +6.3% -> Jun +7.3% -> Jul +7.2% (second straight month above 7%, first time above 7% since around 2023)",
-      "import_price_yoy_pct": 29.1, "import_price_month": "2026-07",
+      "import_price_yoy_pct": 29.1,
+      "import_price_month": "2026-07",
       "note": "BOJ's own data (published 2026-08-13). This is the real-economy transmission channel for a weak yen: import costs -> corporate input costs -> either passed to consumers (inflation) or absorbed (margin/bankruptcy pressure) — both outcomes visible in the bankruptcy-by-cause data above.",
       "source": "Bank of Japan CGPI release, Nikkei, 2026-08-13"
     },
-
     "curry_price_index_tdb": {
       "_purpose": "Teikoku Databank's household-cost-of-living proxy — tracks cost to cook curry rice at home, updated monthly, faster and more visceral than headline CPI.",
-      "series_jpy_per_serving": {"2026-01": 370, "2026-04_est": 361},
+      "series_jpy_per_serving": {
+        "2026-01": 370,
+        "2026-04_est": 361
+      },
       "note": "370 yen in Jan 2026 was a record high on the post-2026-rebase methodology. Series underwent a base-year revision in 2026 — pre-2026 figures (e.g. 2025 readings in the 390s-400s) are NOT directly comparable to 2026 figures on a like-for-like basis. Treat this as a directional/momentum indicator, not a clean YoY series, until both sides of the rebase are reconciled.",
       "source": "Teikoku Databank monthly カレーライス物価指数 releases, tdb.co.jp"
     }
   },
-
   "central_bank_calendar": {
     "_purpose": "Remaining scheduled meetings for 2026, sourced directly from each central bank's own published calendar (not aggregators). Add new dates here once each bank publishes its 2027 schedule.",
     "fed": {
       "current_rate": "3.50-3.75%",
-      "remaining_2026": ["2026-09-15_16", "2026-10-27_28", "2026-12-08_09"],
+      "remaining_2026": [
+        "2026-09-15_16",
+        "2026-10-27_28",
+        "2026-12-08_09"
+      ],
       "source": "federalreserve.gov, FOMC calendar"
     },
     "ecb": {
       "current_rate_deposit_facility": "2.25%",
-      "remaining_2026": ["2026-09-09_10", "2026-10-28_29", "2026-12-16_17"],
+      "remaining_2026": [
+        "2026-09-09_10",
+        "2026-10-28_29",
+        "2026-12-16_17"
+      ],
       "source": "ecb.europa.eu/press/calendars/mgcgc"
     },
     "boj": {
       "current_rate": "1.00%",
-      "remaining_2026": ["2026-09-17_18", "2026-10-29_30", "2026-12-17_18"],
+      "remaining_2026": [
+        "2026-09-17_18",
+        "2026-10-29_30",
+        "2026-12-17_18"
+      ],
       "source": "boj.or.jp/en/mopo/mpmsche_minu — official 2026 MPM schedule"
     },
     "boe": {
       "current_rate": "3.75%",
-      "remaining_2026": ["2026-09-17", "2026-11-05", "2026-12-17"],
+      "remaining_2026": [
+        "2026-09-17",
+        "2026-11-05",
+        "2026-12-17"
+      ],
       "source": "bankofengland.co.uk/monetary-policy/upcoming-mpc-dates"
     }
   },
-
   "media_fact_checks": {
     "_purpose": "Claims sourced from a TV news graphic (2026-08-15) that were checked against primary sources — most held up; two didn't and are flagged rather than silently corrected.",
-    "checked_and_accurate": ["PPI +7.2% YoY July 2026", "Import price +29.1% YoY July 2026", "H1 2026 bankruptcies 5,346 (+7.1%), 12-year high", "Labor-shortage bankruptcies 237 (record), wage-cost-surge 120 (+140%/2.4x)", "Curry price index ~370 yen Jan 2026 record high"],
+    "checked_and_accurate": [
+      "PPI +7.2% YoY July 2026",
+      "Import price +29.1% YoY July 2026",
+      "H1 2026 bankruptcies 5,346 (+7.1%), 12-year high",
+      "Labor-shortage bankruptcies 237 (record), wage-cost-surge 120 (+140%/2.4x)",
+      "Curry price index ~370 yen Jan 2026 record high"
+    ],
     "flagged_as_overstated": [
-      {"claim": "PPI at a '44-year high'", "issue": "The YoY growth RATE was higher as recently as Dec 2022 (~+10.6%) during the post-Ukraine energy shock. 7.2% is a genuine 2-year-high and the 2nd straight month above 7%, but not the highest print in living memory — the '44-year' framing looks like broadcast-headline embellishment, not an official BOJ characterization."},
-      {"claim": "Japan holds '1.4 trillion USD' in US Treasuries", "issue": "Official US Treasury TIC data shows Japan's holdings around $1.14-1.23tn through mid-2026 (e.g. $1,225.3bn Jan 2026, $1,143.1bn May 2026) — real, still the largest foreign holder, but roughly $150-250bn below the figure quoted."}
+      {
+        "claim": "PPI at a '44-year high'",
+        "issue": "The YoY growth RATE was higher as recently as Dec 2022 (~+10.6%) during the post-Ukraine energy shock. 7.2% is a genuine 2-year-high and the 2nd straight month above 7%, but not the highest print in living memory — the '44-year' framing looks like broadcast-headline embellishment, not an official BOJ characterization."
+      },
+      {
+        "claim": "Japan holds '1.4 trillion USD' in US Treasuries",
+        "issue": "Official US Treasury TIC data shows Japan's holdings around $1.14-1.23tn through mid-2026 (e.g. $1,225.3bn Jan 2026, $1,143.1bn May 2026) — real, still the largest foreign holder, but roughly $150-250bn below the figure quoted."
+      }
     ]
+  },
+  "china_property": {
+    "_purpose": "China property/LGFV is the slow-burn channel: it hits global growth via commodities and banks, not via a daily price. No free daily API exists, so this is a CHECKLIST to verify against primary releases, not a live number.",
+    "tier": "seed",
+    "status": "NOT YET VERIFIED — values intentionally left blank rather than guessed",
+    "check_monthly": [
+      {
+        "item": "70-city new home prices (m/m, y/y)",
+        "primary_source": "National Bureau of Statistics of China (stats.gov.cn) monthly release",
+        "why": "Sustained m/m declines = collateral erosion for banks and LGFVs"
+      },
+      {
+        "item": "Property investment y/y and new starts",
+        "primary_source": "NBS monthly activity data",
+        "why": "Leading indicator for steel, copper, iron ore demand"
+      },
+      {
+        "item": "Developer distress (Vanke and other large developers): bond extensions, defaults",
+        "primary_source": "Company exchange filings / Caixin / Reuters",
+        "why": "Contagion to banks and trust products"
+      },
+      {
+        "item": "LGFV debt and bond spreads",
+        "primary_source": "PBoC / MoF statements; Wind/Bloomberg if available",
+        "why": "Local-government fiscal capacity"
+      }
+    ],
+    "danger_triggers": "Disorderly developer default affecting a state-linked entity; broad CNY depreciation >5% in 3M (see CNY card); policy-bank rescue announcements."
+  },
+  "taiwan_watch": {
+    "_purpose": "Taiwan is a supply-chain single point of failure (advanced semiconductors). It is a tail-risk tag, not a forecast, and has no price signal until it is too late.",
+    "tier": "seed",
+    "status": "NOT YET VERIFIED — qualitative tag; update from primary sources",
+    "indicators_to_watch": [
+      {
+        "item": "PLA aircraft/vessel counts around Taiwan",
+        "primary_source": "Taiwan Ministry of National Defense daily reports (mnd.gov.tw)"
+      },
+      {
+        "item": "Large named exercises / live-fire closure areas",
+        "primary_source": "PLA Eastern Theater Command announcements; Taiwan MND"
+      },
+      {
+        "item": "TWD and KOSPI/TAIEX stress (see TWD and KRW cards)",
+        "primary_source": "FRED H.10 daily"
+      },
+      {
+        "item": "Shipping insurance / Strait transit disruption",
+        "primary_source": "Lloyd's List / shipping-insurer notices"
+      }
+    ],
+    "escalation_ladder": "1) Elevated drills (routine) -> 2) Named exercise with blockade rehearsal -> 3) Quarantine/inspection regime -> 4) Kinetic. Markets typically price only from step 3; TWD and semiconductor equities move first."
   }
 }

@@ -23,7 +23,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import csv
 import io
 import os
@@ -324,6 +324,93 @@ def get_cape():
     return {"value": round(float(last_valid), 2), "unit": "x", "as_of": "latest available month", "source": "Shiller/Yale ie_data.xls"}
 
 
+
+# ---------------------------------------------------------------------------
+# WORLD: Europe / UK / Asia-EM / liquidity & financial conditions (all FRED)
+# ---------------------------------------------------------------------------
+
+def _monthly_yield(series_id, label):
+    def fn():
+        p = fred_point(series_id)
+        return {"value": p["value"], "unit": "%", "as_of": p["date"],
+                "source": f"FRED:{series_id} ({label} 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)"}
+    return fn
+
+
+def _fx_3m_move(series_id, label):
+    """3-month % change of local currency vs USD. FRED H.10 quotes local per USD,
+    so a POSITIVE number = local currency WEAKENED vs the dollar."""
+    def fn():
+        obs = fred_latest(series_id, n=90)           # ~4 months of daily obs, newest first
+        latest_d, latest_v = obs[0][0], float(obs[0][1])
+        target = datetime.fromisoformat(latest_d) - timedelta(days=91)
+        old_v = None
+        for d, v in obs:
+            if datetime.fromisoformat(d) <= target:
+                old_v = float(v); break
+        if old_v is None:
+            old_v = float(obs[-1][1])
+        return {"value": round((latest_v / old_v - 1) * 100, 2), "unit": "% (+ = weaker vs USD, 3M)",
+                "level": latest_v, "as_of": latest_d,
+                "source": f"FRED:{series_id} ({label} per USD, daily; 3-month change)"}
+    return fn
+
+
+def _plain(series_id, label, unit, divisor=1.0, digits=2):
+    def fn():
+        p = fred_point(series_id)
+        return {"value": round(p["value"] / divisor, digits), "unit": unit, "as_of": p["date"],
+                "source": f"FRED:{series_id} ({label})"}
+    return fn
+
+
+def build_world():
+    w = {"_purpose": "Beyond US/Japan: sovereign spreads in Europe/UK, Asia & EM currency stress, EM credit, and US financial conditions — the channels through which a local problem becomes a global one."}
+    w["de_10y"] = safe_fetch("de_10y", _monthly_yield("IRLTLT01DEM156N", "Germany"), {"value": None, "unit": "%"})
+    w["fr_10y"] = safe_fetch("fr_10y", _monthly_yield("IRLTLT01FRM156N", "France"), {"value": None, "unit": "%"})
+    w["it_10y"] = safe_fetch("it_10y", _monthly_yield("IRLTLT01ITM156N", "Italy"), {"value": None, "unit": "%"})
+    w["uk_10y"] = safe_fetch("uk_10y", _monthly_yield("IRLTLT01GBM156N", "UK gilt"), {"value": None, "unit": "%"})
+    for key, sid, lab in (("fx_cny", "DEXCHUS", "China yuan"), ("fx_krw", "DEXKOUS", "Korean won"),
+                          ("fx_twd", "DEXTAUS", "Taiwan dollar"), ("fx_inr", "DEXINUS", "Indian rupee"),
+                          ("fx_mxn", "DEXMXUS", "Mexican peso"), ("fx_brl", "DEXBZUS", "Brazilian real")):
+        w[key] = safe_fetch(key, _fx_3m_move(sid, lab), {"value": None, "unit": "%"})
+    w["em_corp_oas"] = safe_fetch("em_oas", _plain("BAMLEMCBPIOAS", "ICE BofA EM corporate OAS", "%"), {"value": None, "unit": "%"})
+    w["nfci"] = safe_fetch("nfci", _plain("NFCI", "Chicago Fed National Financial Conditions Index, weekly; >0 = tighter than average", "", digits=3), {"value": None, "unit": ""})
+    w["jobless_claims"] = safe_fetch("claims", _plain("ICSA", "US initial jobless claims, weekly", "claims"), {"value": None, "unit": "claims"})
+    w["breakeven_10y"] = safe_fetch("be10", _plain("T10YIE", "10Y breakeven inflation", "%"), {"value": None, "unit": "%"})
+    w["real_yield_10y"] = safe_fetch("tips10", _plain("DFII10", "10Y TIPS real yield", "%"), {"value": None, "unit": "%"})
+    w["fed_balance_sheet"] = safe_fetch("walcl", _plain("WALCL", "Fed total assets, weekly", "USD bn", divisor=1000.0, digits=0), {"value": None, "unit": "USD bn"})
+
+    # ---- Derived: sovereign spreads (computed from the monthly yields above) ----
+    def spread(a, b, name):
+        ea, eb = w.get(a, {}), w.get(b, {})
+        if ea.get("value") is None or eb.get("value") is None:
+            return {"value": None, "unit": "bp", "tier": "stale", "error": "inputs missing", "source": name}
+        ok = ea.get("tier") == "live-api" and eb.get("tier") == "live-api"
+        return {"value": round((ea["value"] - eb["value"]) * 100), "unit": "bp",
+                "as_of": min(ea.get("as_of", ""), eb.get("as_of", "")),
+                "source": f"derived: {name} (monthly data — lags 1-2 months)",
+                "tier": "live-api" if ok else "stale", "error": None}
+    w["oat_bund_spread"] = spread("fr_10y", "de_10y", "France 10Y − Germany 10Y")
+    w["btp_bund_spread"] = spread("it_10y", "de_10y", "Italy 10Y − Germany 10Y")
+
+    # ---- Derived: EM stress composite. Rule is explicit so it can be audited. ----
+    #  +1 for each of 6 EM/Asia currencies that lost >5% vs USD in 3 months
+    #  +1 if EM corporate OAS > 5.0%        => score 0..7
+    flags, missing = 0, 0
+    for k in ("fx_cny", "fx_krw", "fx_twd", "fx_inr", "fx_mxn", "fx_brl"):
+        v = w[k].get("value")
+        if v is None: missing += 1
+        elif v > 5.0: flags += 1
+    oas = w["em_corp_oas"].get("value")
+    if oas is None: missing += 1
+    elif oas > 5.0: flags += 1
+    w["em_stress_score"] = {"value": flags, "unit": "/ 7 flags", "as_of": datetime.now(timezone.utc).date().isoformat(),
+        "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5%",
+        "tier": "live-api" if missing == 0 else "stale", "error": None if missing == 0 else f"{missing} input(s) missing"}
+    return w
+
+
 def main():
     now = datetime.now(timezone.utc).isoformat()
 
@@ -347,6 +434,7 @@ def main():
             "jgb_curve": safe_fetch("jgb", lambda: get_jgb_curve(), {"value": None, "curve": {}, "unit": "%"}),
             "usdjpy": safe_fetch("usdjpy", lambda: get_usdjpy(), {"value": None, "unit": "JPY per USD"}),
         },
+        "world": build_world(),
         "global_systemic": {
             "_purpose": "Cross-asset gauges that matter regardless of which country is the proximate story — dollar liquidity, credit stress beyond equity vol, and the energy channel that feeds into every inflation print.",
             "dxy": safe_fetch("dxy", lambda: get_dxy(), {"value": None, "unit": ""}),
@@ -375,7 +463,7 @@ def main():
         try:
             with open(out_path) as f:
                 prev = json.load(f)
-            for section in ("us_global", "japan", "global_systemic"):
+            for section in ("us_global", "japan", "global_systemic", "world"):
                 for k, v in data.get(section, {}).items():
                     if not isinstance(v, dict):
                         continue  # skip non-metric entries like "_purpose" descriptive strings
