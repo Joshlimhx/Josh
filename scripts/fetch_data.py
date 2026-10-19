@@ -528,9 +528,22 @@ def _dosm_rows(dataset, limit=30):
 
 
 def get_my_cpi():
-    rows = _dosm_rows("cpi_headline", 60)
-    if rows and "division" in rows[0]:
-        rows = [r for r in rows if str(r.get("division")).lower() in ("overall", "all", "00", "total")] or rows
+    # cpi_headline has one row per month PER division, so ask only for the overall
+    # series (data.gov.my filter syntax: value@column) and fetch >12 months.
+    rows = None
+    for q in (f"{DOSM}?id=cpi_headline&filter=overall@division&sort=-date&limit=30",
+              f"{DOSM}?id=cpi_headline&sort=-date&limit=1500"):
+        try:
+            j = json.loads(http_get(q, timeout=40))
+            r = j["data"] if isinstance(j, dict) and "data" in j else j
+            if "division" in (r[0] if r else {}):
+                r = [x for x in r if str(x.get("division")).lower() in ("overall", "all", "00", "total")]
+            if r and len({x["date"] for x in r}) >= 13:
+                rows = r; break
+        except Exception as e:
+            print(f"[warn] cpi query failed: {e}", file=sys.stderr)
+    if not rows:
+        raise RuntimeError("cpi_headline: could not get >=13 months of overall CPI rows")
     rows = sorted(rows, key=lambda r: r["date"], reverse=True)
     latest = rows[0]
     for k in ("inflation_yoy", "yoy", "growth_yoy", "cpi_yoy"):
@@ -540,11 +553,11 @@ def get_my_cpi():
     idx_key = next((k for k in ("index", "cpi") if latest.get(k) is not None), None)
     if not idx_key:
         raise RuntimeError(f"cpi_headline: unknown columns {list(latest.keys())}")
-    cur = float(latest[idx_key]); y, m = latest["date"][:4], latest["date"][5:7]
-    prev = next((r for r in rows if r["date"][:4] == str(int(y) - 1) and r["date"][5:7] == m), None)
+    y, mth = latest["date"][:4], latest["date"][5:7]
+    prev = next((r for r in rows if r["date"][:4] == str(int(y) - 1) and r["date"][5:7] == mth), None)
     if not prev:
-        raise RuntimeError("cpi_headline: no year-ago row")
-    return {"value": round((cur / float(prev[idx_key]) - 1) * 100, 2), "unit": "% YoY", "as_of": latest["date"],
+        raise RuntimeError(f"cpi_headline: no year-ago row; dates seen {sorted({r['date'] for r in rows})[:3]}..")
+    return {"value": round((float(latest[idx_key]) / float(prev[idx_key]) - 1) * 100, 2), "unit": "% YoY", "as_of": latest["date"],
             "source": "DOSM via data.gov.my (cpi_headline index, YoY computed)"}
 
 
