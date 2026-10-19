@@ -295,6 +295,15 @@
     },
     "my_interbank_3m": {
       "note": "Read against the OPR: a 3M interbank rate far above the policy rate signals funding tightness; near it, calm."
+    },
+    "my_mgs_10y": {
+      "note": "Read against the OPR and the US 10Y: a widening gap to US yields with a weakening ringgit is the stress combination. No fixed band set."
+    },
+    "my_mgs_2y": {
+      "note": "Market's rate expectation: if the 2Y sits well below the OPR, the market is pricing cuts; well above, hikes."
+    },
+    "my_fx_reserves": {
+      "note": "Direction over several releases matters more than the level; a steady drawdown alongside a weaker ringgit is the warning."
     }
   },
   "real_economy_stress": {
@@ -474,16 +483,6 @@
         "url": "https://www.bnm.gov.my/monetary-stability/mpc-meeting-schedule"
       },
       {
-        "item": "MGS 10Y yield (Malaysian government bond)",
-        "why": "Sovereign funding cost; the key Malaysia-specific rates signal",
-        "url": "https://www.bnm.gov.my/financial-market"
-      },
-      {
-        "item": "Official foreign reserves (BNM, twice monthly)",
-        "why": "Buffer against ringgit and outflow stress",
-        "url": "https://www.bnm.gov.my/statistics"
-      },
-      {
         "item": "Fiscal deficit and federal debt vs statutory limit (MOF Fiscal Outlook / Budget)",
         "why": "Sovereign credit and rating risk",
         "url": "https://www.mof.gov.my/portal/en/"
@@ -499,5 +498,29 @@
         "url": "https://www.bnm.gov.my/publications/fsr"
       }
     ]
+  },
+  "malaysia_manual": {
+    "_how_to_update": "Edit this file on GitHub (pencil icon on manual.json). Replace value and as_of (YYYY-MM-DD) for the entries below, then commit. The dashboard shows the as_of date and turns the tag to STALE if the figure is more than 10 days old. Leave value as null if you don't have a verified figure.",
+    "mgs_10y": {
+      "value": null,
+      "unit": "%",
+      "as_of": null,
+      "source": "Your entry — from BNM / BPAM (bpam.com.my) / Bloomberg / broker screen",
+      "source_url": "https://www.bnm.gov.my/financial-market"
+    },
+    "mgs_2y": {
+      "value": null,
+      "unit": "%",
+      "as_of": null,
+      "source": "Your entry — from BNM / BPAM / Bloomberg / broker screen",
+      "source_url": "https://www.bnm.gov.my/financial-market"
+    },
+    "fx_reserves": {
+      "value": null,
+      "unit": "USD bn",
+      "as_of": null,
+      "source": "Your entry — BNM international reserves release (published twice monthly)",
+      "source_url": "https://www.bnm.gov.my/statistics"
+    }
   }
 }

@@ -185,6 +185,9 @@
     <div class="grid" id="myMarketGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Commodities Malaysia is exposed to</h2>
     <div class="grid" id="myCommodityGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Manual entries <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— no free feed exists; you update these, the page shows how old they are</span></h2>
+    <div class="grid" id="myManualGrid"></div>
+    <div class="note-block" id="myManualHow"></div>
     <h2 style="margin-top:24px; font-size:16px;">Not auto-updated — click through for the live figure</h2>
     <div class="note-block" id="myWatchNote"></div>
   </section>
@@ -580,6 +583,26 @@ async function load(){
     card('Brent Crude', myp('brent'), {thresholdKey:'brent'}),
     card('Palm Oil', myp('palm_oil'), {thresholdKey:'palm_oil'}),
   ].join('');
+  const mm = manual.malaysia_manual || {};
+  const manualCard = (label, key, thr) => {
+    const e = mm[key] || {};
+    const hasVal = e.value !== null && e.value !== undefined;
+    let tier = 'event-driven', ageNote = '';
+    if (hasVal && e.as_of) {
+      const age = Math.floor((Date.now() - new Date(e.as_of).getTime()) / 864e5);
+      if (age > 10) tier = 'stale';
+      ageNote = ` (${age} days old)`;
+    }
+    const html = card(label, {value: e.value, unit: e.unit, as_of: hasVal ? (e.as_of + ageNote) : 'not entered yet', source: e.source || '', tier}, {thresholdKey: thr});
+    const link = e.source_url ? `<div class="src-row"><a class="src-link" href="${e.source_url}" target="_blank" rel="noopener noreferrer">Where to get it ↗</a></div>` : '';
+    return html.replace(/<\/div>\s*$/, link + '</div>');
+  };
+  document.getElementById('myManualGrid').innerHTML = [
+    manualCard('MGS 10Y yield', 'mgs_10y', 'my_mgs_10y'),
+    manualCard('MGS 2Y yield', 'mgs_2y', 'my_mgs_2y'),
+    manualCard('Foreign reserves (BNM)', 'fx_reserves', 'my_fx_reserves'),
+  ].join('');
+  document.getElementById('myManualHow').innerHTML = '<strong>How to update:</strong> ' + (mm._how_to_update || '');
   const mw = manual.malaysia_watch || {};
   document.getElementById('myWatchNote').innerHTML =
     `${tierTag(mw.tier)} <em>${mw.status||''}</em><br>${mw._purpose||''}<br><strong>Next MPC:</strong> ${mw.next_mpc||'—'}` +
