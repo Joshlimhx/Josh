@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T09:26:07.087379+00:00",
+  "generated_at": "2026-10-19T09:27:07.494792+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 82871,
+      "value": 82892,
       "unit": "USD",
       "as_of": "2026-10-19",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 4170.899902,
+      "value": 4171.200195,
       "unit": "USD/oz",
       "as_of": "2026-10-19",
       "source": "gold-api.com",
@@ -269,15 +269,15 @@
       "value": 101,
       "unit": "bp",
       "as_of": "2026-09-01",
-      "source": "derived: France 10Y − Germany 10Y (monthly data — lags 1-2 months) [FRED:IRLTLT01FRM156N, FRED:IRLTLT01DEM156N]",
+      "source": "derived: France 10Y − Germany 10Y, same-month match (monthly data — lags 1-2 months) [FRED:IRLTLT01FRM156N, FRED:IRLTLT01DEM156N]",
       "tier": "live-api",
       "error": null
     },
     "btp_bund_spread": {
-      "value": 52,
+      "value": 80,
       "unit": "bp",
       "as_of": "2026-08-01",
-      "source": "derived: Italy 10Y − Germany 10Y (monthly data — lags 1-2 months) [FRED:IRLTLT01ITM156N, FRED:IRLTLT01DEM156N]",
+      "source": "derived: Italy 10Y − Germany 10Y, same-month match (monthly data — lags 1-2 months) [FRED:IRLTLT01ITM156N, FRED:IRLTLT01DEM156N]",
       "tier": "live-api",
       "error": null
     },
