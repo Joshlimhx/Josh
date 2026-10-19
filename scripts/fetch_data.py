@@ -167,26 +167,24 @@ def get_jgb_history():
     raw = http_get("https://www.mof.go.jp/jgbs/reference/interest_rate/data/jgbcm_all.csv", timeout=120)
     text = raw.decode("shift_jis", errors="replace")
     reader = list(csv.reader(io.StringIO(text)))
+    def _tenor(c):
+        # Normalise "10年" / "10Y" / "10N" / "10" -> "10"
+        c = c.strip().replace("\u5e74", "").rstrip("YyNn").strip()
+        return c
+
     header_row = None
     header_idx = None
     for i, row in enumerate(reader):
-        # This file's header row has a BLANK first cell (unlike jgbcme.csv,
-        # which labels it "Date") — detect it instead by the tenor columns
-        # themselves, e.g. "10N"/"10Y" appearing in the row.
-        if row and len(row) > 1 and row[1].strip() in ("1N", "1Y"):
-            header_row = row
-            header_idx = i
+        norm = [_tenor(c) for c in row]
+        if "10" in norm and "30" in norm:
+            header_row, header_idx = row, i
             break
     if header_row is None:
-        raise RuntimeError("could not find header row in MOF full-history CSV")
+        sample = " | ".join(",".join(r) for r in reader[:6])
+        raise RuntimeError(f"could not find header row in MOF full-history CSV; first rows: {sample}")
     start_idx = header_idx + 1
-    cols = [c.strip() for c in header_row]
-    # Japanese file labels tenor columns like "10N", "30N" (English uses "10Y","30Y")
-    col_10y = next((c for c in cols if c in ("10N", "10Y")), None)
-    col_30y = next((c for c in cols if c in ("30N", "30Y")), None)
-    if not col_10y or not col_30y:
-        raise RuntimeError(f"could not find 10Y/30Y columns in header: {cols}")
-    idx_10y, idx_30y = cols.index(col_10y), cols.index(col_30y)
+    norm = [_tenor(c) for c in header_row]
+    idx_10y, idx_30y = norm.index("10"), norm.index("30")
 
     series_10y, series_30y = [], []
     for row in reader[start_idx:]:
