@@ -18,5 +18,20 @@ for i in ("mgs","mgs_yield","govt_bond","bond_yield","mgs_gii","interest_rates",
     t("DOSM "+i, f"https://api.data.gov.my/data-catalogue?id={i}&limit=2", UA, 400)
 t("WGB MY", "https://www.worldgovernmentbonds.com/country/malaysia/", UA, 200)
 t("BPAM", "https://bpam.com.my/", UA, 100)
+import re
+try:
+    req=urllib.request.Request("https://www.worldgovernmentbonds.com/country/malaysia/",headers=UA)
+    html=urllib.request.urlopen(req,timeout=30).read().decode("utf-8","replace")
+    for m in list(re.finditer(r"10\s*Y|10 Years|Yield", html))[:6]:
+        out.append("WGB-CTX :: "+re.sub(r"\s+"," ",html[max(0,m.start()-200):m.start()+400]))
+    out.append("WGB-title :: "+ (re.search(r"<title>(.*?)</title>",html,re.S).group(1)[:200] if re.search(r"<title>",html) else ""))
+    for m in list(re.finditer(r"Malaysia[^<]{0,80}(\d\.\d+)\s*%", html))[:4]:
+        out.append("WGB-PCT :: "+re.sub(r"\s+"," ",m.group(0)))
+except Exception as e:
+    out.append(f"WGB-ERR {e}")
+try:
+    req=urllib.request.Request("https://api.data.gov.my/data-catalogue?id=gdp_qtr_real&filter=growth_yoy@series&sort=-date&limit=3",headers=UA)
+    out.append("GDP :: "+urllib.request.urlopen(req,timeout=30).read().decode()[:400])
+except Exception as e: out.append(f"GDP-ERR {e}")
 open(os.path.join(os.path.dirname(__file__),"..","malaysia_probe.txt"),"w").write("\n".join(out))
 print("\n".join(o[:200] for o in out))
