@@ -438,6 +438,9 @@ HISTORY_SPECS = [
     ("fr_10y", "IRLTLT01FRM156N", "France 10Y OAT yield (monthly)", "%", None),
     ("it_10y", "IRLTLT01ITM156N", "Italy 10Y BTP yield (monthly)", "%", None),
     ("uk_10y", "IRLTLT01GBM156N", "UK 10Y gilt yield (monthly)", "%", None),
+    ("usd_myr", "DEXMAUS", "USD/MYR (ringgit per dollar)", "MYR", None),
+    ("brent", "DCOILBRENTEU", "Brent crude oil", "USD/bbl", None),
+    ("palm_oil", "PPOILUSDM", "Palm oil price (monthly)", "USD/mt", None),
 ]
 
 
@@ -502,6 +505,80 @@ def build_us_history():
     return {"generated_at": datetime.now(timezone.utc).isoformat(), "series": series, "recessions": recessions}
 
 
+# ---------------------------------------------------------------------------
+# MALAYSIA — BNM public API + OpenDOSM (data.gov.my) + FRED + Yahoo (KLCI)
+# ---------------------------------------------------------------------------
+BNM_HEADERS = {"Accept": "application/vnd.BNM.API.v1+json"}
+DOSM = "https://api.data.gov.my/data-catalogue"
+
+
+def get_my_opr():
+    j = json.loads(http_get("https://api.bnm.gov.my/public/opr", headers=BNM_HEADERS, timeout=30))
+    d = j["data"]
+    return {"value": float(d["new_opr_level"]), "unit": "%", "as_of": d.get("date"),
+            "change_at_last_decision": d.get("change_in_opr"),
+            "source": "BNM public API (api.bnm.gov.my) — Overnight Policy Rate, date = last decision that set this level"}
+
+
+def _dosm_rows(dataset, limit=30):
+    j = json.loads(http_get(f"{DOSM}?id={dataset}&sort=-date&limit={limit}", timeout=30))
+    if isinstance(j, dict) and "data" in j:
+        j = j["data"]
+    return j
+
+
+def get_my_cpi():
+    rows = _dosm_rows("cpi_headline", 60)
+    if rows and "division" in rows[0]:
+        rows = [r for r in rows if str(r.get("division")).lower() in ("overall", "all", "00", "total")] or rows
+    rows = sorted(rows, key=lambda r: r["date"], reverse=True)
+    latest = rows[0]
+    for k in ("inflation_yoy", "yoy", "growth_yoy", "cpi_yoy"):
+        if latest.get(k) is not None:
+            return {"value": round(float(latest[k]), 2), "unit": "% YoY", "as_of": latest["date"],
+                    "source": "DOSM via data.gov.my (cpi_headline)"}
+    idx_key = next((k for k in ("index", "cpi") if latest.get(k) is not None), None)
+    if not idx_key:
+        raise RuntimeError(f"cpi_headline: unknown columns {list(latest.keys())}")
+    cur = float(latest[idx_key]); y, m = latest["date"][:4], latest["date"][5:7]
+    prev = next((r for r in rows if r["date"][:4] == str(int(y) - 1) and r["date"][5:7] == m), None)
+    if not prev:
+        raise RuntimeError("cpi_headline: no year-ago row")
+    return {"value": round((cur / float(prev[idx_key]) - 1) * 100, 2), "unit": "% YoY", "as_of": latest["date"],
+            "source": "DOSM via data.gov.my (cpi_headline index, YoY computed)"}
+
+
+def get_my_unemployment():
+    rows = sorted(_dosm_rows("lfs_month", 6), key=lambda r: r["date"], reverse=True)
+    latest = rows[0]
+    k = next((k for k in ("u_rate", "unemployment_rate") if latest.get(k) is not None), None)
+    if not k:
+        raise RuntimeError(f"lfs_month: unknown columns {list(latest.keys())}")
+    return {"value": round(float(latest[k]), 2), "unit": "%", "as_of": latest["date"],
+            "source": "DOSM via data.gov.my (lfs_month, Labour Force Survey)"}
+
+
+def get_klci():
+    raw = http_get("https://query1.finance.yahoo.com/v8/finance/chart/%5EKLSE?range=5d&interval=1d", timeout=20)
+    m = json.loads(raw)["chart"]["result"][0]["meta"]
+    px = m["regularMarketPrice"]
+    return {"value": round(float(px), 2), "unit": "pts", "as_of": datetime.fromtimestamp(m["regularMarketTime"], timezone.utc).date().isoformat(),
+            "source": "Yahoo Finance ^KLSE (FBM KLCI) — best-effort, unofficial; Bursa Malaysia is the official source"}
+
+
+def build_malaysia():
+    m = {"_purpose": "Malaysia: policy rate, inflation, jobs, ringgit, KLCI, and the commodity prices (crude, palm oil) the economy and fiscal accounts are most exposed to."}
+    m["opr"] = safe_fetch("my_opr", get_my_opr, {"value": 2.75, "unit": "%", "as_of": "seed: held at 2.75% per press reports (Sep 2026) — NOT verified from BNM", "source": "BNM — seed value, live fetch failed"})
+    m["cpi_yoy"] = safe_fetch("my_cpi", get_my_cpi, {"value": None, "unit": "% YoY"})
+    m["unemployment"] = safe_fetch("my_unemp", get_my_unemployment, {"value": None, "unit": "%"})
+    m["usd_myr"] = safe_fetch("usd_myr", _plain("DEXMAUS", "Malaysian ringgit per USD, daily (Fed H.10)", "MYR per USD", digits=4), {"value": None, "unit": "MYR per USD"})
+    m["myr_3m_move"] = safe_fetch("myr_3m", _fx_3m_move("DEXMAUS", "Malaysian ringgit"), {"value": None, "unit": "%"})
+    m["klci"] = safe_fetch("klci", get_klci, {"value": None, "unit": "pts"})
+    m["brent"] = safe_fetch("brent", _plain("DCOILBRENTEU", "Brent crude spot, daily", "USD/bbl"), {"value": None, "unit": "USD/bbl"})
+    m["palm_oil"] = safe_fetch("palm", _plain("PPOILUSDM", "Global price of palm oil, monthly (IMF)", "USD/mt"), {"value": None, "unit": "USD/mt"})
+    return m
+
+
 def main():
     now = datetime.now(timezone.utc).isoformat()
 
@@ -526,6 +603,7 @@ def main():
             "usdjpy": safe_fetch("usdjpy", lambda: get_usdjpy(), {"value": None, "unit": "JPY per USD"}),
         },
         "world": build_world(),
+        "malaysia": build_malaysia(),
         "global_systemic": {
             "_purpose": "Cross-asset gauges that matter regardless of which country is the proximate story — dollar liquidity, credit stress beyond equity vol, and the energy channel that feeds into every inflation print.",
             "dxy": safe_fetch("dxy", lambda: get_dxy(), {"value": None, "unit": ""}),
@@ -554,7 +632,7 @@ def main():
         try:
             with open(out_path) as f:
                 prev = json.load(f)
-            for section in ("us_global", "japan", "global_systemic", "world"):
+            for section in ("us_global", "japan", "global_systemic", "world", "malaysia"):
                 for k, v in data.get(section, {}).items():
                     if not isinstance(v, dict):
                         continue  # skip non-metric entries like "_purpose" descriptive strings

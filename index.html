@@ -177,8 +177,20 @@
     <div class="grid" id="cbCalendarGrid"></div>
   </section>
 
+  <section id="section-malaysia">
+    <h2>05 — Malaysia <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— home market</span></h2>
+    <h2 style="margin-top:8px; font-size:16px;">Policy, inflation &amp; jobs</h2>
+    <div class="grid" id="myMacroGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Ringgit &amp; equities</h2>
+    <div class="grid" id="myMarketGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Commodities Malaysia is exposed to</h2>
+    <div class="grid" id="myCommodityGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Not auto-updated — click through for the live figure</h2>
+    <div class="note-block" id="myWatchNote"></div>
+  </section>
+
   <section id="section-world">
-    <h2>05 — Europe, UK, Asia &amp; EM <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where a local problem becomes a global one</span></h2>
+    <h2>06 — Europe, UK, Asia &amp; EM <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where a local problem becomes a global one</span></h2>
     <h2 style="margin-top:8px; font-size:16px;">Europe &amp; UK sovereign stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(OECD monthly data — lags 1–2 months)</span></h2>
     <div class="grid" id="europeGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Asia &amp; EM currencies vs USD <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(3-month move, + = weaker vs USD)</span></h2>
@@ -195,7 +207,7 @@
   </section>
 
   <section id="section-history">
-    <h2>06 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
+    <h2>07 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <div style="font-family:var(--mono); font-size:11px; color:var(--paper-dim);" id="historyMeta">Loading history…</div>
       <button id="resetZoomBtn" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--steel-bright); border:1px solid var(--panel-line); border-radius:5px; padding:6px 10px; cursor:pointer;">Reset zoom</button>
@@ -207,7 +219,7 @@
   </section>
 
   <section id="section-history2">
-    <h2>07 — Cross-Asset History <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— pick an indicator; grey bands = US recessions, dashed lines = your Watch / Danger levels</span></h2>
+    <h2>08 — Cross-Asset History <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— pick an indicator; grey bands = US recessions, dashed lines = your Watch / Danger levels</span></h2>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
       <select id="h2Select" style="font-family:var(--mono); font-size:12px; background:var(--panel); color:var(--paper); border:1px solid var(--panel-line); border-radius:5px; padding:7px 10px;"></select>
       <span id="h2Ranges"></span>
@@ -246,6 +258,8 @@ const FRED_OFFICIAL = {
   RRPONTSYD:['NY Fed reverse repo','https://www.newyorkfed.org/markets/desk-operations/reverse-repo'],
   NFCI:['Chicago Fed NFCI','https://www.chicagofed.org/research/data/nfci/current-data'],
   ICSA:['US Dept of Labor claims','https://oui.doleta.gov/unemploy/claims.asp'],
+  DCOILBRENTEU:['US EIA Brent','https://www.eia.gov/dnav/pet/hist/RBRTED.htm'],
+  PPOILUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
   WALCL:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
   DTWEXBGS:['Federal Reserve H.10','https://www.federalreserve.gov/releases/h10/'],
   BAMLH0A0HYM2:['ICE Data Indices','https://www.ice.com/data-indices'],
@@ -253,6 +267,9 @@ const FRED_OFFICIAL = {
 };
 const OECD_LINK = ['OECD data','https://data-explorer.oecd.org/'];
 const KEYWORD_LINKS = [
+  [/BNM public API|BNM —|BNM/, 'Bank Negara Malaysia', 'https://www.bnm.gov.my/'],
+  [/DOSM|data\.gov\.my/, 'DOSM / data.gov.my', 'https://data.gov.my/data-catalogue'],
+  [/Yahoo.*KLSE|KLCI/, 'FBM KLCI quote', 'https://finance.yahoo.com/quote/%5EKLSE/'],
   [/Tokyo Shoko|tsr-net/i, 'Tokyo Shoko Research', 'https://www.tsr-net.co.jp/en/'],
   [/Teikoku|tdb\.co\.jp/i, 'Teikoku Databank', 'https://www.tdb.co.jp/'],
   [/CGPI|import price/i, 'BOJ price indexes', 'https://www.boj.or.jp/en/statistics/pi/index.htm'],
@@ -543,6 +560,28 @@ async function load(){
       `<div class="note-block callout-danger">2s10s currently INVERTED at ${spread2s10s}pp (10Y below 2Y) — historically a recession signal, though with a long and variable lag.</div>`);
   }
 
+
+
+  // ---- Malaysia ----
+  const my = data.malaysia || {}, myp = k => my[k] || {};
+  document.getElementById('myMacroGrid').innerHTML = [
+    card('BNM Policy Rate (OPR)', myp('opr'), {thresholdKey:'my_opr'}),
+    card('Malaysia CPI (YoY)', myp('cpi_yoy'), {thresholdKey:'my_cpi_yoy'}),
+    card('Malaysia Unemployment', myp('unemployment'), {thresholdKey:'my_unemployment'}),
+  ].join('');
+  document.getElementById('myMarketGrid').innerHTML = [
+    card('USD/MYR', myp('usd_myr'), {thresholdKey:'usd_myr'}),
+    card('Ringgit 3M move (+ = weaker)', myp('myr_3m_move'), {thresholdKey:'myr_3m_move'}),
+    card('FBM KLCI', myp('klci'), {thresholdKey:'klci'}),
+  ].join('');
+  document.getElementById('myCommodityGrid').innerHTML = [
+    card('Brent Crude', myp('brent'), {thresholdKey:'brent'}),
+    card('Palm Oil', myp('palm_oil'), {thresholdKey:'palm_oil'}),
+  ].join('');
+  const mw = manual.malaysia_watch || {};
+  document.getElementById('myWatchNote').innerHTML =
+    `${tierTag(mw.tier)} <em>${mw.status||''}</em><br>${mw._purpose||''}<br><strong>Next MPC:</strong> ${mw.next_mpc||'—'}` +
+    '<ul style="margin:6px 0 0 18px;">' + (mw.items||[]).map(i => `<li><a class="src-link" href="${i.url}" target="_blank" rel="noopener noreferrer">${i.item} ↗</a> <span style="color:var(--paper-dim)">${i.why}</span></li>`).join('') + '</ul>';
 
   // ---- World: Europe / UK / Asia-EM / conditions ----
   const wd = data.world || {};
