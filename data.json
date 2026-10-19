@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T09:33:26.320810+00:00",
+  "generated_at": "2026-10-19T09:34:36.611316+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 82922,
+      "value": 82923,
       "unit": "USD",
       "as_of": "2026-10-19",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 4169.399902,
+      "value": 4169.600098,
       "unit": "USD/oz",
       "as_of": "2026-10-19",
       "source": "gold-api.com",
@@ -302,10 +302,12 @@
       "error": null
     },
     "cpi_yoy": {
-      "value": null,
+      "value": 1.78,
       "unit": "% YoY",
-      "tier": "stale",
-      "error": "cpi_headline: no year-ago row"
+      "as_of": "2026-09-01",
+      "source": "DOSM via data.gov.my (cpi_headline index, YoY computed)",
+      "tier": "live-api",
+      "error": null
     },
     "unemployment": {
       "value": 2.9,
