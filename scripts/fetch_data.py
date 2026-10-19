@@ -383,14 +383,20 @@ def build_world():
 
     # ---- Derived: sovereign spreads (computed from the monthly yields above) ----
     def spread(a, b, name, ids=""):
-        ea, eb = w.get(a, {}), w.get(b, {})
-        if ea.get("value") is None or eb.get("value") is None:
-            return {"value": None, "unit": "bp", "tier": "stale", "error": "inputs missing", "source": name}
-        ok = ea.get("tier") == "live-api" and eb.get("tier") == "live-api"
-        return {"value": round((ea["value"] - eb["value"]) * 100), "unit": "bp",
-                "as_of": min(ea.get("as_of", ""), eb.get("as_of", "")),
-                "source": f"derived: {name} (monthly data — lags 1-2 months) [FRED:{ids}]",
-                "tier": "live-api" if ok else "stale", "error": None}
+        """Spread of two monthly yields at their latest COMMON month (the two
+        series publish with different lags, so never subtract mismatched dates)."""
+        sid = {"fr_10y": "IRLTLT01FRM156N", "it_10y": "IRLTLT01ITM156N", "de_10y": "IRLTLT01DEM156N"}
+        try:
+            da = dict(fred_latest(sid[a], n=6)); db = dict(fred_latest(sid[b], n=6))
+            common = sorted(set(da) & set(db))
+            if not common:
+                raise RuntimeError("no common month")
+            d = common[-1]
+            return {"value": round((float(da[d]) - float(db[d])) * 100), "unit": "bp", "as_of": d,
+                    "source": f"derived: {name}, same-month match (monthly data — lags 1-2 months) [FRED:{ids}]",
+                    "tier": "live-api", "error": None}
+        except Exception as e:
+            return {"value": None, "unit": "bp", "tier": "stale", "error": str(e), "source": name}
     w["oat_bund_spread"] = spread("fr_10y", "de_10y", "France 10Y − Germany 10Y", "IRLTLT01FRM156N, FRED:IRLTLT01DEM156N")
     w["btp_bund_spread"] = spread("it_10y", "de_10y", "Italy 10Y − Germany 10Y", "IRLTLT01ITM156N, FRED:IRLTLT01DEM156N")
 
