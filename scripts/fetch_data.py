@@ -164,7 +164,7 @@ def era_date_to_iso(era_str):
 
 
 def get_jgb_history():
-    raw = http_get("https://www.mof.go.jp/jgbs/reference/interest_rate/data/jgbcm_all.csv")
+    raw = http_get("https://www.mof.go.jp/jgbs/reference/interest_rate/data/jgbcm_all.csv", timeout=120)
     text = raw.decode("shift_jis", errors="replace")
     reader = list(csv.reader(io.StringIO(text)))
     header_row = None
@@ -404,6 +404,10 @@ def main():
         print(f"Wrote {history_path} ({len(history['10y'])} points)")
     except Exception as e:
         print(f"[warn] jgb_history fetch failed, leaving existing file untouched: {e}", file=sys.stderr)
+        import traceback
+        status_path = os.path.join(os.path.dirname(__file__), "..", "jgb_history_error.txt")
+        with open(status_path, "w") as f:
+            f.write(traceback.format_exc())
 
 
 if __name__ == "__main__":
