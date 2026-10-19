@@ -1,0 +1,29 @@
+ERR FRED IRLTLT01MYM156N :: HTTP Error 400: Bad Request
+ERR FRED INTDSRMYM193N :: HTTP Error 400: Bad Request
+ERR FRED IR3TIB01MYM156N :: HTTP Error 400: Bad Request
+ERR FRED TRESEGMYM052N :: HTTP Error 400: Bad Request
+ERR FRED MYSCPIALLMINMEI :: HTTP Error 400: Bad Request
+ERR BNM / :: HTTP Error 404: Not Found
+ERR BNM /mgs :: HTTP Error 404: Not Found
+ERR BNM /government-securities :: HTTP Error 404: Not Found
+ERR BNM /govt-securities :: HTTP Error 404: Not Found
+ERR BNM /bond-yield :: HTTP Error 404: Not Found
+OK  BNM /interest-rate [200] 585B :: '{"data":[{"product":"overall","date":"2026-10-16","overnight":2.75,"1_week":2.8100000000000001,"1_month":3.0800000000000001,"3_month":3.5600000000000001,"6_month":null,"1_year":null},{"product":"interbank","date":"2026-10-16","overnight":2.7599999999999998,"1_week":2.8100000000000001,"1_month":3.080'
+ERR BNM /international-reserves :: HTTP Error 404: Not Found
+ERR BNM /reserves :: HTTP Error 404: Not Found
+OK  BNM /kijang-emas [200] 230B :: '{"data":{"effective_date":"2026-10-19","one_oz":{"buying":17400,"selling":18111},"half_oz":{"buying":8700,"selling":9227},"quarter_oz":{"buying":4350,"selling":4699}},"meta":{"last_updated":"2026-10-19 03:00:05","total_result":1}}'
+OK  BNM /base-rate [200] 5952B :: '{"data":[{"bank_code":"AFFINBANK","bank_name":"Affin Bank","base_rate":2.7000000000000002,"base_lending_rate":5.5599999999999996,"indicative_eff_lending_rate":3.2999999999999998},{"bank_code":"ALLIANCEB","bank_name":"Alliance Bank","base_rate":2.5699999999999998,"base_lending_rate":5.419999999999999'
+ERR BNM /interbank-rate :: HTTP Error 404: Not Found
+OK  BNM /exchange-rate [200] 4315B :: '{"data":[{"currency_code":"CHF","unit":1,"rate":{"date":"2026-10-19","buying_rate":4.9478999999999997,"selling_rate":4.9539,"middle_rate":4.9508999999999999}},{"currency_code":"CAD","unit":1,"rate":{"date":"2026-10-19","buying_rate":2.8950999999999998,"selling_rate":2.8982999999999999,"middle_rate":'
+ERR DOSM mgs :: HTTP Error 404: Not Found
+ERR DOSM mgs_yield :: HTTP Error 404: Not Found
+ERR DOSM govt_bond :: HTTP Error 404: Not Found
+ERR DOSM bond_yield :: HTTP Error 404: Not Found
+ERR DOSM mgs_gii :: HTTP Error 404: Not Found
+ERR DOSM interest_rates :: HTTP Error 404: Not Found
+ERR DOSM reserves :: HTTP Error 404: Not Found
+ERR DOSM international_reserves :: HTTP Error 404: Not Found
+OK  DOSM gdp_qtr_real [200] 120B :: '[{"date": "2015-01-01", "value": 282255.0, "series": "abs"}, {"date": "2015-04-01", "value": 288975.0, "series": "abs"}]'
+OK  DOSM gdp_qtr_real_sa [200] 120B :: '[{"date": "2015-01-01", "value": 289405.0, "series": "abs"}, {"date": "2015-04-01", "value": 293440.0, "series": "abs"}]'
+OK  WGB MY [200] 47183B :: '<!DOCTYPE html>\n<html lang="en-US">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    <meta name="description" content="Updated Government '
+OK  BPAM [200] 34634B :: '<!DOCTYPE html>\n<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->\n<!--[i'

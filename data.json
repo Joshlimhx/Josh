@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T09:34:36.611316+00:00",
+  "generated_at": "2026-10-19T09:37:45.990453+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 82923,
+      "value": 82999,
       "unit": "USD",
       "as_of": "2026-10-19",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 4169.600098,
+      "value": 4170.299805,
       "unit": "USD/oz",
       "as_of": "2026-10-19",
       "source": "gold-api.com",
