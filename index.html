@@ -568,6 +568,8 @@ async function load(){
     card('BNM Policy Rate (OPR)', myp('opr'), {thresholdKey:'my_opr'}),
     card('Malaysia CPI (YoY)', myp('cpi_yoy'), {thresholdKey:'my_cpi_yoy'}),
     card('Malaysia Unemployment', myp('unemployment'), {thresholdKey:'my_unemployment'}),
+    card('Malaysia GDP growth', myp('gdp_yoy'), {thresholdKey:'my_gdp'}),
+    card('Interbank 3M rate', myp('interbank_3m'), {thresholdKey:'my_interbank_3m'}),
   ].join('');
   document.getElementById('myMarketGrid').innerHTML = [
     card('USD/MYR', myp('usd_myr'), {thresholdKey:'usd_myr'}),

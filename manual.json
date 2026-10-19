@@ -289,6 +289,12 @@
     },
     "palm_oil": {
       "note": "Plantation and export-earnings driver; falling prices hit plantation earnings and ringgit sentiment. No fixed band."
+    },
+    "my_gdp": {
+      "note": "Growth is judged against trend, not a ceiling: sustained prints well below ~4% would be a slowdown signal for Malaysia. No fixed danger band set."
+    },
+    "my_interbank_3m": {
+      "note": "Read against the OPR: a 3M interbank rate far above the policy rate signals funding tightness; near it, calm."
     }
   },
   "real_economy_stress": {
@@ -457,7 +463,7 @@
     "escalation_ladder": "1) Elevated drills (routine) -> 2) Named exercise with blockade rehearsal -> 3) Quarantine/inspection regime -> 4) Kinetic. Markets typically price only from step 3; TWD and semiconductor equities move first."
   },
   "malaysia_watch": {
-    "_purpose": "Malaysian indicators with no free reliable daily feed. This is a verify-against-primary-source checklist. No numbers here are claimed; click through for the current figure.",
+    "_purpose": "Malaysian indicators with no free reliable daily feed (an automated MGS 10Y source was tested and not found: FRED has none, BNM's API does not carry it, and the public aggregator renders it with JavaScript). No numbers are claimed here; click through for the figure.",
     "tier": "seed",
     "status": "NOT AUTO-UPDATED — open the official source for the live figure",
     "next_mpc": "BNM's next Monetary Policy Committee meeting is in November 2026 per press reports; confirm the exact date on BNM's official MPC calendar.",
@@ -476,11 +482,6 @@
         "item": "Official foreign reserves (BNM, twice monthly)",
         "why": "Buffer against ringgit and outflow stress",
         "url": "https://www.bnm.gov.my/statistics"
-      },
-      {
-        "item": "Quarterly GDP growth (DOSM)",
-        "why": "Real-economy momentum",
-        "url": "https://open.dosm.gov.my/data-catalogue"
       },
       {
         "item": "Fiscal deficit and federal debt vs statutory limit (MOF Fiscal Outlook / Budget)",

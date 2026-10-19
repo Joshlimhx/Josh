@@ -579,11 +579,29 @@ def get_klci():
             "source": "Yahoo Finance ^KLSE (FBM KLCI) — best-effort, unofficial; Bursa Malaysia is the official source"}
 
 
+def get_my_gdp():
+    j = json.loads(http_get(f"{DOSM}?id=gdp_qtr_real&filter=growth_yoy@series&sort=-date&limit=2", timeout=30))
+    rows = j["data"] if isinstance(j, dict) and "data" in j else j
+    r = sorted(rows, key=lambda x: x["date"], reverse=True)[0]
+    return {"value": round(float(r["value"]), 2), "unit": "% YoY (real, quarterly)", "as_of": r["date"],
+            "source": "DOSM via data.gov.my (gdp_qtr_real, growth_yoy) — date = start of the quarter"}
+
+
+def get_my_interbank_3m():
+    j = json.loads(http_get("https://api.bnm.gov.my/public/interest-rate", headers=BNM_HEADERS, timeout=30))
+    row = next(r for r in j["data"] if r.get("product") == "interbank")
+    return {"value": float(row["3_month"]), "unit": "%", "as_of": row["date"],
+            "overnight": row.get("overnight"),
+            "source": "BNM public API (api.bnm.gov.my) — interbank 3-month rate; compare with the OPR for funding-cost stress"}
+
+
 def build_malaysia():
     m = {"_purpose": "Malaysia: policy rate, inflation, jobs, ringgit, KLCI, and the commodity prices (crude, palm oil) the economy and fiscal accounts are most exposed to."}
     m["opr"] = safe_fetch("my_opr", get_my_opr, {"value": 2.75, "unit": "%", "as_of": "seed: held at 2.75% per press reports (Sep 2026) — NOT verified from BNM", "source": "BNM — seed value, live fetch failed"})
     m["cpi_yoy"] = safe_fetch("my_cpi", get_my_cpi, {"value": None, "unit": "% YoY"})
     m["unemployment"] = safe_fetch("my_unemp", get_my_unemployment, {"value": None, "unit": "%"})
+    m["gdp_yoy"] = safe_fetch("my_gdp", get_my_gdp, {"value": None, "unit": "% YoY"})
+    m["interbank_3m"] = safe_fetch("my_ib3m", get_my_interbank_3m, {"value": None, "unit": "%"})
     m["usd_myr"] = safe_fetch("usd_myr", _plain("DEXMAUS", "Malaysian ringgit per USD, daily (Fed H.10)", "MYR per USD", digits=4), {"value": None, "unit": "MYR per USD"})
     m["myr_3m_move"] = safe_fetch("myr_3m", _fx_3m_move("DEXMAUS", "Malaysian ringgit"), {"value": None, "unit": "%"})
     m["klci"] = safe_fetch("klci", get_klci, {"value": None, "unit": "pts"})
