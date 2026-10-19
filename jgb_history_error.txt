@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/home/runner/work/Josh/Josh/scripts/fetch_data.py", line 401, in main
-    history = get_jgb_history()
-              ^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/Josh/Josh/scripts/fetch_data.py", line 181, in get_jgb_history
-    raise RuntimeError("could not find header row in MOF full-history CSV")
-RuntimeError: could not find header row in MOF full-history CSV
