@@ -104,6 +104,9 @@
     h1{ font-size: 24px; }
     .grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   }
+.src-row{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.src-link{font-family:var(--mono);font-size:10px;color:var(--steel-bright);text-decoration:none;border:1px solid var(--panel-line);border-radius:4px;padding:2px 6px}
+.src-link:hover{background:var(--panel-line);color:var(--paper)}
 </style>
 </head>
 <body>
@@ -221,7 +224,65 @@
 </div>
 
 <script>
-const fmt = (v, unit) => v === null || v === undefined ? '—' : `${v}${unit ? ' ' + unit : ''}`;
+const fmtNum = v => (typeof v === 'number' && !Number.isInteger(v)) ? Number(v.toFixed(Math.abs(v) < 10 ? 3 : 2)) : v;
+const fmt = (v, unit) => v === null || v === undefined ? '—' : `${fmtNum(v)}${unit ? ' ' + unit : ''}`;
+
+// ---- Source links: every number links to where it came from ----
+const FRED_OFFICIAL = {
+  DFF:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  FEDFUNDS:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  DGS2:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  DGS10:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  DGS30:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  T10YIE:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  DFII10:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  CPIAUCSL:['BLS CPI','https://www.bls.gov/cpi/'],
+  UNRATE:['BLS jobs report','https://www.bls.gov/news.release/empsit.nr0.htm'],
+  VIXCLS:['Cboe VIX','https://www.cboe.com/tradable_products/vix/'],
+  GFDEGDQ188S:['US Treasury Fiscal Data','https://fiscaldata.treasury.gov/americas-finance-guide/national-debt/'],
+  GDP:['BEA GDP','https://www.bea.gov/data/gdp/gross-domestic-product'],
+  NCBEILQ027S:['Fed Z.1 release','https://www.federalreserve.gov/releases/z1/'],
+  DCOILWTICO:['US EIA WTI','https://www.eia.gov/dnav/pet/hist/RWTCD.htm'],
+  RRPONTSYD:['NY Fed reverse repo','https://www.newyorkfed.org/markets/desk-operations/reverse-repo'],
+  NFCI:['Chicago Fed NFCI','https://www.chicagofed.org/research/data/nfci/current-data'],
+  ICSA:['US Dept of Labor claims','https://oui.doleta.gov/unemploy/claims.asp'],
+  WALCL:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
+  DTWEXBGS:['Federal Reserve H.10','https://www.federalreserve.gov/releases/h10/'],
+  BAMLH0A0HYM2:['ICE Data Indices','https://www.ice.com/data-indices'],
+  BAMLEMCBPIOAS:['ICE Data Indices','https://www.ice.com/data-indices'],
+};
+const OECD_LINK = ['OECD data','https://data-explorer.oecd.org/'];
+const KEYWORD_LINKS = [
+  [/Tokyo Shoko|tsr-net/i, 'Tokyo Shoko Research', 'https://www.tsr-net.co.jp/en/'],
+  [/Teikoku|tdb\.co\.jp/i, 'Teikoku Databank', 'https://www.tdb.co.jp/'],
+  [/CGPI|import price/i, 'BOJ price indexes', 'https://www.boj.or.jp/en/statistics/pi/index.htm'],
+  [/MOF|jgbcm/i, 'Japan MOF JGB rates', 'https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/index.htm'],
+  [/Frankfurter|ECB/i, 'ECB reference rates', 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html'],
+  [/CoinGecko/i, 'CoinGecko', 'https://www.coingecko.com/en/coins/bitcoin'],
+  [/gold-api/i, 'gold-api.com', 'https://gold-api.com/'],
+  [/Shiller|Yale/i, 'Shiller data (Yale)', 'http://www.econ.yale.edu/~shiller/data.htm'],
+  [/BOJ|Bank of Japan/i, 'Bank of Japan', 'https://www.boj.or.jp/en/mopo/mpmdeci/index.htm'],
+];
+const CB_LINKS = {
+  fed:'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm', fomc:'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm',
+  ecb:'https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html',
+  boj:'https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm',
+  boe:'https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates', bank_of_england:'https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates'
+};
+function sourceLinks(source){
+  const out = [], seen = new Set();
+  const add = (label, url) => { if (!seen.has(url)) { seen.add(url); out.push(`<a class="src-link" href="${url}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`); } };
+  const text = source || '';
+  const ids = [...text.matchAll(/FRED:([A-Z0-9]+)/g)].map(m => m[1]);
+  ids.forEach(id => add('FRED:' + id, 'https://fred.stlouisfed.org/series/' + id));
+  ids.forEach(id => {
+    if (FRED_OFFICIAL[id]) add(FRED_OFFICIAL[id][0], FRED_OFFICIAL[id][1]);
+    else if (/^IRLTLT01/.test(id)) add(OECD_LINK[0], OECD_LINK[1]);
+    else if (/^DEX/.test(id)) add('Federal Reserve H.10', 'https://www.federalreserve.gov/releases/h10/');
+  });
+  KEYWORD_LINKS.forEach(([re, label, url]) => { if (re.test(text) && !ids.length) add(label, url); });
+  return out;
+}
 
 let THRESHOLDS = {}; // populated from manual.risk_thresholds once data loads
 
@@ -270,7 +331,8 @@ function card(label, entry, opts={}){
   return `<div class="card">
     <div class="card-label"><span>${label}</span>${tierTag(entry.tier)}</div>
     <div class="card-value ${cls}">${fmt(entry.value)}<span class="card-unit">${entry.unit||''}</span></div>
-    <div class="card-meta">as of ${entry.as_of||'—'} · ${entry.source||''}</div>
+    <div class="card-meta">as of ${entry.as_of||'—'} · ${(entry.source||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+    ${(() => { const l = sourceLinks(entry.source); return l.length ? `<div class="src-row">${l.join('')}</div>` : ''; })()}
     ${chip ? `<div style="margin-top:6px;">${chip}</div>` : ''}
   </div>`;
 }
@@ -450,7 +512,7 @@ async function load(){
     if (!info.remaining_2026) return;
     info.remaining_2026.forEach(dateRange => {
       const firstDate = dateRange.split('_')[0].replace(/_\d+$/, '');
-      cbEntries.push({bank: cbNames[key] || key, dateRange, firstDate, rate: info.current_rate || info.current_rate_deposit_facility});
+      cbEntries.push({bank: cbNames[key] || key, bankKey: key, src: info.source, dateRange, firstDate, rate: info.current_rate || info.current_rate_deposit_facility});
     });
   });
   cbEntries.sort((a,b) => a.firstDate.localeCompare(b.firstDate));
@@ -460,6 +522,7 @@ async function load(){
       <div class="card-label"><span>${e.bank}</span>${isNext ? '<span class="tier-tag tier-event">NEXT</span>' : ''}</div>
       <div class="card-value" style="font-size:18px;">${e.dateRange.replace(/_/g,'–')}</div>
       <div class="card-meta">current rate: ${e.rate || '—'}</div>
+      ${CB_LINKS[e.bankKey] ? `<div class="src-row"><a class="src-link" href="${CB_LINKS[e.bankKey]}" target="_blank" rel="noopener noreferrer">Official calendar ↗</a></div>` : ''}
     </div>`;
   }).join('');
 

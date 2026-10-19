@@ -382,17 +382,17 @@ def build_world():
     w["fed_balance_sheet"] = safe_fetch("walcl", _plain("WALCL", "Fed total assets, weekly", "USD bn", divisor=1000.0, digits=0), {"value": None, "unit": "USD bn"})
 
     # ---- Derived: sovereign spreads (computed from the monthly yields above) ----
-    def spread(a, b, name):
+    def spread(a, b, name, ids=""):
         ea, eb = w.get(a, {}), w.get(b, {})
         if ea.get("value") is None or eb.get("value") is None:
             return {"value": None, "unit": "bp", "tier": "stale", "error": "inputs missing", "source": name}
         ok = ea.get("tier") == "live-api" and eb.get("tier") == "live-api"
         return {"value": round((ea["value"] - eb["value"]) * 100), "unit": "bp",
                 "as_of": min(ea.get("as_of", ""), eb.get("as_of", "")),
-                "source": f"derived: {name} (monthly data — lags 1-2 months)",
+                "source": f"derived: {name} (monthly data — lags 1-2 months) [FRED:{ids}]",
                 "tier": "live-api" if ok else "stale", "error": None}
-    w["oat_bund_spread"] = spread("fr_10y", "de_10y", "France 10Y − Germany 10Y")
-    w["btp_bund_spread"] = spread("it_10y", "de_10y", "Italy 10Y − Germany 10Y")
+    w["oat_bund_spread"] = spread("fr_10y", "de_10y", "France 10Y − Germany 10Y", "IRLTLT01FRM156N, FRED:IRLTLT01DEM156N")
+    w["btp_bund_spread"] = spread("it_10y", "de_10y", "Italy 10Y − Germany 10Y", "IRLTLT01ITM156N, FRED:IRLTLT01DEM156N")
 
     # ---- Derived: EM stress composite. Rule is explicit so it can be audited. ----
     #  +1 for each of 6 EM/Asia currencies that lost >5% vs USD in 3 months
@@ -406,7 +406,7 @@ def build_world():
     if oas is None: missing += 1
     elif oas > 5.0: flags += 1
     w["em_stress_score"] = {"value": flags, "unit": "/ 7 flags", "as_of": datetime.now(timezone.utc).date().isoformat(),
-        "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5%",
+        "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5% [FRED:DEXCHUS, FRED:DEXKOUS, FRED:DEXTAUS, FRED:DEXINUS, FRED:DEXMXUS, FRED:DEXBZUS, FRED:BAMLEMCBPIOAS]",
         "tier": "live-api" if missing == 0 else "stale", "error": None if missing == 0 else f"{missing} input(s) missing"}
     return w
 
@@ -428,6 +428,10 @@ HISTORY_SPECS = [
     ("unemployment", "UNRATE", "US unemployment rate", "%", None),
     ("nfci", "NFCI", "Financial conditions (NFCI, >0 = tight)", "", None),
     ("em_corp_oas", "BAMLEMCBPIOAS", "EM corporate credit spread", "%", None),
+    ("de_10y", "IRLTLT01DEM156N", "Germany 10Y Bund yield (monthly)", "%", None),
+    ("fr_10y", "IRLTLT01FRM156N", "France 10Y OAT yield (monthly)", "%", None),
+    ("it_10y", "IRLTLT01ITM156N", "Italy 10Y BTP yield (monthly)", "%", None),
+    ("uk_10y", "IRLTLT01GBM156N", "UK 10Y gilt yield (monthly)", "%", None),
 ]
 
 
@@ -466,6 +470,15 @@ def build_us_history():
                            "data": [[d, round(v, 4)] for d, v in pts]}
         except Exception as e:
             print(f"[warn] history {key} ({sid}) failed: {e}", file=sys.stderr)
+    # Derived sovereign spreads (bp), from the monthly yields above
+    def _spread(a, b, key, label, src):
+        if a in series and b in series:
+            bd = dict((d, v) for d, v in series[b]["data"])
+            data = [[d, round((v - bd[d]) * 100)] for d, v in series[a]["data"] if d in bd]
+            if data:
+                series[key] = {"label": label, "unit": "bp", "source": src, "data": data}
+    _spread("fr_10y", "de_10y", "oat_bund_spread", "France–Germany spread (OAT–Bund, monthly)", "FRED:IRLTLT01FRM156N − FRED:IRLTLT01DEM156N")
+    _spread("it_10y", "de_10y", "btp_bund_spread", "Italy–Germany spread (BTP–Bund, monthly)", "FRED:IRLTLT01ITM156N − FRED:IRLTLT01DEM156N")
     # NBER recession periods from USREC (monthly 0/1)
     recessions = []
     try:
