@@ -33,6 +33,7 @@ jobs:
           git config user.name "macro-dashboard-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data.json
+          if [ -f daily_snapshot.json ]; then git add daily_snapshot.json; fi
           if [ -f jgb_history.json ]; then git add jgb_history.json; fi
           if [ -f jgb_history_error.txt ]; then git add jgb_history_error.txt; fi
           if [ -f history_us.json ]; then git add history_us.json; fi

@@ -680,6 +680,32 @@ def main():
 
     print(f"Wrote {out_path}")
 
+    # ---- Daily snapshot of every numeric metric (powers "since last run" deltas) ----
+    try:
+        flat = {}
+        for section in ("us_global", "japan", "global_systemic", "world", "malaysia"):
+            for k, v in data.get(section, {}).items():
+                if not isinstance(v, dict):
+                    continue
+                if isinstance(v.get("value"), (int, float)):
+                    flat[f"{section}.{k}"] = v["value"]
+                if k == "jgb_curve" and isinstance(v.get("curve"), dict):
+                    for tenor, val in v["curve"].items():
+                        if isinstance(val, (int, float)):
+                            flat[f"japan.jgb_{tenor.lower()}"] = val
+        snap_path = os.path.join(os.path.dirname(__file__), "..", "daily_snapshot.json")
+        snaps = {}
+        if os.path.exists(snap_path):
+            with open(snap_path) as f:
+                snaps = json.load(f)
+        snaps[datetime.now(timezone.utc).date().isoformat()] = flat
+        for old in sorted(snaps.keys())[:-45]:
+            del snaps[old]
+        with open(snap_path, "w") as f:
+            json.dump(snaps, f, separators=(",", ":"))
+    except Exception as e:
+        print(f"[warn] daily snapshot skipped: {e}", file=sys.stderr)
+
     # ---- JGB full history (separate file, only refetched successfully — ----
     # ---- on failure, leave whatever history file already exists alone) ----
     history_path = os.path.join(os.path.dirname(__file__), "..", "jgb_history.json")

@@ -107,6 +107,25 @@
 .src-row{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
 .src-link{font-family:var(--mono);font-size:10px;color:var(--steel-bright);text-decoration:none;border:1px solid var(--panel-line);border-radius:4px;padding:2px 6px}
 .src-link:hover{background:var(--panel-line);color:var(--paper)}
+
+.summary{margin:18px 0 8px;background:var(--panel);border:1px solid var(--panel-line);border-radius:10px;padding:16px}
+.sum-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.sum-count{font-family:var(--mono);font-size:12px;border:1px solid var(--panel-line);border-radius:6px;padding:6px 10px}
+.sum-count b{font-size:18px;margin-right:4px}
+.sum-danger b{color:#d96a4a}.sum-watch b{color:#d4a64a}.sum-normal b{color:#6fae85}
+.sum-row{margin-top:10px;font-size:13px;line-height:1.9}
+.sum-row .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-dim);display:block}
+.sum-chip{display:inline-block;font-family:var(--mono);font-size:11px;text-decoration:none;color:var(--paper);border:1px solid var(--panel-line);border-radius:5px;padding:2px 8px;margin:2px 4px 2px 0}
+.sum-chip:hover{background:var(--panel-line)}
+.sum-chip.d{border-color:#b5533a}.sum-chip.w{border-color:#9b7a2f}
+.fresh{font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;border:1px solid var(--panel-line)}
+.fresh.ok{color:#6fae85}.fresh.warn{color:#d4a64a;border-color:#9b7a2f}.fresh.bad{color:#fff;background:#8a2f1d;border-color:#b5533a}
+.navrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.navrow a,.navrow button{font-family:var(--mono);font-size:11px;color:var(--steel-bright);background:transparent;border:1px solid var(--panel-line);border-radius:5px;padding:4px 9px;text-decoration:none;cursor:pointer}
+.navrow a:hover,.navrow button:hover{background:var(--panel-line);color:var(--paper)}
+.delta{font-family:var(--mono);font-size:10px;color:var(--paper-dim);margin-top:4px}
+body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){display:none}
+.card.flash{outline:2px solid var(--steel-bright)}
 </style>
 </head>
 <body>
@@ -122,6 +141,8 @@
       <span class="legend-item"><span class="dot seed"></span>Seed / Stale</span>
     </span>
   </div>
+
+  <div class="summary" id="summary"><div class="fresh">Loading summary…</div></div>
 
   <section id="section-global">
     <h2>01 — US &amp; Global</h2>
@@ -335,12 +356,14 @@ function statusFor(value, bands){
   return 'status-normal';
 }
 
+let ZONE_LOG = [], PREV = null, PREV_DATE = null, CARD_N = 0;
+const slug = t => String(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 function card(label, entry, opts={}){
-  let cls = '', chip = '';
+  let cls = '', chip = '', zone = null;
   const thresholdKey = opts.thresholdKey;
   const band = thresholdKey ? THRESHOLDS[thresholdKey] : null;
   if (band && band.normal_max !== undefined) {
-    const zone = zoneFor(entry.value, band);
+    zone = zoneFor(entry.value, band);
     cls = zone ? `status-${zone}` : '';
     chip = zoneChip(zone, band);
   } else if (opts.bands) {
@@ -348,13 +371,68 @@ function card(label, entry, opts={}){
   } else if (band && band.note) {
     chip = `<span class="zone-chip zone-nodata" title="${band.note.replace(/"/g,'&quot;')}">NO BAND YET</span>`;
   }
-  return `<div class="card">
+  const id = 'c-' + slug(label) + '-' + (CARD_N++);
+  // change since the previous day's snapshot
+  let deltaHtml = '', prevZone = null;
+  const path = entry._path;
+  if (path && PREV && typeof PREV[path] === 'number' && typeof entry.value === 'number') {
+    const d = entry.value - PREV[path];
+    if (band && band.normal_max !== undefined) prevZone = zoneFor(PREV[path], band);
+    const arrow = d > 0 ? '▲' : d < 0 ? '▼' : '■';
+    deltaHtml = `<div class="delta">${arrow} ${d > 0 ? '+' : ''}${fmtNum(Math.round(d*1000)/1000)} since ${PREV_DATE}</div>`;
+  }
+  if (zone) ZONE_LOG.push({id, label, zone, prevZone, value: entry.value, unit: entry.unit || '', tier: entry.tier});
+  return `<div class="card" id="${id}" data-zone="${zone || 'none'}">
     <div class="card-label"><span>${label}</span>${tierTag(entry.tier)}</div>
     <div class="card-value ${cls}">${fmt(entry.value)}<span class="card-unit">${entry.unit||''}</span></div>
+    ${deltaHtml}
     <div class="card-meta">as of ${entry.as_of||'—'} · ${(entry.source||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
     ${(() => { const l = sourceLinks(entry.source); return l.length ? `<div class="src-row">${l.join('')}</div>` : ''; })()}
     ${chip ? `<div style="margin-top:6px;">${chip}</div>` : ''}
   </div>`;
+}
+
+function renderSummary(data){
+  const el = document.getElementById('summary');
+  const ageH = (Date.now() - new Date(data.generated_at).getTime()) / 36e5;
+  const ageTxt = ageH < 1 ? 'less than an hour ago' : ageH < 48 ? `${Math.round(ageH)} hours ago` : `${Math.round(ageH/24)} days ago`;
+  const freshCls = ageH > 72 ? 'bad' : ageH > 36 ? 'warn' : 'ok';
+  const freshMsg = ageH > 72 ? `⚠ DATA IS STALE — last updated ${ageTxt}. The daily update has stopped; open GitHub → Actions → Run workflow.`
+                 : ageH > 36 ? `Data updated ${ageTxt} (one daily run may have been missed)`
+                 : `✓ Data updated ${ageTxt}`;
+  const by = z => ZONE_LOG.filter(r => r.zone === z);
+  const D = by('danger'), W = by('watch'), N = by('normal');
+  const nStale = ZONE_LOG.filter(r => r.tier === 'stale').length;
+  const chip = (r, c) => `<a class="sum-chip ${c}" href="#${r.id}" data-jump="${r.id}">${r.label}: ${fmt(r.value)}${r.unit && r.unit.length < 8 ? ' ' + r.unit : ''}</a>`;
+  const moved = ZONE_LOG.filter(r => r.prevZone && r.prevZone !== r.zone);
+  const rank = {normal:0, watch:1, danger:2};
+  const worse = moved.filter(r => rank[r.zone] > rank[r.prevZone]), better = moved.filter(r => rank[r.zone] < rank[r.prevZone]);
+  const movedChip = r => `<a class="sum-chip ${r.zone==='danger'?'d':r.zone==='watch'?'w':''}" href="#${r.id}" data-jump="${r.id}">${r.label}: ${r.prevZone.toUpperCase()} → ${r.zone.toUpperCase()}</a>`;
+  el.innerHTML = `
+    <div class="sum-top">
+      <span class="fresh ${freshCls}">${freshMsg}</span>
+      <span class="sum-count sum-danger"><b>${D.length}</b>DANGER</span>
+      <span class="sum-count sum-watch"><b>${W.length}</b>WATCH</span>
+      <span class="sum-count sum-normal"><b>${N.length}</b>NORMAL</span>
+      ${nStale ? `<span class="sum-count"><b>${nStale}</b>STALE feeds</span>` : ''}
+    </div>
+    <div class="sum-row"><span class="lbl">In DANGER now (click to jump)</span>${D.length ? D.map(r => chip(r,'d')).join('') : 'None'}</div>
+    <div class="sum-row"><span class="lbl">In WATCH</span>${W.length ? W.map(r => chip(r,'w')).join('') : 'None'}</div>
+    <div class="sum-row"><span class="lbl">Changed zone since ${PREV_DATE || 'last run'}</span>${PREV ? ((worse.length ? '<b>Worse:</b> ' + worse.map(movedChip).join('') : '') + (better.length ? ' <b>Better:</b> ' + better.map(movedChip).join('') : '') || 'No zone changes') : 'No earlier snapshot yet (starts tomorrow)'}</div>
+    <div class="navrow">
+      <button id="onlyProblemsBtn">Show only problems</button>
+      <a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
+    </div>`;
+  document.getElementById('onlyProblemsBtn').addEventListener('click', e => {
+    const on = document.body.classList.toggle('only-problems');
+    e.target.textContent = on ? 'Show all indicators' : 'Show only problems';
+  });
+  el.querySelectorAll('[data-jump]').forEach(a => a.addEventListener('click', ev => {
+    ev.preventDefault();
+    document.body.classList.remove('only-problems');
+    const t = document.getElementById(a.dataset.jump); if (!t) return;
+    t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 2200);
+  }));
 }
 
 function scoreCard(title, pct, formula, color){
@@ -373,6 +451,19 @@ async function load(){
   const res = await fetch('./data.json', {cache: 'no-store'});
   data = await res.json();
   manual = data.manual || {};
+  ZONE_LOG = []; CARD_N = 0; PREV = null; PREV_DATE = null;
+  ['us_global','japan','global_systemic','world','malaysia'].forEach(sec => {
+    Object.entries(data[sec] || {}).forEach(([k, v]) => { if (v && typeof v === 'object') v._path = sec + '.' + k; });
+  });
+  try {
+    const sr = await fetch('./daily_snapshot.json', {cache: 'no-store'});
+    if (sr.ok) {
+      const snaps = await sr.json();
+      const today = (data.generated_at || '').slice(0,10);
+      const dates = Object.keys(snaps).filter(d => d < today).sort();
+      if (dates.length) { PREV_DATE = dates[dates.length-1]; PREV = snaps[PREV_DATE]; }
+    }
+  } catch(e) { /* deltas are optional */ }
   THRESHOLDS = manual.risk_thresholds || {};
 
   document.getElementById('generatedAt').textContent =
@@ -424,9 +515,9 @@ async function load(){
   const japanGrid = document.getElementById('japanGrid');
   japanGrid.innerHTML = [
     card('USD/JPY', j.usdjpy, {thresholdKey: 'usdjpy'}),
-    card('10Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['10Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_10y'}),
-    card('30Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['30Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_30y'}),
-    card('40Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['40Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier}, {thresholdKey: 'jgb_40y'}),
+    card('10Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['10Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier, _path:'japan.jgb_10y'}, {thresholdKey: 'jgb_10y'}),
+    card('30Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['30Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier, _path:'japan.jgb_30y'}, {thresholdKey: 'jgb_30y'}),
+    card('40Y JGB', {value: j.jgb_curve.curve ? j.jgb_curve.curve['40Y'] : null, unit:'%', as_of:j.jgb_curve.as_of, source:j.jgb_curve.source, tier:j.jgb_curve.tier, _path:'japan.jgb_40y'}, {thresholdKey: 'jgb_40y'}),
     card('BOJ Policy Rate', boj, {thresholdKey: 'boj_rate'}),
   ].join('');
 
@@ -650,6 +741,8 @@ async function load(){
     `${tierTag(tw.tier)} <em>${tw.status||''}</em><br>${tw._purpose||''}` +
     listHtml(tw.indicators_to_watch, i => `<li><strong>${i.item}</strong> — ${i.primary_source}</li>`) +
     `<br><strong>Escalation ladder:</strong> ${tw.escalation_ladder||'—'}`;
+
+  renderSummary(data);
 
   document.getElementById('footerSources').innerHTML =
     'US/Global/World: FRED incl. OECD sovereign yields, H.10 FX, ICE BofA EM OAS, NFCI (Fed Funds, UST 2/10/30Y, CPI, Unemployment, Debt/GDP, VIX, Wilshire5000/GDP), CoinGecko (BTC), gold-api.com, Shiller/Yale (CAPE, best-effort). ' +
