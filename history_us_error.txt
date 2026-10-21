@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/runner/work/Josh/Josh/scripts/fetch_data.py", line 727, in main
+    us_hist = build_us_history()
+              ^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Josh/Josh/scripts/fetch_data.py", line 504, in build_us_history
+    raise RuntimeError("no history series fetched")
+RuntimeError: no history series fetched
