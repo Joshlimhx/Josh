@@ -1,69 +1,69 @@
 {
-  "generated_at": "2026-10-21T23:46:49.369579+00:00",
+  "generated_at": "2026-10-22T23:44:54.119165+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:DFF",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "ust_10y": {
-      "value": 5.15,
+      "value": 5.13,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:DGS10",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "ust_30y": {
-      "value": 5.48,
+      "value": 5.42,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:DGS30",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "ust_2y": {
-      "value": 4.77,
+      "value": 4.81,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:DGS2",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "cpi_yoy": {
       "value": 3.72,
       "unit": "% YoY",
       "as_of": "2026-09-01",
       "source": "FRED:CPIAUCSL",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "unemployment": {
       "value": 4.2,
       "unit": "%",
       "as_of": "2026-09-01",
       "source": "FRED:UNRATE",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "debt_to_gdp": {
       "value": 122.59387,
       "unit": "%",
       "as_of": "2026-01-01",
       "source": "FRED:GFDEGDQ188S",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "vix": {
-      "value": 18.44,
+      "value": 16.68,
       "unit": "",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:VIXCLS",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "buffett_indicator": {
       "value": 255.0,
@@ -76,8 +76,8 @@
         "gdp_billion": 32563.03,
         "gdp_as_of": "2026-04-01"
       },
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "shiller_cape": {
       "value": 35.23,
@@ -88,42 +88,42 @@
       "error": null
     },
     "bitcoin": {
-      "value": 84203,
+      "value": 81259,
       "unit": "USD",
-      "as_of": "2026-10-21",
+      "as_of": "2026-10-22",
       "source": "CoinGecko",
       "tier": "live-api",
       "error": null
     },
     "gold": {
-      "value": 4117.0,
+      "value": 4026.300049,
       "unit": "USD/oz",
-      "as_of": "2026-10-20",
+      "as_of": "2026-10-22",
       "source": "gold-api.com",
-      "tier": "stale",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "tier": "live-api",
+      "error": null
     }
   },
   "japan": {
     "jgb_curve": {
-      "value": 2.927,
+      "value": 2.923,
       "curve": {
-        "10Y": 2.927,
-        "20Y": 3.723,
-        "30Y": 3.992,
-        "40Y": 4.002,
-        "2Y": 1.909
+        "10Y": 2.923,
+        "20Y": 3.726,
+        "30Y": 3.98,
+        "40Y": 3.994,
+        "2Y": 1.914
       },
       "unit": "%",
-      "as_of": "2026/10/20",
+      "as_of": "2026/10/21",
       "source": "MOF Japan — 国債金利情報 (jgbcme.csv)",
       "tier": "live-api",
       "error": null
     },
     "usdjpy": {
-      "value": 157.88,
+      "value": 157.05,
       "unit": "JPY per USD",
-      "as_of": "2026-10-21",
+      "as_of": "2026-10-22",
       "source": "Frankfurter (ECB reference rates)",
       "tier": "live-api",
       "error": null
@@ -136,32 +136,32 @@
       "unit": "%",
       "as_of": "2026-09-01",
       "source": "FRED:IRLTLT01DEM156N (Germany 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fr_10y": {
       "value": 4.4771,
       "unit": "%",
       "as_of": "2026-09-01",
       "source": "FRED:IRLTLT01FRM156N (France 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "it_10y": {
       "value": 3.986,
       "unit": "%",
       "as_of": "2026-08-01",
       "source": "FRED:IRLTLT01ITM156N (Italy 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "uk_10y": {
       "value": 5.2421,
       "unit": "%",
       "as_of": "2026-09-01",
       "source": "FRED:IRLTLT01GBM156N (UK gilt 10Y gov bond yield, OECD monthly avg — lags ~1-2 months)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_cny": {
       "value": -1.33,
@@ -169,8 +169,8 @@
       "level": 6.6861,
       "as_of": "2026-10-16",
       "source": "FRED:DEXCHUS (China yuan per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_krw": {
       "value": -10.43,
@@ -178,8 +178,8 @@
       "level": 1334.03,
       "as_of": "2026-10-16",
       "source": "FRED:DEXKOUS (Korean won per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_twd": {
       "value": 0.09,
@@ -187,8 +187,8 @@
       "level": 32.4,
       "as_of": "2026-10-16",
       "source": "FRED:DEXTAUS (Taiwan dollar per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_inr": {
       "value": -1.37,
@@ -196,8 +196,8 @@
       "level": 94.96,
       "as_of": "2026-10-16",
       "source": "FRED:DEXINUS (Indian rupee per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_mxn": {
       "value": 5.66,
@@ -205,8 +205,8 @@
       "level": 18.5026,
       "as_of": "2026-10-16",
       "source": "FRED:DEXMXUS (Mexican peso per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fx_brl": {
       "value": -0.42,
@@ -214,80 +214,80 @@
       "level": 5.0864,
       "as_of": "2026-10-16",
       "source": "FRED:DEXBZUS (Brazilian real per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "em_corp_oas": {
-      "value": 1.6,
+      "value": 1.63,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:BAMLEMCBPIOAS (ICE BofA EM corporate OAS)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "nfci": {
-      "value": -0.499,
+      "value": -0.496,
       "unit": "",
-      "as_of": "2026-10-09",
+      "as_of": "2026-10-16",
       "source": "FRED:NFCI (Chicago Fed National Financial Conditions Index, weekly; >0 = tighter than average)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "jobless_claims": {
-      "value": 199000.0,
+      "value": 194000.0,
       "unit": "claims",
-      "as_of": "2026-10-10",
+      "as_of": "2026-10-17",
       "source": "FRED:ICSA (US initial jobless claims, weekly)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "breakeven_10y": {
-      "value": 2.35,
+      "value": 2.32,
       "unit": "%",
-      "as_of": "2026-10-20",
+      "as_of": "2026-10-22",
       "source": "FRED:T10YIE (10Y breakeven inflation)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "real_yield_10y": {
-      "value": 2.8,
+      "value": 2.76,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:DFII10 (10Y TIPS real yield)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "fed_balance_sheet": {
-      "value": 6756.0,
+      "value": 6754.0,
       "unit": "USD bn",
-      "as_of": "2026-10-14",
+      "as_of": "2026-10-21",
       "source": "FRED:WALCL (Fed total assets, weekly)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "oat_bund_spread": {
       "value": 101,
       "unit": "bp",
       "as_of": "2026-09-01",
       "source": "derived: France 10Y − Germany 10Y, same-month match (monthly data — lags 1-2 months) [FRED:IRLTLT01FRM156N, FRED:IRLTLT01DEM156N]",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "btp_bund_spread": {
       "value": 80,
       "unit": "bp",
       "as_of": "2026-08-01",
       "source": "derived: Italy 10Y − Germany 10Y, same-month match (monthly data — lags 1-2 months) [FRED:IRLTLT01ITM156N, FRED:IRLTLT01DEM156N]",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "em_stress_score": {
       "value": 1,
       "unit": "/ 7 flags",
-      "as_of": "2026-10-20",
+      "as_of": "2026-10-22",
       "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5% [FRED:DEXCHUS, FRED:DEXKOUS, FRED:DEXTAUS, FRED:DEXINUS, FRED:DEXMXUS, FRED:DEXBZUS, FRED:BAMLEMCBPIOAS]",
-      "tier": "stale",
-      "error": "7 input(s) missing"
+      "tier": "live-api",
+      "error": null
     }
   },
   "malaysia": {
@@ -339,8 +339,8 @@
       "unit": "MYR per USD",
       "as_of": "2026-10-16",
       "source": "FRED:DEXMAUS (Malaysian ringgit per USD, daily (Fed H.10))",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "myr_3m_move": {
       "value": -0.36,
@@ -348,32 +348,32 @@
       "level": 4.079,
       "as_of": "2026-10-16",
       "source": "FRED:DEXMAUS (Malaysian ringgit per USD, daily; 3-month change)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "klci": {
-      "value": 1602.27,
+      "value": 1608.14,
       "unit": "pts",
-      "as_of": "2026-10-21",
+      "as_of": "2026-10-22",
       "source": "Yahoo Finance ^KLSE (FBM KLCI) — best-effort, unofficial; Bursa Malaysia is the official source",
       "tier": "live-api",
       "error": null
     },
     "brent": {
-      "value": 126.55,
+      "value": 115.22,
       "unit": "USD/bbl",
-      "as_of": "2026-10-14",
+      "as_of": "2026-10-20",
       "source": "FRED:DCOILBRENTEU (Brent crude spot, daily)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "palm_oil": {
-      "value": 1106.47,
+      "value": 1133.13,
       "unit": "USD/mt",
-      "as_of": "2026-07-01",
+      "as_of": "2026-09-01",
       "source": "FRED:PPOILUSDM (Global price of palm oil, monthly (IMF))",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     }
   },
   "global_systemic": {
@@ -383,32 +383,32 @@
       "unit": "",
       "as_of": "2026-10-16",
       "source": "FRED:DTWEXBGS (trade-weighted broad dollar index)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "us_hy_credit_spread": {
-      "value": 3.29,
+      "value": 3.27,
       "unit": "%",
-      "as_of": "2026-10-19",
+      "as_of": "2026-10-21",
       "source": "FRED:BAMLH0A0HYM2 (ICE BofA US High Yield OAS)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "wti_oil": {
-      "value": 101.91,
+      "value": 107.89,
       "unit": "USD/bbl",
-      "as_of": "2026-10-14",
+      "as_of": "2026-10-20",
       "source": "FRED:DCOILWTICO (WTI spot)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     },
     "rrp": {
-      "value": 0.227,
+      "value": 0.351,
       "unit": "USD bn",
-      "as_of": "2026-10-20",
+      "as_of": "2026-10-22",
       "source": "FRED:RRPONTSYD (Fed overnight reverse repo, daily)",
-      "tier": "stale",
-      "error": "Expecting value: line 1 column 1 (char 0)"
+      "tier": "live-api",
+      "error": null
     }
   },
   "manual": {
