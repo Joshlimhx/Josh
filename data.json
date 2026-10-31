@@ -1,34 +1,34 @@
 {
-  "generated_at": "2026-10-30T00:29:17.742972+00:00",
+  "generated_at": "2026-10-31T00:13:30.991196+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:DFF",
       "tier": "live-api",
       "error": null
     },
     "ust_10y": {
-      "value": 5.05,
+      "value": 4.98,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:DGS10",
       "tier": "live-api",
       "error": null
     },
     "ust_30y": {
-      "value": 5.37,
+      "value": 5.32,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:DGS30",
       "tier": "live-api",
       "error": null
     },
     "ust_2y": {
-      "value": 4.67,
+      "value": 4.61,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:DGS2",
       "tier": "live-api",
       "error": null
@@ -58,9 +58,9 @@
       "error": null
     },
     "vix": {
-      "value": 16.91,
+      "value": 17.2,
       "unit": "",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:VIXCLS",
       "tier": "live-api",
       "error": null
@@ -88,17 +88,17 @@
       "error": null
     },
     "bitcoin": {
-      "value": 76869,
+      "value": 77224,
       "unit": "USD",
-      "as_of": "2026-10-30",
+      "as_of": "2026-10-31",
       "source": "CoinGecko",
       "tier": "live-api",
       "error": null
     },
     "gold": {
-      "value": 4013.800049,
+      "value": 3876.399902,
       "unit": "USD/oz",
-      "as_of": "2026-10-30",
+      "as_of": "2026-10-31",
       "source": "gold-api.com",
       "tier": "live-api",
       "error": null
@@ -106,24 +106,24 @@
   },
   "japan": {
     "jgb_curve": {
-      "value": 2.867,
+      "value": 2.876,
       "curve": {
-        "10Y": 2.867,
-        "20Y": 3.685,
-        "30Y": 3.941,
-        "40Y": 3.974,
-        "2Y": 1.915
+        "10Y": 2.876,
+        "20Y": 3.701,
+        "30Y": 3.956,
+        "40Y": 3.984,
+        "2Y": 1.901
       },
       "unit": "%",
-      "as_of": "2026/10/28",
+      "as_of": "2026/10/29",
       "source": "MOF Japan — 国債金利情報 (jgbcme.csv)",
       "tier": "live-api",
       "error": null
     },
     "usdjpy": {
-      "value": 158.06,
+      "value": 157.25,
       "unit": "JPY per USD",
-      "as_of": "2026-10-29",
+      "as_of": "2026-10-30",
       "source": "Frankfurter (ECB reference rates)",
       "tier": "live-api",
       "error": null
@@ -218,9 +218,9 @@
       "error": null
     },
     "em_corp_oas": {
-      "value": 1.7,
+      "value": 1.73,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:BAMLEMCBPIOAS (ICE BofA EM corporate OAS)",
       "tier": "live-api",
       "error": null
@@ -242,17 +242,17 @@
       "error": null
     },
     "breakeven_10y": {
-      "value": 2.35,
+      "value": 2.34,
       "unit": "%",
-      "as_of": "2026-10-29",
+      "as_of": "2026-10-30",
       "source": "FRED:T10YIE (10Y breakeven inflation)",
       "tier": "live-api",
       "error": null
     },
     "real_yield_10y": {
-      "value": 2.67,
+      "value": 2.63,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:DFII10 (10Y TIPS real yield)",
       "tier": "live-api",
       "error": null
@@ -284,7 +284,7 @@
     "em_stress_score": {
       "value": 1,
       "unit": "/ 7 flags",
-      "as_of": "2026-10-30",
+      "as_of": "2026-10-31",
       "source": "derived: count of {CNY,KRW,TWD,INR,MXN,BRL} down >5% vs USD over 3M, plus EM corp OAS >5% [FRED:DEXCHUS, FRED:DEXKOUS, FRED:DEXTAUS, FRED:DEXINUS, FRED:DEXMXUS, FRED:DEXBZUS, FRED:BAMLEMCBPIOAS]",
       "tier": "live-api",
       "error": null
@@ -352,9 +352,9 @@
       "error": null
     },
     "klci": {
-      "value": 1611.16,
+      "value": 1615.6,
       "unit": "pts",
-      "as_of": "2026-10-29",
+      "as_of": "2026-10-30",
       "source": "Yahoo Finance ^KLSE (FBM KLCI) — best-effort, unofficial; Bursa Malaysia is the official source",
       "tier": "live-api",
       "error": null
@@ -387,9 +387,9 @@
       "error": null
     },
     "us_hy_credit_spread": {
-      "value": 3.14,
+      "value": 3.26,
       "unit": "%",
-      "as_of": "2026-10-28",
+      "as_of": "2026-10-29",
       "source": "FRED:BAMLH0A0HYM2 (ICE BofA US High Yield OAS)",
       "tier": "live-api",
       "error": null
@@ -403,9 +403,9 @@
       "error": null
     },
     "rrp": {
-      "value": 0.353,
+      "value": 4.375,
       "unit": "USD bn",
-      "as_of": "2026-10-29",
+      "as_of": "2026-10-30",
       "source": "FRED:RRPONTSYD (Fed overnight reverse repo, daily)",
       "tier": "live-api",
       "error": null
