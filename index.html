@@ -206,8 +206,7 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
     <div class="grid" id="youthGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Uncertainty, supply chains &amp; markets</h2>
     <div class="grid" id="uncertGrid"></div>
-    <h2 style="margin-top:24px; font-size:16px;">Unrest intensity in the news <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— a media-attention proxy, not an event count</span></h2>
-    <div class="grid" id="unrestGrid"></div>
+    <div class="note-block" id="unrestGapNote"><strong>Live unrest counts: not available for free.</strong> A news-volume feed (GDELT) was tested and refuses requests from GitHub's servers (HTTP 429), so it is not shown rather than shown empty. Real protest/riot event counts by country exist at ACLED (acleddata.com), which needs a free registered key; if added, this section can show true event counts.</div>
     <h2 style="margin-top:24px; font-size:16px;">2026 European unrest — sourced log</h2>
     <div class="note-block" id="unrestLog"></div>
   </section>
@@ -705,10 +704,6 @@ async function load(){
     card('Supply-Chain Pressure (NY Fed)', sp('gscpi'), {thresholdKey:'gscpi'}),
     card('S&P 500 drawdown', sp('sp500_drawdown'), {thresholdKey:'sp500_drawdown'}),
     card('Copper', sp('copper'), {thresholdKey:'copper'}),
-  ].join('');
-  document.getElementById('unrestGrid').innerHTML = [
-    card('Unrest in the news — Global', sp('unrest_global'), {thresholdKey:'unrest_global'}),
-    card('Unrest in the news — Europe', sp('unrest_europe'), {thresholdKey:'unrest_europe'}),
   ].join('');
   const ul = manual.unrest_log || {};
   const ulItem = i => `<li><strong>${i.date} · ${i.where || ''}</strong> — ${i.what || ''}${i.source ? ` <a class="src-link" href="${i.url}" target="_blank" rel="noopener noreferrer">${i.source} ↗</a>` : ''}</li>`;

@@ -729,8 +729,6 @@ def build_social():
     s["gscpi"] = safe_fetch("gscpi", get_gscpi, {"value": None, "unit": "std dev"})
     s["sp500_drawdown"] = safe_fetch("spdd", get_sp500_drawdown, {"value": None, "unit": "%"})
     s["copper"] = safe_fetch("copper", _plain("PCOPPUSDM", "Global copper price, monthly (IMF) — growth barometer", "USD/mt", digits=0), {"value": None, "unit": "USD/mt"})
-    s["unrest_global"] = safe_fetch("gd_global", get_gdelt_ratio("(protest OR riot OR unrest)", "protest/riot/unrest"), {"value": None, "unit": "x"})
-    s["unrest_europe"] = safe_fetch("gd_eu", get_gdelt_ratio("(protest OR riot) (France OR Germany OR Spain OR Italy OR Portugal OR Belgium)", "protest/riot in France/Germany/Spain/Italy/Portugal/Belgium"), {"value": None, "unit": "x"})
     return s
 
 
