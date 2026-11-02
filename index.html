@@ -202,7 +202,7 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
     <h2>05 — Social &amp; Geopolitical Stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where economic pressure turns into street pressure</span></h2>
     <h2 style="margin-top:8px; font-size:16px;">Cost of living &amp; fuel</h2>
     <div class="grid" id="costGrid"></div>
-    <h2 style="margin-top:24px; font-size:16px;">Youth unemployment (15–24) <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— monthly OECD data, judge each country vs its own history</span></h2>
+    <h2 style="margin-top:24px; font-size:16px;">Youth unemployment (15–24) <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— monthly Eurostat data, judge each country vs its own history</span></h2>
     <div class="grid" id="youthGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Uncertainty, supply chains &amp; markets</h2>
     <div class="grid" id="uncertGrid"></div>
@@ -314,6 +314,7 @@ const FRED_OFFICIAL = {
 const OECD_LINK = ['OECD data','https://data-explorer.oecd.org/'];
 const KEYWORD_LINKS = [
   [/GDELT/, 'GDELT project', 'https://www.gdeltproject.org/'],
+  [/Eurostat/, 'Eurostat unemployment', 'https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table'],
   [/Supply Chain Pressure|GSCPI/, 'NY Fed GSCPI', 'https://www.newyorkfed.org/research/policy/gscpi'],
   [/Geopolitical Risk|Iacoviello/, 'GPR index', 'https://www.matteoiacoviello.com/gpr.htm'],
   [/BNM public API|BNM —|BNM/, 'Bank Negara Malaysia', 'https://www.bnm.gov.my/'],
@@ -343,7 +344,7 @@ function sourceLinks(source){
   ids.forEach(id => add('FRED:' + id, 'https://fred.stlouisfed.org/series/' + id));
   ids.forEach(id => {
     if (FRED_OFFICIAL[id]) add(FRED_OFFICIAL[id][0], FRED_OFFICIAL[id][1]);
-    else if (/^(IRLTLT01|LRUN24)/.test(id)) add(OECD_LINK[0], OECD_LINK[1]);
+    else if (/^IRLTLT01/.test(id)) add(OECD_LINK[0], OECD_LINK[1]);
     else if (/^DEX/.test(id)) add('Federal Reserve H.10', 'https://www.federalreserve.gov/releases/h10/');
   });
   KEYWORD_LINKS.forEach(([re, label, url]) => { if (re.test(text) && !ids.length) add(label, url); });

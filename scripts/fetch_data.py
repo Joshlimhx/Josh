@@ -444,11 +444,6 @@ HISTORY_SPECS = [
     ("ez_hicp_yoy", "CP0000EZ19M086NEST", "Euro-area inflation (HICP, YoY)", "%", "yoy"),
     ("food_price_yoy", "PFOODINDEXM", "Global food prices (IMF index, YoY)", "%", "yoy"),
     ("us_gasoline", "GASREGW", "US regular gasoline", "USD/gal", None),
-    ("youth_unemp_fr", "LRUN24TTFRM156S", "France youth unemployment (15-24)", "%", None),
-    ("youth_unemp_de", "LRUN24TTDEM156S", "Germany youth unemployment (15-24)", "%", None),
-    ("youth_unemp_es", "LRUN24TTESM156S", "Spain youth unemployment (15-24)", "%", None),
-    ("youth_unemp_it", "LRUN24TTITM156S", "Italy youth unemployment (15-24)", "%", None),
-    ("youth_unemp_pt", "LRUN24TTPTM156S", "Portugal youth unemployment (15-24)", "%", None),
     ("global_epu", "GEPUCURRENT", "Global economic policy uncertainty", "index", None),
     ("sp500", "SP500", "S&P 500", "pts", None),
     ("copper", "PCOPPUSDM", "Copper price (monthly)", "USD/mt", None),
@@ -637,6 +632,22 @@ def _yoy(series_id, label, unit="% YoY", n=16):
     return fn
 
 
+def _eurostat_youth(geo, label):
+    def fn():
+        url = ("https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m"
+               f"?format=JSON&lang=EN&geo={geo}&age=Y_LT25&sex=T&unit=PC_ACT&s_adj=SA&lastTimePeriod=6")
+        j = json.loads(http_get(url, timeout=40))
+        idx = j["dimension"]["time"]["category"]["index"]          # {"2026-08": 0, ...}
+        vals = j["value"]                                            # {"0": 17.9, ...}
+        have = [(t, vals[str(i)]) for t, i in idx.items() if str(i) in vals and vals[str(i)] is not None]
+        if not have:
+            raise RuntimeError(f"Eurostat une_rt_m {geo}: no values")
+        t, v = sorted(have)[-1]
+        return {"value": round(float(v), 1), "unit": "%", "as_of": t + "-01",
+                "source": f"Eurostat une_rt_m ({label} youth <25 unemployment rate, seasonally adjusted, monthly)"}
+    return fn
+
+
 def get_sp500_drawdown():
     obs = fred_latest("SP500", n=300)
     last = float(obs[0][1]); high = max(float(v) for _, v in obs[:252])
@@ -683,8 +694,15 @@ def get_gdelt_ratio(query, label):
         import urllib.parse
         url = ("https://api.gdeltproject.org/api/v2/doc/doc?query=" + urllib.parse.quote(query) +
                "&mode=timelinevol&timespan=3months&format=json")
-        time.sleep(6)  # GDELT asks for >=5s between requests
-        j = json.loads(http_get(url, timeout=60))
+        j = None
+        for wait in (10, 30, 60):                      # GDELT rate-limits shared IPs; back off and retry
+            time.sleep(wait)
+            try:
+                j = json.loads(http_get(url, timeout=60)); break
+            except urllib.error.HTTPError as e:
+                if e.code != 429: raise
+        if j is None:
+            raise RuntimeError("GDELT rate-limited (HTTP 429) after 3 attempts")
         data = j["timeline"][0]["data"]
         vals = [float(x["value"]) for x in data if x.get("value") is not None]
         if len(vals) < 30:
@@ -701,10 +719,10 @@ def build_social():
     s["food_price_yoy"] = safe_fetch("food", _yoy("PFOODINDEXM", "IMF global food price index"), {"value": None, "unit": "% YoY"})
     s["us_gasoline"] = safe_fetch("gas", _plain("GASREGW", "US regular gasoline, weekly (EIA)", "USD/gal"), {"value": None, "unit": "USD/gal"})
     s["us_diesel"] = safe_fetch("diesel", _plain("GASDESW", "US diesel retail, weekly (EIA)", "USD/gal"), {"value": None, "unit": "USD/gal"})
-    for key, sid, lab in (("youth_unemp_fr", "LRUN24TTFRM156S", "France"), ("youth_unemp_de", "LRUN24TTDEM156S", "Germany"),
-                          ("youth_unemp_es", "LRUN24TTESM156S", "Spain"), ("youth_unemp_it", "LRUN24TTITM156S", "Italy"),
-                          ("youth_unemp_pt", "LRUN24TTPTM156S", "Portugal")):
-        s[key] = safe_fetch(key, _plain(sid, f"{lab} youth (15-24) unemployment, OECD", "%"), {"value": None, "unit": "%"})
+    for key, geo, lab in (("youth_unemp_fr", "FR", "France"), ("youth_unemp_de", "DE", "Germany"),
+                          ("youth_unemp_es", "ES", "Spain"), ("youth_unemp_it", "IT", "Italy"),
+                          ("youth_unemp_pt", "PT", "Portugal")):
+        s[key] = safe_fetch(key, _eurostat_youth(geo, lab), {"value": None, "unit": "%"})
     s["global_epu"] = safe_fetch("gepu", _plain("GEPUCURRENT", "Global Economic Policy Uncertainty index", "index", digits=1), {"value": None, "unit": "index"})
     s["us_epu"] = safe_fetch("usepu", _plain("USEPUINDXD", "US Economic Policy Uncertainty, daily", "index", digits=1), {"value": None, "unit": "index"})
     s["gpr"] = safe_fetch("gpr", get_gpr, {"value": None, "unit": "index"})
