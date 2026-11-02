@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T17:39:14.466319+00:00",
+  "generated_at": "2026-11-02T17:46:08.971067+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 77063,
+      "value": 76931,
       "unit": "USD",
       "as_of": "2026-11-02",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 3960.800049,
+      "value": 3956.899902,
       "unit": "USD/oz",
       "as_of": "2026-11-02",
       "source": "gold-api.com",
@@ -498,18 +498,6 @@
       "source": "FRED:PCOPPUSDM (Global copper price, monthly (IMF) — growth barometer)",
       "tier": "live-api",
       "error": null
-    },
-    "unrest_global": {
-      "value": null,
-      "unit": "x",
-      "tier": "stale",
-      "error": "GDELT rate-limited (HTTP 429) after 3 attempts"
-    },
-    "unrest_europe": {
-      "value": null,
-      "unit": "x",
-      "tier": "stale",
-      "error": "GDELT rate-limited (HTTP 429) after 3 attempts"
     }
   },
   "global_systemic": {
