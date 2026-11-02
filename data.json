@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T17:37:00.985935+00:00",
+  "generated_at": "2026-11-02T17:39:14.466319+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -88,7 +88,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 76946,
+      "value": 77063,
       "unit": "USD",
       "as_of": "2026-11-02",
       "source": "CoinGecko",
@@ -96,7 +96,7 @@
       "error": null
     },
     "gold": {
-      "value": 3959.199951,
+      "value": 3960.800049,
       "unit": "USD/oz",
       "as_of": "2026-11-02",
       "source": "gold-api.com",
@@ -411,34 +411,44 @@
       "error": null
     },
     "youth_unemp_fr": {
-      "value": null,
+      "value": 21.9,
       "unit": "%",
-      "tier": "stale",
-      "error": "HTTP Error 400: Bad Request"
+      "as_of": "2026-09-01",
+      "source": "Eurostat une_rt_m (France youth <25 unemployment rate, seasonally adjusted, monthly)",
+      "tier": "live-api",
+      "error": null
     },
     "youth_unemp_de": {
-      "value": null,
+      "value": 7.5,
       "unit": "%",
-      "tier": "stale",
-      "error": "HTTP Error 400: Bad Request"
+      "as_of": "2026-09-01",
+      "source": "Eurostat une_rt_m (Germany youth <25 unemployment rate, seasonally adjusted, monthly)",
+      "tier": "live-api",
+      "error": null
     },
     "youth_unemp_es": {
-      "value": null,
+      "value": 22.8,
       "unit": "%",
-      "tier": "stale",
-      "error": "HTTP Error 400: Bad Request"
+      "as_of": "2026-09-01",
+      "source": "Eurostat une_rt_m (Spain youth <25 unemployment rate, seasonally adjusted, monthly)",
+      "tier": "live-api",
+      "error": null
     },
     "youth_unemp_it": {
-      "value": null,
+      "value": 19.9,
       "unit": "%",
-      "tier": "stale",
-      "error": "HTTP Error 400: Bad Request"
+      "as_of": "2026-09-01",
+      "source": "Eurostat une_rt_m (Italy youth <25 unemployment rate, seasonally adjusted, monthly)",
+      "tier": "live-api",
+      "error": null
     },
     "youth_unemp_pt": {
-      "value": null,
+      "value": 19.1,
       "unit": "%",
-      "tier": "stale",
-      "error": "HTTP Error 400: Bad Request"
+      "as_of": "2026-09-01",
+      "source": "Eurostat une_rt_m (Portugal youth <25 unemployment rate, seasonally adjusted, monthly)",
+      "tier": "live-api",
+      "error": null
     },
     "global_epu": {
       "value": 241.7,
@@ -493,13 +503,13 @@
       "value": null,
       "unit": "x",
       "tier": "stale",
-      "error": "HTTP Error 429: Too Many Requests"
+      "error": "GDELT rate-limited (HTTP 429) after 3 attempts"
     },
     "unrest_europe": {
       "value": null,
       "unit": "x",
       "tier": "stale",
-      "error": "HTTP Error 429: Too Many Requests"
+      "error": "GDELT rate-limited (HTTP 429) after 3 attempts"
     }
   },
   "global_systemic": {
