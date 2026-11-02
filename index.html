@@ -198,8 +198,22 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
     <div class="grid" id="cbCalendarGrid"></div>
   </section>
 
+  <section id="section-social">
+    <h2>05 — Social &amp; Geopolitical Stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where economic pressure turns into street pressure</span></h2>
+    <h2 style="margin-top:8px; font-size:16px;">Cost of living &amp; fuel</h2>
+    <div class="grid" id="costGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Youth unemployment (15–24) <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— monthly OECD data, judge each country vs its own history</span></h2>
+    <div class="grid" id="youthGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Uncertainty, supply chains &amp; markets</h2>
+    <div class="grid" id="uncertGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">Unrest intensity in the news <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— a media-attention proxy, not an event count</span></h2>
+    <div class="grid" id="unrestGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">2026 European unrest — sourced log</h2>
+    <div class="note-block" id="unrestLog"></div>
+  </section>
+
   <section id="section-malaysia">
-    <h2>05 — Malaysia <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— home market</span></h2>
+    <h2>06 — Malaysia <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— home market</span></h2>
     <h2 style="margin-top:8px; font-size:16px;">Policy, inflation &amp; jobs</h2>
     <div class="grid" id="myMacroGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Ringgit &amp; equities</h2>
@@ -214,7 +228,7 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
   </section>
 
   <section id="section-world">
-    <h2>06 — Europe, UK, Asia &amp; EM <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where a local problem becomes a global one</span></h2>
+    <h2>07 — Europe, UK, Asia &amp; EM <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where a local problem becomes a global one</span></h2>
     <h2 style="margin-top:8px; font-size:16px;">Europe &amp; UK sovereign stress <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(OECD monthly data — lags 1–2 months)</span></h2>
     <div class="grid" id="europeGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Asia &amp; EM currencies vs USD <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">(3-month move, + = weaker vs USD)</span></h2>
@@ -231,7 +245,7 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
   </section>
 
   <section id="section-history">
-    <h2>07 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
+    <h2>08 — Historical Context <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— where today's number sits since 1974</span></h2>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <div style="font-family:var(--mono); font-size:11px; color:var(--paper-dim);" id="historyMeta">Loading history…</div>
       <button id="resetZoomBtn" style="font-family:var(--mono); font-size:11px; background:var(--panel); color:var(--steel-bright); border:1px solid var(--panel-line); border-radius:5px; padding:6px 10px; cursor:pointer;">Reset zoom</button>
@@ -243,7 +257,7 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
   </section>
 
   <section id="section-history2">
-    <h2>08 — Cross-Asset History <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— pick an indicator; grey bands = US recessions, dashed lines = your Watch / Danger levels</span></h2>
+    <h2>09 — Cross-Asset History <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— pick an indicator; grey bands = US recessions, dashed lines = your Watch / Danger levels</span></h2>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
       <select id="h2Select" style="font-family:var(--mono); font-size:12px; background:var(--panel); color:var(--paper); border:1px solid var(--panel-line); border-radius:5px; padding:7px 10px;"></select>
       <span id="h2Ranges"></span>
@@ -284,6 +298,14 @@ const FRED_OFFICIAL = {
   ICSA:['US Dept of Labor claims','https://oui.doleta.gov/unemploy/claims.asp'],
   DCOILBRENTEU:['US EIA Brent','https://www.eia.gov/dnav/pet/hist/RBRTED.htm'],
   PPOILUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  GASREGW:['US EIA gasoline','https://www.eia.gov/petroleum/gasdiesel/'],
+  GASDESW:['US EIA diesel','https://www.eia.gov/petroleum/gasdiesel/'],
+  GEPUCURRENT:['Policy Uncertainty (policyuncertainty.com)','https://www.policyuncertainty.com/'],
+  USEPUINDXD:['Policy Uncertainty (policyuncertainty.com)','https://www.policyuncertainty.com/'],
+  PFOODINDEXM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  PCOPPUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  CP0000EZ19M086NEST:['Eurostat HICP','https://ec.europa.eu/eurostat/web/hicp'],
+  SP500:['S&P Dow Jones Indices','https://www.spglobal.com/spdji/en/indices/equity/sp-500/'],
   WALCL:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
   DTWEXBGS:['Federal Reserve H.10','https://www.federalreserve.gov/releases/h10/'],
   BAMLH0A0HYM2:['ICE Data Indices','https://www.ice.com/data-indices'],
@@ -291,6 +313,9 @@ const FRED_OFFICIAL = {
 };
 const OECD_LINK = ['OECD data','https://data-explorer.oecd.org/'];
 const KEYWORD_LINKS = [
+  [/GDELT/, 'GDELT project', 'https://www.gdeltproject.org/'],
+  [/Supply Chain Pressure|GSCPI/, 'NY Fed GSCPI', 'https://www.newyorkfed.org/research/policy/gscpi'],
+  [/Geopolitical Risk|Iacoviello/, 'GPR index', 'https://www.matteoiacoviello.com/gpr.htm'],
   [/BNM public API|BNM —|BNM/, 'Bank Negara Malaysia', 'https://www.bnm.gov.my/'],
   [/DOSM|data\.gov\.my/, 'DOSM / data.gov.my', 'https://data.gov.my/data-catalogue'],
   [/Yahoo.*KLSE|KLCI/, 'FBM KLCI quote', 'https://finance.yahoo.com/quote/%5EKLSE/'],
@@ -318,7 +343,7 @@ function sourceLinks(source){
   ids.forEach(id => add('FRED:' + id, 'https://fred.stlouisfed.org/series/' + id));
   ids.forEach(id => {
     if (FRED_OFFICIAL[id]) add(FRED_OFFICIAL[id][0], FRED_OFFICIAL[id][1]);
-    else if (/^IRLTLT01/.test(id)) add(OECD_LINK[0], OECD_LINK[1]);
+    else if (/^(IRLTLT01|LRUN24)/.test(id)) add(OECD_LINK[0], OECD_LINK[1]);
     else if (/^DEX/.test(id)) add('Federal Reserve H.10', 'https://www.federalreserve.gov/releases/h10/');
   });
   KEYWORD_LINKS.forEach(([re, label, url]) => { if (re.test(text) && !ids.length) add(label, url); });
@@ -421,7 +446,7 @@ function renderSummary(data){
     <div class="sum-row"><span class="lbl">Changed zone since ${PREV_DATE || 'last run'}</span>${PREV ? ((worse.length ? '<b>Worse:</b> ' + worse.map(movedChip).join('') : '') + (better.length ? ' <b>Better:</b> ' + better.map(movedChip).join('') : '') || 'No zone changes') : 'No earlier snapshot yet (starts tomorrow)'}</div>
     <div class="navrow">
       <button id="onlyProblemsBtn">Show only problems</button>
-      <a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
+      <a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-social">Social stress</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
     </div>`;
   document.getElementById('onlyProblemsBtn').addEventListener('click', e => {
     const on = document.body.classList.toggle('only-problems');
@@ -452,7 +477,7 @@ async function load(){
   data = await res.json();
   manual = data.manual || {};
   ZONE_LOG = []; CARD_N = 0; PREV = null; PREV_DATE = null;
-  ['us_global','japan','global_systemic','world','malaysia'].forEach(sec => {
+  ['us_global','japan','global_systemic','world','malaysia','social'].forEach(sec => {
     Object.entries(data[sec] || {}).forEach(([k, v]) => { if (v && typeof v === 'object') v._path = sec + '.' + k; });
   });
   try {
@@ -655,6 +680,43 @@ async function load(){
   }
 
 
+
+
+  // ---- Social & geopolitical stress ----
+  const so = data.social || {}, sp = k => so[k] || {};
+  document.getElementById('costGrid').innerHTML = [
+    card('Euro-area Inflation (HICP)', sp('ez_hicp_yoy'), {thresholdKey:'ez_hicp_yoy'}),
+    card('Global Food Prices (YoY)', sp('food_price_yoy'), {thresholdKey:'food_price_yoy'}),
+    card('US Gasoline', sp('us_gasoline'), {thresholdKey:'us_gasoline'}),
+    card('US Diesel', sp('us_diesel'), {thresholdKey:'us_diesel'}),
+  ].join('');
+  document.getElementById('youthGrid').innerHTML = [
+    card('France youth unemployment', sp('youth_unemp_fr'), {thresholdKey:'youth_unemp'}),
+    card('Germany youth unemployment', sp('youth_unemp_de'), {thresholdKey:'youth_unemp'}),
+    card('Spain youth unemployment', sp('youth_unemp_es'), {thresholdKey:'youth_unemp'}),
+    card('Italy youth unemployment', sp('youth_unemp_it'), {thresholdKey:'youth_unemp'}),
+    card('Portugal youth unemployment', sp('youth_unemp_pt'), {thresholdKey:'youth_unemp'}),
+  ].join('');
+  document.getElementById('uncertGrid').innerHTML = [
+    card('Global Policy Uncertainty', sp('global_epu'), {thresholdKey:'global_epu'}),
+    card('US Policy Uncertainty (daily)', sp('us_epu'), {thresholdKey:'us_epu'}),
+    card('Geopolitical Risk Index', sp('gpr'), {thresholdKey:'gpr'}),
+    card('Supply-Chain Pressure (NY Fed)', sp('gscpi'), {thresholdKey:'gscpi'}),
+    card('S&P 500 drawdown', sp('sp500_drawdown'), {thresholdKey:'sp500_drawdown'}),
+    card('Copper', sp('copper'), {thresholdKey:'copper'}),
+  ].join('');
+  document.getElementById('unrestGrid').innerHTML = [
+    card('Unrest in the news — Global', sp('unrest_global'), {thresholdKey:'unrest_global'}),
+    card('Unrest in the news — Europe', sp('unrest_europe'), {thresholdKey:'unrest_europe'}),
+  ].join('');
+  const ul = manual.unrest_log || {};
+  const ulItem = i => `<li><strong>${i.date} · ${i.where || ''}</strong> — ${i.what || ''}${i.source ? ` <a class="src-link" href="${i.url}" target="_blank" rel="noopener noreferrer">${i.source} ↗</a>` : ''}</li>`;
+  document.getElementById('unrestLog').innerHTML =
+    `${tierTag(ul.tier)} <em>last checked ${ul.last_checked || '—'}</em><br>${ul._purpose || ''}` +
+    `<br><strong>Verified (named outlet, dated):</strong><ul style="margin:6px 0 0 18px;">${(ul.verified||[]).map(ulItem).join('')}</ul>` +
+    `<br><strong>Single-source — treat as unconfirmed:</strong><ul style="margin:6px 0 0 18px;">${(ul.single_source_unverified||[]).map(ulItem).join('')}</ul>` +
+    `<br><strong>Upcoming (unconfirmed):</strong> ${(ul.upcoming_unconfirmed||[]).map(u => `${u.date} ${u.what}`).join(' · ')}<br><span style="color:var(--paper-dim)">${ul.upcoming_source || ''}</span>` +
+    `<br><br><strong>Outside Europe:</strong> ${ul.outside_europe || ''}`;
 
   // ---- Malaysia ----
   const my = data.malaysia || {}, myp = k => my[k] || {};

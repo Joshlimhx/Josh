@@ -441,6 +441,17 @@ HISTORY_SPECS = [
     ("usd_myr", "DEXMAUS", "USD/MYR (ringgit per dollar)", "MYR", None),
     ("brent", "DCOILBRENTEU", "Brent crude oil", "USD/bbl", None),
     ("palm_oil", "PPOILUSDM", "Palm oil price (monthly)", "USD/mt", None),
+    ("ez_hicp_yoy", "CP0000EZ19M086NEST", "Euro-area inflation (HICP, YoY)", "%", "yoy"),
+    ("food_price_yoy", "PFOODINDEXM", "Global food prices (IMF index, YoY)", "%", "yoy"),
+    ("us_gasoline", "GASREGW", "US regular gasoline", "USD/gal", None),
+    ("youth_unemp_fr", "LRUN24TTFRM156S", "France youth unemployment (15-24)", "%", None),
+    ("youth_unemp_de", "LRUN24TTDEM156S", "Germany youth unemployment (15-24)", "%", None),
+    ("youth_unemp_es", "LRUN24TTESM156S", "Spain youth unemployment (15-24)", "%", None),
+    ("youth_unemp_it", "LRUN24TTITM156S", "Italy youth unemployment (15-24)", "%", None),
+    ("youth_unemp_pt", "LRUN24TTPTM156S", "Portugal youth unemployment (15-24)", "%", None),
+    ("global_epu", "GEPUCURRENT", "Global economic policy uncertainty", "index", None),
+    ("sp500", "SP500", "S&P 500", "pts", None),
+    ("copper", "PCOPPUSDM", "Copper price (monthly)", "USD/mt", None),
 ]
 
 
@@ -590,9 +601,11 @@ def get_my_gdp():
 def get_my_interbank_3m():
     j = json.loads(http_get("https://api.bnm.gov.my/public/interest-rate", headers=BNM_HEADERS, timeout=30))
     row = next(r for r in j["data"] if r.get("product") == "interbank")
-    return {"value": float(row["3_month"]), "unit": "%", "as_of": row["date"],
-            "overnight": row.get("overnight"),
-            "source": "BNM public API (api.bnm.gov.my) — interbank 3-month rate; compare with the OPR for funding-cost stress"}
+    for tenor, label in (("3_month", "3-month"), ("1_month", "1-month (3M not published today)"), ("1_week", "1-week (longer tenors not published today)")):
+        if row.get(tenor) is not None:
+            return {"value": float(row[tenor]), "unit": "%", "as_of": row["date"], "overnight": row.get("overnight"),
+                    "source": f"BNM public API (api.bnm.gov.my) — interbank {label} rate; compare with the OPR for funding-cost stress"}
+    raise RuntimeError("no interbank tenor published")
 
 
 def build_malaysia():
@@ -608,6 +621,99 @@ def build_malaysia():
     m["brent"] = safe_fetch("brent", _plain("DCOILBRENTEU", "Brent crude spot, daily", "USD/bbl"), {"value": None, "unit": "USD/bbl"})
     m["palm_oil"] = safe_fetch("palm", _plain("PPOILUSDM", "Global price of palm oil, monthly (IMF)", "USD/mt"), {"value": None, "unit": "USD/mt"})
     return m
+
+
+# ---------------------------------------------------------------------------
+# SOCIAL & GEOPOLITICAL STRESS — cost of living, uncertainty, unrest intensity
+# ---------------------------------------------------------------------------
+
+def _yoy(series_id, label, unit="% YoY", n=16):
+    def fn():
+        obs = fred_latest(series_id, n=n)
+        if len(obs) < 13:
+            raise RuntimeError(f"{series_id}: fewer than 13 observations")
+        return {"value": round((float(obs[0][1]) / float(obs[12][1]) - 1) * 100, 2), "unit": unit, "as_of": obs[0][0],
+                "source": f"FRED:{series_id} ({label}; YoY computed)"}
+    return fn
+
+
+def get_sp500_drawdown():
+    obs = fred_latest("SP500", n=300)
+    last = float(obs[0][1]); high = max(float(v) for _, v in obs[:252])
+    return {"value": round((high - last) / high * 100, 2), "unit": "% below 1Y high", "level": last, "as_of": obs[0][0],
+            "source": "FRED:SP500 (S&P 500 close; drawdown from trailing-1-year high)"}
+
+
+def get_gscpi():
+    import pandas as pd
+    raw = http_get("https://www.newyorkfed.org/medialibrary/research/interactives/gscpi/downloads/gscpi_data.xlsx", timeout=60)
+    sheets = pd.read_excel(io.BytesIO(raw), sheet_name=None, header=None)
+    best = None
+    for name, df in sheets.items():
+        for _, row in df.iterrows():
+            vals = list(row.values)
+            for i in range(len(vals) - 1):
+                d = pd.to_datetime(vals[i], errors="coerce")
+                v = vals[i + 1]
+                if pd.notna(d) and isinstance(v, (int, float)) and v == v and d.year >= 2015:
+                    if best is None or d > best[0]:
+                        best = (d, float(v))
+    if not best:
+        raise RuntimeError(f"GSCPI: no dated numeric rows; sheets={list(sheets.keys())}")
+    return {"value": round(best[1], 2), "unit": "std dev from avg", "as_of": best[0].date().isoformat(),
+            "source": "NY Fed Global Supply Chain Pressure Index (gscpi_data.xlsx), 0 = average"}
+
+
+def get_gpr():
+    import pandas as pd
+    raw = http_get("https://www.matteoiacoviello.com/gpr_files/data_gpr_export.xls", timeout=60)
+    df = pd.read_excel(io.BytesIO(raw))
+    col = next((c for c in df.columns if str(c).strip().upper() == "GPR"), None)
+    dcol = next((c for c in df.columns if str(c).strip().lower() in ("month", "date")), df.columns[0])
+    if col is None:
+        raise RuntimeError(f"GPR column not found; columns={list(df.columns)[:8]}")
+    d = df[[dcol, col]].dropna()
+    last = d.iloc[-1]
+    return {"value": round(float(last[col]), 1), "unit": "index (avg = 100)", "as_of": str(pd.to_datetime(last[dcol]).date()),
+            "source": "Caldara & Iacoviello Geopolitical Risk Index (matteoiacoviello.com/gpr.htm), monthly"}
+
+
+def get_gdelt_ratio(query, label):
+    def fn():
+        import urllib.parse
+        url = ("https://api.gdeltproject.org/api/v2/doc/doc?query=" + urllib.parse.quote(query) +
+               "&mode=timelinevol&timespan=3months&format=json")
+        time.sleep(6)  # GDELT asks for >=5s between requests
+        j = json.loads(http_get(url, timeout=60))
+        data = j["timeline"][0]["data"]
+        vals = [float(x["value"]) for x in data if x.get("value") is not None]
+        if len(vals) < 30:
+            raise RuntimeError(f"GDELT: only {len(vals)} points")
+        recent, base = sum(vals[-7:]) / 7, sum(vals) / len(vals)
+        return {"value": round(recent / base, 2), "unit": "x of 3-month avg", "as_of": data[-1]["date"][:8][:4] + "-" + data[-1]["date"][4:6] + "-" + data[-1]["date"][6:8],
+                "source": f"GDELT news-volume (gdeltproject.org): share of global coverage matching {label}, last 7 days vs 3-month average — a MEDIA-ATTENTION proxy, not a count of events"}
+    return fn
+
+
+def build_social():
+    s = {"_purpose": "Pressure that turns economic stress into street stress: cost of living, fuel, youth jobs, policy/geopolitical uncertainty, supply chains, and how much the world's news is about unrest right now."}
+    s["ez_hicp_yoy"] = safe_fetch("ez_hicp", _yoy("CP0000EZ19M086NEST", "Euro-area HICP inflation"), {"value": None, "unit": "% YoY"})
+    s["food_price_yoy"] = safe_fetch("food", _yoy("PFOODINDEXM", "IMF global food price index"), {"value": None, "unit": "% YoY"})
+    s["us_gasoline"] = safe_fetch("gas", _plain("GASREGW", "US regular gasoline, weekly (EIA)", "USD/gal"), {"value": None, "unit": "USD/gal"})
+    s["us_diesel"] = safe_fetch("diesel", _plain("GASDESW", "US diesel retail, weekly (EIA)", "USD/gal"), {"value": None, "unit": "USD/gal"})
+    for key, sid, lab in (("youth_unemp_fr", "LRUN24TTFRM156S", "France"), ("youth_unemp_de", "LRUN24TTDEM156S", "Germany"),
+                          ("youth_unemp_es", "LRUN24TTESM156S", "Spain"), ("youth_unemp_it", "LRUN24TTITM156S", "Italy"),
+                          ("youth_unemp_pt", "LRUN24TTPTM156S", "Portugal")):
+        s[key] = safe_fetch(key, _plain(sid, f"{lab} youth (15-24) unemployment, OECD", "%"), {"value": None, "unit": "%"})
+    s["global_epu"] = safe_fetch("gepu", _plain("GEPUCURRENT", "Global Economic Policy Uncertainty index", "index", digits=1), {"value": None, "unit": "index"})
+    s["us_epu"] = safe_fetch("usepu", _plain("USEPUINDXD", "US Economic Policy Uncertainty, daily", "index", digits=1), {"value": None, "unit": "index"})
+    s["gpr"] = safe_fetch("gpr", get_gpr, {"value": None, "unit": "index"})
+    s["gscpi"] = safe_fetch("gscpi", get_gscpi, {"value": None, "unit": "std dev"})
+    s["sp500_drawdown"] = safe_fetch("spdd", get_sp500_drawdown, {"value": None, "unit": "%"})
+    s["copper"] = safe_fetch("copper", _plain("PCOPPUSDM", "Global copper price, monthly (IMF) — growth barometer", "USD/mt", digits=0), {"value": None, "unit": "USD/mt"})
+    s["unrest_global"] = safe_fetch("gd_global", get_gdelt_ratio("(protest OR riot OR unrest)", "protest/riot/unrest"), {"value": None, "unit": "x"})
+    s["unrest_europe"] = safe_fetch("gd_eu", get_gdelt_ratio("(protest OR riot) (France OR Germany OR Spain OR Italy OR Portugal OR Belgium)", "protest/riot in France/Germany/Spain/Italy/Portugal/Belgium"), {"value": None, "unit": "x"})
+    return s
 
 
 def main():
@@ -635,6 +741,7 @@ def main():
         },
         "world": build_world(),
         "malaysia": build_malaysia(),
+        "social": build_social(),
         "global_systemic": {
             "_purpose": "Cross-asset gauges that matter regardless of which country is the proximate story — dollar liquidity, credit stress beyond equity vol, and the energy channel that feeds into every inflation print.",
             "dxy": safe_fetch("dxy", lambda: get_dxy(), {"value": None, "unit": ""}),
@@ -663,7 +770,7 @@ def main():
         try:
             with open(out_path) as f:
                 prev = json.load(f)
-            for section in ("us_global", "japan", "global_systemic", "world", "malaysia"):
+            for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social"):
                 for k, v in data.get(section, {}).items():
                     if not isinstance(v, dict):
                         continue  # skip non-metric entries like "_purpose" descriptive strings
@@ -683,7 +790,7 @@ def main():
     # ---- Daily snapshot of every numeric metric (powers "since last run" deltas) ----
     try:
         flat = {}
-        for section in ("us_global", "japan", "global_systemic", "world", "malaysia"):
+        for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social"):
             for k, v in data.get(section, {}).items():
                 if not isinstance(v, dict):
                     continue
