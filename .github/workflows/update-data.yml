@@ -2,9 +2,10 @@ name: Update macro dashboard data
 
 on:
   schedule:
-    # 21:00 UTC daily — after US market close and after Japan's next
+    # every 3 hours (markets move intraday; FRED series only change at their own cadence)
+    # (old note: 21:00 UTC daily — after US market close and after Japan's next
     # business day's JGB curve (jgbcme.csv) has posted.
-    - cron: "0 21 * * *"
+    - cron: "17 */3 * * *"
   workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
 
 permissions:

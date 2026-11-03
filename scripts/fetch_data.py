@@ -732,6 +732,110 @@ def build_social():
     return s
 
 
+# ---------------------------------------------------------------------------
+# MARKETS NOW — near-real-time quotes (Yahoo Finance chart API, unofficial)
+# ---------------------------------------------------------------------------
+MARKET_SYMBOLS = [
+    # key, Yahoo symbol, label, group, unit
+    ("sp500", "^GSPC", "S&P 500", "Equities", "pts"),
+    ("nasdaq", "^IXIC", "Nasdaq Composite", "Equities", "pts"),
+    ("nikkei", "^N225", "Nikkei 225", "Equities", "pts"),
+    ("hsi", "^HSI", "Hang Seng", "Equities", "pts"),
+    ("kospi", "^KS11", "KOSPI", "Equities", "pts"),
+    ("klci", "^KLSE", "FBM KLCI", "Equities", "pts"),
+    ("dax", "^GDAXI", "DAX", "Equities", "pts"),
+    ("cac", "^FCHI", "CAC 40", "Equities", "pts"),
+    ("ftse", "^FTSE", "FTSE 100", "Equities", "pts"),
+    ("vix", "^VIX", "VIX", "Risk & rates", ""),
+    ("us10y", "^TNX", "US 10Y yield", "Risk & rates", "%"),
+    ("dxy", "DX-Y.NYB", "Dollar index (DXY)", "Risk & rates", ""),
+    ("usdjpy", "JPY=X", "USD/JPY", "FX", "JPY"),
+    ("usdmyr", "MYR=X", "USD/MYR", "FX", "MYR"),
+    ("eurusd", "EURUSD=X", "EUR/USD", "FX", "USD"),
+    ("wti", "CL=F", "WTI crude (front month)", "Commodities", "USD/bbl"),
+    ("brent", "BZ=F", "Brent crude (front month)", "Commodities", "USD/bbl"),
+    ("gold", "GC=F", "Gold (front month)", "Commodities", "USD/oz"),
+    ("copper", "HG=F", "Copper (front month)", "Commodities", "USD/lb"),
+    ("btc", "BTC-USD", "Bitcoin", "Crypto", "USD"),
+]
+
+
+def get_yahoo_quote(sym, label, group, unit):
+    def fn():
+        import urllib.parse
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range=5d&interval=1d"
+        r = json.loads(http_get(url, timeout=25))["chart"]["result"][0]
+        meta = r["meta"]; ts = r["timestamp"]; closes = r["indicators"]["quote"][0]["close"]
+        bars = [(t, c) for t, c in zip(ts, closes) if c is not None]
+        if len(bars) < 2:
+            raise RuntimeError(f"{sym}: fewer than 2 daily bars")
+        price = float(meta.get("regularMarketPrice") or bars[-1][1])
+        prev_close = float(bars[-2][1])
+        qt = int(meta.get("regularMarketTime") or bars[-1][0])
+        return {"value": round(price, 4 if price < 20 else 2), "unit": unit,
+                "label": label, "group": group, "symbol": sym,
+                "prev_close": round(prev_close, 4 if prev_close < 20 else 2),
+                "pct_1d": round((price / prev_close - 1) * 100, 2),
+                "abs_1d": round(price - prev_close, 4),
+                "quote_time": datetime.fromtimestamp(qt, timezone.utc).isoformat(),
+                "as_of": datetime.fromtimestamp(qt, timezone.utc).date().isoformat(),
+                "source": f"Yahoo Finance {sym} — unofficial, best-effort; the exchange/central bank is the official source"}
+    return fn
+
+
+def build_markets():
+    out = {"_purpose": "Near-real-time market quotes with the move vs the previous close. Refreshed every few hours by the automation; the quote time shows how old each price is (markets are closed at weekends)."}
+    for key, sym, label, group, unit in MARKET_SYMBOLS:
+        out[key] = safe_fetch("mkt_" + key, get_yahoo_quote(sym, label, group, unit),
+                              {"value": None, "unit": unit, "label": label, "group": group, "symbol": sym})
+        time.sleep(0.4)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# CHANGES — how far each FRED-backed reading moved vs previous / 1 week / 1 month
+# ---------------------------------------------------------------------------
+def add_changes(data):
+    import re as _re
+    for section in ("us_global", "global_systemic", "world", "malaysia", "social", "markets"):
+        for key, entry in data.get(section, {}).items():
+            if not isinstance(entry, dict) or not isinstance(entry.get("value"), (int, float)):
+                continue
+            if entry.get("tier") != "live-api":
+                continue
+            m = _re.match(r"FRED:([A-Z0-9]+)\b", entry.get("source", ""))
+            if not m or "derived" in entry.get("source", "")[:12]:
+                continue
+            try:
+                obs = fred_latest(m.group(1), n=90)
+                latest_d, latest_v = obs[0][0], float(obs[0][1])
+                v = float(entry["value"])
+                # only attach when this card really shows the raw latest observation
+                if abs(v - latest_v) > max(0.006, abs(latest_v) * 0.002):
+                    continue
+                ld = datetime.fromisoformat(latest_d)
+
+                def ref_at(days):
+                    tgt = ld - timedelta(days=days)
+                    for d, val in obs[1:]:
+                        if datetime.fromisoformat(d) <= tgt:
+                            return d, float(val)
+                    return None
+
+                def chg(ref):
+                    if not ref:
+                        return None
+                    d, rv = ref
+                    return {"ref": d, "abs": round(latest_v - rv, 4),
+                            "pct": round((latest_v / rv - 1) * 100, 2) if rv else None}
+
+                entry["changes"] = {"d1": chg((obs[1][0], float(obs[1][1]))) if len(obs) > 1 else None,
+                                    "w1": chg(ref_at(7)), "m1": chg(ref_at(30))}
+                time.sleep(0.12)
+            except Exception as e:
+                print(f"[warn] changes {section}.{key} skipped: {e}", file=sys.stderr)
+
+
 def main():
     now = datetime.now(timezone.utc).isoformat()
 
@@ -758,6 +862,7 @@ def main():
         "world": build_world(),
         "malaysia": build_malaysia(),
         "social": build_social(),
+        "markets": build_markets(),
         "global_systemic": {
             "_purpose": "Cross-asset gauges that matter regardless of which country is the proximate story — dollar liquidity, credit stress beyond equity vol, and the energy channel that feeds into every inflation print.",
             "dxy": safe_fetch("dxy", lambda: get_dxy(), {"value": None, "unit": ""}),
@@ -779,6 +884,11 @@ def main():
 
     data["manual"] = manual
 
+    try:
+        add_changes(data)
+    except Exception as e:
+        print(f"[warn] add_changes failed: {e}", file=sys.stderr)
+
     # Preserve last-good values for anything that came back stale, by
     # merging against the previous data.json if present.
     out_path = os.path.join(os.path.dirname(__file__), "..", "data.json")
@@ -786,7 +896,7 @@ def main():
         try:
             with open(out_path) as f:
                 prev = json.load(f)
-            for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social"):
+            for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social", "markets"):
                 for k, v in data.get(section, {}).items():
                     if not isinstance(v, dict):
                         continue  # skip non-metric entries like "_purpose" descriptive strings
@@ -806,7 +916,7 @@ def main():
     # ---- Daily snapshot of every numeric metric (powers "since last run" deltas) ----
     try:
         flat = {}
-        for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social"):
+        for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social", "markets"):
             for k, v in data.get(section, {}).items():
                 if not isinstance(v, dict):
                     continue

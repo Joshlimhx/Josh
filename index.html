@@ -144,6 +144,11 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
 
   <div class="summary" id="summary"><div class="fresh">Loading summary…</div></div>
 
+  <section id="section-markets">
+    <h2>Markets Now <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— move vs previous close · arrows show direction only, not good or bad · unofficial quotes</span></h2>
+    <div id="marketsWrap"></div>
+  </section>
+
   <section id="section-global">
     <h2>01 — US &amp; Global</h2>
     <div class="grid" id="globalGrid"></div>
@@ -383,6 +388,23 @@ function statusFor(value, bands){
 
 let ZONE_LOG = [], PREV = null, PREV_DATE = null, CARD_N = 0;
 const slug = t => String(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const fmtRef = d => { const x = String(d||'').slice(5,10); return x || '—'; };
+function changesLine(entry){
+  const c = entry && entry.changes; if (!c) return '';
+  const isRate = /^%/.test(entry.unit || '');
+  const part = (lbl, o) => {
+    if (!o) return '';
+    const v = isRate ? o.abs : o.pct; if (v === null || v === undefined) return '';
+    const unit = isRate ? 'pp' : '%';
+    const arrow = v > 0 ? '▲' : v < 0 ? '▼' : '■';
+    const num = (v > 0 ? '+' : '') + fmtNum(Math.round(v * 100) / 100) + unit;
+    return `<span title="vs reading dated ${o.ref}">${lbl} ${arrow} ${num}</span>`;
+  };
+  const bits = [part('prev', c.d1), part('1W', c.w1), part('1M', c.m1)].filter(Boolean);
+  if (!bits.length) return '';
+  const ref = c.d1 ? ` (prev = ${fmtRef(c.d1.ref)})` : '';
+  return `<div class="delta">${bits.join(' · ')}${ref}</div>`;
+}
 function card(label, entry, opts={}){
   let cls = '', chip = '', zone = null;
   const thresholdKey = opts.thresholdKey;
@@ -397,15 +419,11 @@ function card(label, entry, opts={}){
     chip = `<span class="zone-chip zone-nodata" title="${band.note.replace(/"/g,'&quot;')}">NO BAND YET</span>`;
   }
   const id = 'c-' + slug(label) + '-' + (CARD_N++);
-  // change since the previous day's snapshot
-  let deltaHtml = '', prevZone = null;
+  // zone the PREVIOUS day's snapshot value would have had (for the summary's "changed zone" list)
+  let prevZone = null;
   const path = entry._path;
-  if (path && PREV && typeof PREV[path] === 'number' && typeof entry.value === 'number') {
-    const d = entry.value - PREV[path];
-    if (band && band.normal_max !== undefined) prevZone = zoneFor(PREV[path], band);
-    const arrow = d > 0 ? '▲' : d < 0 ? '▼' : '■';
-    deltaHtml = `<div class="delta">${arrow} ${d > 0 ? '+' : ''}${fmtNum(Math.round(d*1000)/1000)} since ${PREV_DATE}</div>`;
-  }
+  if (path && PREV && typeof PREV[path] === 'number' && band && band.normal_max !== undefined) prevZone = zoneFor(PREV[path], band);
+  const deltaHtml = changesLine(entry);
   if (zone) ZONE_LOG.push({id, label, zone, prevZone, value: entry.value, unit: entry.unit || '', tier: entry.tier});
   return `<div class="card" id="${id}" data-zone="${zone || 'none'}">
     <div class="card-label"><span>${label}</span>${tierTag(entry.tier)}</div>
@@ -446,7 +464,7 @@ function renderSummary(data){
     <div class="sum-row"><span class="lbl">Changed zone since ${PREV_DATE || 'last run'}</span>${PREV ? ((worse.length ? '<b>Worse:</b> ' + worse.map(movedChip).join('') : '') + (better.length ? ' <b>Better:</b> ' + better.map(movedChip).join('') : '') || 'No zone changes') : 'No earlier snapshot yet (starts tomorrow)'}</div>
     <div class="navrow">
       <button id="onlyProblemsBtn">Show only problems</button>
-      <a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-social">Social stress</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
+      <a href="#section-markets">Markets now</a><a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-social">Social stress</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
     </div>`;
   document.getElementById('onlyProblemsBtn').addEventListener('click', e => {
     const on = document.body.classList.toggle('only-problems');
@@ -681,6 +699,26 @@ async function load(){
 
 
 
+
+
+  // ---- Markets now ----
+  const mk = data.markets || {};
+  const groups = {};
+  Object.entries(mk).forEach(([k, v]) => { if (v && typeof v === 'object' && v.label) (groups[v.group] = groups[v.group] || []).push(v); });
+  const ago = iso => { if (!iso) return 'no quote'; const m = Math.round((Date.now() - new Date(iso).getTime()) / 6e4);
+    return m < 90 ? `${m} min ago` : m < 2880 ? `${Math.round(m/60)}h ago` : `${Math.round(m/1440)} days ago`; };
+  document.getElementById('marketsWrap').innerHTML = Object.entries(groups).map(([g, items]) =>
+    `<h2 style="margin-top:14px; font-size:14px;">${g}</h2><div class="grid">` + items.map(v => {
+      const has = typeof v.value === 'number';
+      const up = v.pct_1d > 0, dn = v.pct_1d < 0;
+      const col = up ? '#6fae85' : dn ? '#d96a4a' : 'var(--paper-dim)';
+      const pct = (typeof v.pct_1d === 'number') ? `<div class="card-value" style="font-size:15px; color:${col};">${up ? '▲' : dn ? '▼' : '■'} ${up ? '+' : ''}${v.pct_1d}%<span class="card-unit" style="color:var(--paper-dim);"> vs prev close ${fmtNum(v.prev_close)}</span></div>` : '';
+      const stale = v.tier === 'stale';
+      return `<div class="card"><div class="card-label"><span>${v.label}</span>${tierTag(v.tier)}</div>
+        <div class="card-value">${has ? fmt(v.value) : '—'}<span class="card-unit">${v.unit || ''}</span></div>${pct}
+        <div class="card-meta">quote ${stale ? 'unavailable this run (showing last good value)' : ago(v.quote_time)}${v.quote_time ? ' · ' + v.quote_time.slice(0,16).replace('T',' ') + ' UTC' : ''}</div>
+        <div class="src-row"><a class="src-link" href="https://finance.yahoo.com/quote/${encodeURIComponent(v.symbol)}" target="_blank" rel="noopener noreferrer">Yahoo ${v.symbol} ↗</a></div></div>`;
+    }).join('') + '</div>').join('');
 
   // ---- Social & geopolitical stress ----
   const so = data.social || {}, sp = k => so[k] || {};
