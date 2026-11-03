@@ -10,12 +10,12 @@ const fs = require('fs');
   const log = await p.evaluate(() => ZONE_LOG.map(r => ({id:r.id,label:r.label,zone:r.zone,value:r.value,unit:r.unit,tier:r.tier})));
   await b.close();
   const prev = fs.existsSync('alert_state.json') ? JSON.parse(fs.readFileSync('alert_state.json')) : null;
-  const cur = {}; log.forEach(r => { if (r.zone && ['live-api','event-driven'].includes(r.tier)) cur[r.id] = r.zone; });
+  const cur = {}; log.forEach(r => { if (r.zone && ['live-api','event-driven'].includes(r.tier)) cur[r.label] = r.zone; });
   const rank = {normal:0, watch:1, danger:2};
   const lines = [];
   if (prev) for (const r of log) {
-    if (cur[r.id] === 'danger' && prev[r.id] !== 'danger')
-      lines.push(`- **${r.label}**: ${(prev[r.id]||'new').toUpperCase()} → **DANGER** (value ${r.value}${r.unit||''})`);
+    if (cur[r.label] === 'danger' && prev[r.label] !== 'danger')
+      lines.push(`- **${r.label}**: ${(prev[r.label]||'new').toUpperCase()} → **DANGER** (value ${r.value}${r.unit||''})`);
   }
   // keep prior zone if an indicator is temporarily missing, so a data gap doesn't re-fire later
   const next = Object.assign({}, prev || {}, cur);
