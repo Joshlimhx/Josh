@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-05T10:56:13.022254+00:00",
+  "generated_at": "2026-11-05T19:57:04.366403+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -160,27 +160,27 @@
       }
     },
     "vix": {
-      "value": 20.83,
+      "value": 16.61,
       "unit": "",
-      "as_of": "2026-11-03",
+      "as_of": "2026-11-04",
       "source": "FRED:VIXCLS",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-11-02",
-          "abs": -0.32,
-          "pct": -1.51
+          "ref": "2026-11-03",
+          "abs": -4.22,
+          "pct": -20.26
         },
         "w1": {
-          "ref": "2026-10-27",
-          "abs": 3.31,
-          "pct": 18.89
+          "ref": "2026-10-28",
+          "abs": -0.3,
+          "pct": -1.77
         },
         "m1": {
-          "ref": "2026-10-02",
-          "abs": 5.52,
-          "pct": 36.05
+          "ref": "2026-10-05",
+          "abs": 1.09,
+          "pct": 7.02
         }
       }
     },
@@ -207,7 +207,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 80242,
+      "value": 76317,
       "unit": "USD",
       "as_of": "2026-11-05",
       "source": "CoinGecko",
@@ -215,12 +215,12 @@
       "error": null
     },
     "gold": {
-      "value": 4106.0,
+      "value": 4113.899902,
       "unit": "USD/oz",
       "as_of": "2026-11-05",
       "source": "gold-api.com",
-      "tier": "stale",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "tier": "live-api",
+      "error": null
     }
   },
   "japan": {
@@ -240,9 +240,9 @@
       "error": null
     },
     "usdjpy": {
-      "value": 158.25,
+      "value": 158.46,
       "unit": "JPY per USD",
-      "as_of": "2026-11-04",
+      "as_of": "2026-11-05",
       "source": "Frankfurter (ECB reference rates)",
       "tier": "live-api",
       "error": null
@@ -407,25 +407,25 @@
     "em_corp_oas": {
       "value": 1.8,
       "unit": "%",
-      "as_of": "2026-11-03",
+      "as_of": "2026-11-04",
       "source": "FRED:BAMLEMCBPIOAS (ICE BofA EM corporate OAS)",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-11-02",
-          "abs": -0.01,
-          "pct": -0.55
+          "ref": "2026-11-03",
+          "abs": 0.0,
+          "pct": 0.0
         },
         "w1": {
-          "ref": "2026-10-27",
-          "abs": 0.07,
-          "pct": 4.05
+          "ref": "2026-10-28",
+          "abs": 0.1,
+          "pct": 5.88
         },
         "m1": {
-          "ref": "2026-10-02",
-          "abs": 0.22,
-          "pct": 13.92
+          "ref": "2026-10-05",
+          "abs": 0.23,
+          "pct": 14.65
         }
       }
     },
@@ -455,27 +455,27 @@
       }
     },
     "jobless_claims": {
-      "value": 194000.0,
+      "value": 189000.0,
       "unit": "claims",
-      "as_of": "2026-10-24",
+      "as_of": "2026-10-31",
       "source": "FRED:ICSA (US initial jobless claims, weekly)",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-10-17",
-          "abs": -1000.0,
-          "pct": -0.51
+          "ref": "2026-10-24",
+          "abs": -6000.0,
+          "pct": -3.08
         },
         "w1": {
-          "ref": "2026-10-17",
-          "abs": -1000.0,
-          "pct": -0.51
+          "ref": "2026-10-24",
+          "abs": -6000.0,
+          "pct": -3.08
         },
         "m1": {
-          "ref": "2026-09-19",
-          "abs": -4000.0,
-          "pct": -2.02
+          "ref": "2026-09-26",
+          "abs": -10000.0,
+          "pct": -5.03
         }
       }
     },
@@ -833,27 +833,27 @@
       }
     },
     "us_epu": {
-      "value": 288.3,
+      "value": 283.1,
       "unit": "index",
-      "as_of": "2026-11-03",
+      "as_of": "2026-11-04",
       "source": "FRED:USEPUINDXD (US Economic Policy Uncertainty, daily)",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-11-02",
-          "abs": -103.62,
-          "pct": -26.44
+          "ref": "2026-11-03",
+          "abs": 22.95,
+          "pct": 8.82
         },
         "w1": {
-          "ref": "2026-10-27",
-          "abs": 74.51,
-          "pct": 34.85
+          "ref": "2026-10-28",
+          "abs": 86.52,
+          "pct": 44.01
         },
         "m1": {
-          "ref": "2026-10-04",
-          "abs": 38.83,
-          "pct": 15.56
+          "ref": "2026-10-05",
+          "abs": -118.09,
+          "pct": -29.43
         }
       }
     },
@@ -866,18 +866,18 @@
       "error": null
     },
     "gscpi": {
-      "value": 1.28,
+      "value": 1.26,
       "unit": "std dev from avg",
-      "as_of": "2026-09-30",
+      "as_of": "2026-10-31",
       "source": "NY Fed Global Supply Chain Pressure Index (gscpi_data.xlsx), 0 = average",
       "tier": "live-api",
       "error": null
     },
     "sp500_drawdown": {
-      "value": 3.2,
+      "value": 1.67,
       "unit": "% below 1Y high",
-      "level": 7568.92,
-      "as_of": "2026-11-03",
+      "level": 7688.62,
+      "as_of": "2026-11-04",
       "source": "FRED:SP500 (S&P 500 close; drawdown from trailing-1-year high)",
       "tier": "live-api",
       "error": null
@@ -911,31 +911,31 @@
   "markets": {
     "_purpose": "Near-real-time market quotes with the move vs the previous close. Refreshed every few hours by the automation; the quote time shows how old each price is (markets are closed at weekends).",
     "sp500": {
-      "value": 7688.62,
+      "value": 7418.7,
       "unit": "pts",
       "label": "S&P 500",
       "group": "Equities",
       "symbol": "^GSPC",
-      "prev_close": 7568.92,
-      "pct_1d": 1.58,
-      "abs_1d": 119.7001,
-      "quote_time": "2026-11-04T21:51:11+00:00",
-      "as_of": "2026-11-04",
+      "prev_close": 7688.62,
+      "pct_1d": -3.51,
+      "abs_1d": -269.9201,
+      "quote_time": "2026-11-05T19:57:36+00:00",
+      "as_of": "2026-11-05",
       "source": "Yahoo Finance ^GSPC — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "nasdaq": {
-      "value": 25736.51,
+      "value": 24579.06,
       "unit": "pts",
       "label": "Nasdaq Composite",
       "group": "Equities",
       "symbol": "^IXIC",
-      "prev_close": 25372.01,
-      "pct_1d": 1.44,
-      "abs_1d": 364.5042,
-      "quote_time": "2026-11-04T22:15:59+00:00",
-      "as_of": "2026-11-04",
+      "prev_close": 25736.51,
+      "pct_1d": -4.5,
+      "abs_1d": -1157.4458,
+      "quote_time": "2026-11-05T19:57:36+00:00",
+      "as_of": "2026-11-05",
       "source": "Yahoo Finance ^IXIC — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
@@ -946,9 +946,9 @@
       "label": "Nikkei 225",
       "group": "Equities",
       "symbol": "^N225",
-      "prev_close": 62188.63,
-      "pct_1d": -1.79,
-      "abs_1d": -1110.7289,
+      "prev_close": 63081.86,
+      "pct_1d": -3.18,
+      "abs_1d": -2003.9594,
       "quote_time": "2026-11-05T06:45:03+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^N225 — unofficial, best-effort; the exchange/central bank is the official source",
@@ -961,9 +961,9 @@
       "label": "Hang Seng",
       "group": "Equities",
       "symbol": "^HSI",
-      "prev_close": 23919.5,
-      "pct_1d": 3.67,
-      "abs_1d": 877.48,
+      "prev_close": 23525.97,
+      "pct_1d": 5.4,
+      "abs_1d": 1271.0093,
       "quote_time": "2026-11-05T08:08:40+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^HSI — unofficial, best-effort; the exchange/central bank is the official source",
@@ -976,10 +976,10 @@
       "label": "KOSPI",
       "group": "Equities",
       "symbol": "^KS11",
-      "prev_close": 5683.8,
-      "pct_1d": -5.28,
-      "abs_1d": -299.9998,
-      "quote_time": "2026-11-05T06:32:40+00:00",
+      "prev_close": 5648.79,
+      "pct_1d": -4.69,
+      "abs_1d": -264.99,
+      "quote_time": "2026-11-05T11:05:40+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^KS11 — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -991,9 +991,9 @@
       "label": "FBM KLCI",
       "group": "Equities",
       "symbol": "^KLSE",
-      "prev_close": 1616.56,
-      "pct_1d": 1.19,
-      "abs_1d": 19.2999,
+      "prev_close": 1621.85,
+      "pct_1d": 0.86,
+      "abs_1d": 14.01,
       "quote_time": "2026-11-05T08:59:44+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^KLSE — unofficial, best-effort; the exchange/central bank is the official source",
@@ -1001,105 +1001,105 @@
       "error": null
     },
     "dax": {
-      "value": 26602.06,
+      "value": 26325.01,
       "unit": "pts",
       "label": "DAX",
       "group": "Equities",
       "symbol": "^GDAXI",
       "prev_close": 26437.67,
-      "pct_1d": 0.62,
-      "abs_1d": 164.3901,
-      "quote_time": "2026-11-05T10:41:33+00:00",
+      "pct_1d": -0.43,
+      "abs_1d": -112.6599,
+      "quote_time": "2026-11-05T17:00:00+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^GDAXI — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "cac": {
-      "value": 8233.75,
+      "value": 8205.37,
       "unit": "pts",
       "label": "CAC 40",
       "group": "Equities",
       "symbol": "^FCHI",
       "prev_close": 8177.89,
-      "pct_1d": 0.68,
-      "abs_1d": 55.8599,
-      "quote_time": "2026-11-05T10:41:30+00:00",
+      "pct_1d": 0.34,
+      "abs_1d": 27.4799,
+      "quote_time": "2026-11-05T17:05:02+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^FCHI — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "ftse": {
-      "value": 10901.29,
+      "value": 10782.66,
       "unit": "pts",
       "label": "FTSE 100",
       "group": "Equities",
       "symbol": "^FTSE",
       "prev_close": 10829.2,
-      "pct_1d": 0.67,
-      "abs_1d": 72.0898,
-      "quote_time": "2026-11-05T10:41:34+00:00",
+      "pct_1d": -0.43,
+      "abs_1d": -46.5402,
+      "quote_time": "2026-11-05T16:40:45+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^FTSE — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "vix": {
-      "value": 16.86,
+      "value": 25.02,
       "unit": "",
       "label": "VIX",
       "group": "Risk & rates",
       "symbol": "^VIX",
       "prev_close": 16.61,
-      "pct_1d": 1.51,
-      "abs_1d": 0.25,
-      "quote_time": "2026-11-05T10:41:31+00:00",
+      "pct_1d": 50.63,
+      "abs_1d": 8.41,
+      "quote_time": "2026-11-05T19:42:31+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance ^VIX — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "us10y": {
-      "value": 4.894,
+      "value": 4.833,
       "unit": "%",
       "label": "US 10Y yield",
       "group": "Risk & rates",
       "symbol": "^TNX",
-      "prev_close": 4.952,
-      "pct_1d": -1.17,
-      "abs_1d": -0.058,
-      "quote_time": "2026-11-04T19:59:53+00:00",
-      "as_of": "2026-11-04",
+      "prev_close": 4.894,
+      "pct_1d": -1.25,
+      "abs_1d": -0.061,
+      "quote_time": "2026-11-05T19:42:34+00:00",
+      "as_of": "2026-11-05",
       "source": "Yahoo Finance ^TNX — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "dxy": {
-      "value": 101.54,
+      "value": 101.56,
       "unit": "",
       "label": "Dollar index (DXY)",
       "group": "Risk & rates",
       "symbol": "DX-Y.NYB",
       "prev_close": 101.51,
-      "pct_1d": 0.03,
-      "abs_1d": 0.033,
-      "quote_time": "2026-11-05T10:46:34+00:00",
+      "pct_1d": 0.05,
+      "abs_1d": 0.053,
+      "quote_time": "2026-11-05T19:47:42+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance DX-Y.NYB — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "usdjpy": {
-      "value": 158.38,
+      "value": 157.83,
       "unit": "JPY",
       "label": "USD/JPY",
       "group": "FX",
       "symbol": "JPY=X",
       "prev_close": 158.47,
-      "pct_1d": -0.06,
-      "abs_1d": -0.094,
-      "quote_time": "2026-11-05T10:56:37+00:00",
+      "pct_1d": -0.4,
+      "abs_1d": -0.637,
+      "quote_time": "2026-11-05T19:57:43+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance JPY=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1114,97 +1114,97 @@
       "prev_close": 4.0746,
       "pct_1d": -0.75,
       "abs_1d": -0.0306,
-      "quote_time": "2026-11-05T10:06:08+00:00",
+      "quote_time": "2026-11-05T19:19:10+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance MYR=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "eurusd": {
-      "value": 1.1232,
+      "value": 1.1228,
       "unit": "USD",
       "label": "EUR/USD",
       "group": "FX",
       "symbol": "EURUSD=X",
       "prev_close": 1.1207,
-      "pct_1d": 0.22,
-      "abs_1d": 0.0025,
-      "quote_time": "2026-11-05T10:56:25+00:00",
+      "pct_1d": 0.19,
+      "abs_1d": 0.0021,
+      "quote_time": "2026-11-05T19:57:27+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance EURUSD=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "wti": {
-      "value": 88.63,
+      "value": 90.66,
       "unit": "USD/bbl",
       "label": "WTI crude (front month)",
       "group": "Commodities",
       "symbol": "CL=F",
       "prev_close": 88.12,
-      "pct_1d": 0.58,
-      "abs_1d": 0.51,
-      "quote_time": "2026-11-05T10:46:34+00:00",
+      "pct_1d": 2.88,
+      "abs_1d": 2.54,
+      "quote_time": "2026-11-05T19:47:38+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance CL=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "brent": {
-      "value": 96.07,
+      "value": 98.38,
       "unit": "USD/bbl",
       "label": "Brent crude (front month)",
       "group": "Commodities",
       "symbol": "BZ=F",
       "prev_close": 94.62,
-      "pct_1d": 1.53,
-      "abs_1d": 1.45,
-      "quote_time": "2026-11-05T10:46:31+00:00",
+      "pct_1d": 3.97,
+      "abs_1d": 3.76,
+      "quote_time": "2026-11-05T19:47:38+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance BZ=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "gold": {
-      "value": 4137.7,
+      "value": 4124.8,
       "unit": "USD/oz",
       "label": "Gold (front month)",
       "group": "Commodities",
       "symbol": "GC=F",
       "prev_close": 4073.0,
-      "pct_1d": 1.59,
-      "abs_1d": 64.7,
-      "quote_time": "2026-11-05T10:46:36+00:00",
+      "pct_1d": 1.27,
+      "abs_1d": 51.8,
+      "quote_time": "2026-11-05T19:47:29+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance GC=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "copper": {
-      "value": 6.402,
+      "value": 6.258,
       "unit": "USD/lb",
       "label": "Copper (front month)",
       "group": "Commodities",
       "symbol": "HG=F",
       "prev_close": 6.403,
-      "pct_1d": -0.02,
-      "abs_1d": -0.001,
-      "quote_time": "2026-11-05T10:45:25+00:00",
+      "pct_1d": -2.26,
+      "abs_1d": -0.145,
+      "quote_time": "2026-11-05T19:47:44+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance HG=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "btc": {
-      "value": 80176.68,
+      "value": 76261.55,
       "unit": "USD",
       "label": "Bitcoin",
       "group": "Crypto",
       "symbol": "BTC-USD",
       "prev_close": 80405.29,
-      "pct_1d": -0.28,
-      "abs_1d": -228.6091,
-      "quote_time": "2026-11-05T10:56:36+00:00",
+      "pct_1d": -5.15,
+      "abs_1d": -4143.7391,
+      "quote_time": "2026-11-05T19:57:42+00:00",
       "as_of": "2026-11-05",
       "source": "Yahoo Finance BTC-USD — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1239,27 +1239,27 @@
       }
     },
     "us_hy_credit_spread": {
-      "value": 3.4,
+      "value": 3.32,
       "unit": "%",
-      "as_of": "2026-11-03",
+      "as_of": "2026-11-04",
       "source": "FRED:BAMLH0A0HYM2 (ICE BofA US High Yield OAS)",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-11-02",
-          "abs": -0.03,
-          "pct": -0.87
+          "ref": "2026-11-03",
+          "abs": -0.08,
+          "pct": -2.35
         },
         "w1": {
-          "ref": "2026-10-27",
-          "abs": 0.22,
-          "pct": 6.92
+          "ref": "2026-10-28",
+          "abs": 0.18,
+          "pct": 5.73
         },
         "m1": {
-          "ref": "2026-10-02",
-          "abs": 0.3,
-          "pct": 9.68
+          "ref": "2026-10-05",
+          "abs": 0.2,
+          "pct": 6.41
         }
       }
     },
@@ -1289,27 +1289,27 @@
       }
     },
     "rrp": {
-      "value": 0.225,
+      "value": 0.125,
       "unit": "USD bn",
-      "as_of": "2026-11-04",
+      "as_of": "2026-11-05",
       "source": "FRED:RRPONTSYD (Fed overnight reverse repo, daily)",
       "tier": "live-api",
       "error": null,
       "changes": {
         "d1": {
-          "ref": "2026-11-03",
-          "abs": -0.202,
-          "pct": -47.31
+          "ref": "2026-11-04",
+          "abs": -0.1,
+          "pct": -44.44
         },
         "w1": {
-          "ref": "2026-10-28",
-          "abs": 0.049,
-          "pct": 27.84
+          "ref": "2026-10-29",
+          "abs": -0.228,
+          "pct": -64.59
         },
         "m1": {
-          "ref": "2026-10-05",
-          "abs": -0.779,
-          "pct": -77.59
+          "ref": "2026-10-06",
+          "abs": -0.289,
+          "pct": -69.81
         }
       }
     }
