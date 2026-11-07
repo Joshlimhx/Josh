@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T10:08:24.152783+00:00",
+  "generated_at": "2026-11-07T17:44:58.422361+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -207,7 +207,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 76004,
+      "value": 75792,
       "unit": "USD",
       "as_of": "2026-11-07",
       "source": "CoinGecko",
@@ -994,7 +994,7 @@
       "prev_close": 1635.86,
       "pct_1d": -1.18,
       "abs_1d": -19.28,
-      "quote_time": "2026-11-06T08:59:45+00:00",
+      "quote_time": "2026-11-06T08:59:44+00:00",
       "as_of": "2026-11-06",
       "source": "Yahoo Finance ^KLSE — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1114,7 +1114,7 @@
       "prev_close": 4.0446,
       "pct_1d": 0.29,
       "abs_1d": 0.0119,
-      "quote_time": "2026-11-07T03:30:49+00:00",
+      "quote_time": "2026-11-07T03:30:34+00:00",
       "as_of": "2026-11-07",
       "source": "Yahoo Finance MYR=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1129,7 +1129,7 @@
       "prev_close": 1.1235,
       "pct_1d": -0.82,
       "abs_1d": -0.0092,
-      "quote_time": "2026-11-06T22:29:28+00:00",
+      "quote_time": "2026-11-06T22:29:32+00:00",
       "as_of": "2026-11-06",
       "source": "Yahoo Finance EURUSD=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1196,15 +1196,15 @@
       "error": null
     },
     "btc": {
-      "value": 75976.41,
+      "value": 75747.76,
       "unit": "USD",
       "label": "Bitcoin",
       "group": "Crypto",
       "symbol": "BTC-USD",
       "prev_close": 75746.93,
-      "pct_1d": 0.3,
-      "abs_1d": 229.4803,
-      "quote_time": "2026-11-07T10:08:56+00:00",
+      "pct_1d": 0.0,
+      "abs_1d": 0.8303,
+      "quote_time": "2026-11-07T17:45:32+00:00",
       "as_of": "2026-11-07",
       "source": "Yahoo Finance BTC-USD — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
