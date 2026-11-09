@@ -21,8 +21,8 @@
  "Malaysia CPI (YoY)": "normal",
  "Malaysia Unemployment": "normal",
  "Ringgit 3M move (+ = weaker)": "normal",
- "France\u2013Germany (OAT\u2013Bund)": "danger",
- "Italy\u2013Germany (BTP\u2013Bund)": "normal",
+ "France–Germany (OAT–Bund)": "danger",
+ "Italy–Germany (BTP–Bund)": "normal",
  "UK 10Y Gilt": "watch",
  "China yuan (CNY)": "normal",
  "Korean won (KRW)": "normal",
@@ -33,5 +33,6 @@
  "EM Corporate Credit Spread": "normal",
  "EM Stress Score": "watch",
  "Financial Conditions (NFCI)": "normal",
- "US Initial Jobless Claims": "normal"
+ "US Initial Jobless Claims": "normal",
+ "Dollar Index (DXY, ICE)": "watch"
 }
