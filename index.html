@@ -686,7 +686,8 @@ async function load(){
   const spread2s10s = (ust10 !== null && ust2 !== null) ? Math.round((ust10 - ust2) * 100) / 100 : null;
   const spreadEntry = {value: spread2s10s, unit: 'pp', as_of: g.ust_10y.as_of, source: 'derived: FRED:DGS10 − FRED:DGS2', tier: (g.ust_10y.tier==='live-api' && g.ust_2y.tier==='live-api') ? 'live-api' : 'seed'};
   document.getElementById('globalSystemicGrid').innerHTML = [
-    card('Dollar Index (DXY proxy)', gsys.dxy || {}, {thresholdKey: 'dxy'}),
+    card('Dollar Index (DXY, ICE)', (()=>{const q=(data.markets||{}).dxy||{}; return {value:q.value, unit:'', as_of:q.as_of, tier:q.tier, source:q.source, label:q.label, changes:null, _path:'markets.dxy'};})(), {thresholdKey: 'dxy'}),
+    card('Broad USD Index (trade-weighted, FRED)', Object.assign({}, gsys.dxy || {}, {note:'Different scale from DXY (about 120 vs 100). No risk band applied — bands in this dashboard are written for ICE DXY.'})),
     card('US HY Credit Spread', gsys.us_hy_credit_spread || {}, {thresholdKey: 'us_hy_credit_spread'}),
     card('WTI Oil', gsys.wti_oil || {}, {thresholdKey: 'wti_oil'}),
     card('Fed RRP (overnight)', gsys.rrp || {}, {thresholdKey: 'rrp'}),
