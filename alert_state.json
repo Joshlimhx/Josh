@@ -12,7 +12,7 @@
  "BOJ Policy Rate": "normal",
  "US HY Credit Spread": "normal",
  "WTI Oil": "watch",
- "Euro-area Inflation (HICP)": "watch",
+ "Euro-area Inflation (HICP)": "danger",
  "Global Food Prices (YoY)": "watch",
  "US Gasoline": "watch",
  "US Diesel": "danger",
