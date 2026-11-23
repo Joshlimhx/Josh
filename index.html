@@ -108,6 +108,12 @@
 .src-link{font-family:var(--mono);font-size:10px;color:var(--steel-bright);text-decoration:none;border:1px solid var(--panel-line);border-radius:4px;padding:2px 6px}
 .src-link:hover{background:var(--panel-line);color:var(--paper)}
 
+.dec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.dec-card{background:var(--panel);border:1px solid var(--panel-line);border-radius:10px;padding:14px}
+.dec-card .dec-k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-dim)}
+.dec-card .dec-v{font-size:19px;margin:6px 0 4px;font-weight:600}
+.dec-card ul{margin:6px 0 0 16px;font-size:12px;line-height:1.7;color:var(--paper-dim)}
+.dec-card .dec-q{font-size:12px;margin-top:8px;line-height:1.6}
 .summary{margin:18px 0 8px;background:var(--panel);border:1px solid var(--panel-line);border-radius:10px;padding:16px}
 .sum-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
 .sum-count{font-family:var(--mono);font-size:12px;border:1px solid var(--panel-line);border-radius:6px;padding:6px 10px}
@@ -143,6 +149,21 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
   </div>
 
   <div class="summary" id="summary"><div class="fresh">Loading summary…</div></div>
+
+  <section id="section-decision">
+    <h2>00 — So What? <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— three answers built from the indicators below · rules are explicit, heuristic, not backtested</span></h2>
+    <div class="dec-grid" id="decisionGrid"><div class="note-block">Loading…</div></div>
+    <details class="note-block" style="margin-top:12px;"><summary style="cursor:pointer;"><strong>How to read this page in 5 minutes</strong></summary>
+      <ol style="margin:8px 0 0 18px; line-height:1.8;">
+        <li><b>Freshness first.</b> Green tick at the top = numbers are current. Any <span class="tier-tag tier-stale">STALE</span> card is the last good value, not today's.</li>
+        <li><b>Regime (box 1).</b> Growth × inflation. It decides which assets and which client stories work. Read the "why" lines — if the votes are 2-vs-2, it is a transition, not a regime.</li>
+        <li><b>Liquidity (box 2).</b> Is the money tide rising or falling? A good regime with a liquidity headwind = valuations struggle anyway.</li>
+        <li><b>IPO window (box 3).</b> Market conditions for a Bursa listing. Pair it with the deal-side facts (recent IPO first-day returns) before telling a client "go now".</li>
+        <li><b>Changed zone since yesterday</b> (summary above) — what moved. Only then open the sections that changed. Ignore the rest that day.</li>
+        <li><b>Level vs speed.</b> A card in NORMAL whose 1M change is large is often more important than a card sitting quietly in WATCH.</li>
+      </ol>
+    </details>
+  </section>
 
   <section id="section-markets">
     <h2>Markets Now <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— move vs previous close · arrows show direction only, not good or bad · unofficial quotes</span></h2>
@@ -224,6 +245,9 @@ body.only-problems .card:not([data-zone="watch"]):not([data-zone="danger"]){disp
     <div class="grid" id="myMarketGrid"></div>
     <h2 style="margin-top:24px; font-size:16px;">Commodities Malaysia is exposed to</h2>
     <div class="grid" id="myCommodityGrid"></div>
+    <h2 style="margin-top:24px; font-size:16px;">FMCG input costs in ringgit <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— world price move × ringgit move = what the P&amp;L actually feels · IMF monthly, lags 1–2 months</span></h2>
+    <div class="grid" id="fmcgGrid"></div>
+    <div class="note-block">Read it as: "if my client buys this input unhedged at spot, how much more (or less) does it cost in ringgit than a year ago?" A falling ringgit can turn a flat USD price into real cost inflation. The source line on each card splits the move into the price effect and the ringgit effect.</div>
     <h2 style="margin-top:24px; font-size:16px;">Manual entries <span style="font-family:var(--mono); font-size:11px; color:var(--paper-dim); font-weight:400;">— no free feed exists; you update these, the page shows how old they are</span></h2>
     <div class="grid" id="myManualGrid"></div>
     <div class="note-block" id="myManualHow"></div>
@@ -311,6 +335,16 @@ const FRED_OFFICIAL = {
   CP0000EZ19M086NEST:['Eurostat HICP','https://ec.europa.eu/eurostat/web/hicp'],
   SP500:['S&P Dow Jones Indices','https://www.spglobal.com/spdji/en/indices/equity/sp-500/'],
   WALCL:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
+  WTREGEN:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
+  WRESBAL:['Federal Reserve H.4.1','https://www.federalreserve.gov/releases/h41/'],
+  T10Y3M:['Federal Reserve H.15','https://www.federalreserve.gov/releases/h15/'],
+  SAHMREALTIME:['Sahm rule (St. Louis Fed)','https://fred.stlouisfed.org/series/SAHMREALTIME'],
+  BAMLC0A0CM:['ICE Data Indices','https://www.ice.com/data-indices'],
+  PSUGAISAUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  PWHEAMTUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  PCOCOUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  PCOFFOTMUSDM:['IMF commodity prices','https://www.imf.org/en/Research/commodity-prices'],
+  DEXMAUS:['Federal Reserve H.10','https://www.federalreserve.gov/releases/h10/'],
   DTWEXBGS:['Federal Reserve H.10','https://www.federalreserve.gov/releases/h10/'],
   BAMLH0A0HYM2:['ICE Data Indices','https://www.ice.com/data-indices'],
   BAMLEMCBPIOAS:['ICE Data Indices','https://www.ice.com/data-indices'],
@@ -464,7 +498,7 @@ function renderSummary(data){
     <div class="sum-row"><span class="lbl">Changed zone since ${PREV_DATE || 'last run'}</span>${PREV ? ((worse.length ? '<b>Worse:</b> ' + worse.map(movedChip).join('') : '') + (better.length ? ' <b>Better:</b> ' + better.map(movedChip).join('') : '') || 'No zone changes') : 'No earlier snapshot yet (starts tomorrow)'}</div>
     <div class="navrow">
       <button id="onlyProblemsBtn">Show only problems</button>
-      <a href="#section-markets">Markets now</a><a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-social">Social stress</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
+      <a href="#section-decision">So what?</a><a href="#section-markets">Markets now</a><a href="#section-global">US</a><a href="#section-japan">Japan</a><a href="#section-real-economy">Real economy</a><a href="#section-global-systemic">Systemic</a><a href="#section-social">Social stress</a><a href="#section-malaysia">Malaysia</a><a href="#section-world">Europe/EM</a><a href="#section-history">History</a><a href="#section-history2">Cross-asset history</a>
     </div>`;
   document.getElementById('onlyProblemsBtn').addEventListener('click', e => {
     const on = document.body.classList.toggle('only-problems');
@@ -476,6 +510,45 @@ function renderSummary(data){
     const t = document.getElementById(a.dataset.jump); if (!t) return;
     t.scrollIntoView({behavior:'smooth', block:'center'}); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 2200);
   }));
+}
+
+function renderDecision(data, manual){
+  const el = document.getElementById('decisionGrid'); const D = data.decision;
+  if (!D || D.error || !D.regime) { el.innerHTML = `<div class="note-block">Decision layer not generated yet${D && D.error ? ': ' + D.error : ' — runs on the next workflow run'}.</div>`; return; }
+  const col = c => `color:${c}`;
+  const li = arr => '<ul>' + (arr||[]).map(x => `<li>${x}</li>`).join('') + '</ul>';
+  const R = D.regime, L = D.liquidity, W = D.ipo_window;
+  const rCol = /Goldilocks/.test(R.label) ? 'var(--sage)' : /Stagflation/.test(R.label) ? 'var(--rust)' : 'var(--amber)';
+  const rQ = {
+    'Goldilocks': 'Risk-on regime. Equities, credit and EM usually do well; good backdrop for listings and growth stories.',
+    'Reflation': 'Growth is fine but inflation is building. Watch for central banks turning hawkish; commodity producers and pricing-power brands outperform.',
+    'Stagflation': 'Worst regime for margins and multiples. FMCG clients must protect pricing power; listings get priced at a discount.',
+    'Disinflationary': 'Slowdown with falling inflation. Rate cuts likely; defensive cash-flow stories (staples, utilities) are favoured over cyclicals.',
+    'Transition': 'Signals disagree. Do not position hard — wait for the votes to line up, and watch which side breaks first.'
+  };
+  const rKey = Object.keys(rQ).find(k => R.label.startsWith(k)) || 'Transition';
+  const lCol = L.direction === 'tailwind' ? 'var(--sage)' : L.direction === 'headwind' ? 'var(--rust)' : 'var(--amber)';
+  const wCol = W.state === 'OPEN' ? 'var(--sage)' : W.state === 'SHUT' ? 'var(--rust)' : 'var(--amber)';
+  const ipo = (manual.my_ipo_activity || {});
+  const ipoDeal = ipo.as_of ? `Deal side (manual, ${ipo.as_of}): ${ipo.ipos_last_3m ?? '—'} IPOs in 3M · avg day-1 ${ipo.avg_first_day_return_pct ?? '—'}% · ${ipo.share_trading_below_ipo_price_pct ?? '—'}% trading below IPO price${ipo.notes ? ' · ' + ipo.notes : ''}`
+                            : 'Deal side not entered yet → manual.json → my_ipo_activity (recent IPO day-1 returns, % below IPO price).';
+  el.innerHTML = `
+    <div class="dec-card"><div class="dec-k">1 · Regime (growth × inflation)</div>
+      <div class="dec-v" style="${col(rCol)}">${R.label}</div>
+      <div class="dec-q">${rQ[rKey]}</div>
+      <div class="card-meta" style="margin-top:8px;">Growth score ${R.growth_score > 0 ? '+' : ''}${R.growth_score}:</div>${li(R.growth_why)}
+      <div class="card-meta" style="margin-top:6px;">Inflation score ${R.inflation_score > 0 ? '+' : ''}${R.inflation_score}:</div>${li(R.inflation_why)}</div>
+    <div class="dec-card"><div class="dec-k">2 · Liquidity tide</div>
+      <div class="dec-v" style="${col(lCol)}">${L.direction.toUpperCase()} (${L.score > 0 ? '+' : ''}${L.score})</div>
+      <div class="dec-q">${L.direction === 'tailwind' ? 'Money is being added: supports valuations, EM currencies and new issuance.' : L.direction === 'headwind' ? 'Money is being drained: even good news gets priced lower; EM and small caps feel it first.' : 'No clear push either way — fundamentals drive prices.'}</div>
+      ${li(L.why)}</div>
+    <div class="dec-card"><div class="dec-k">3 · Bursa IPO / ECM window</div>
+      <div class="dec-v" style="${col(wCol)}">${W.state} <span style="font-size:12px; color:var(--paper-dim)">${W.flags} red flag(s) of ${W.of} checked</span></div>
+      <div class="dec-q">${W.state === 'OPEN' ? 'Market conditions support pricing a listing.' : W.state === 'CAUTION' ? 'Listable, but expect pricing pressure — strong cornerstones and a conservative valuation needed.' : 'Conditions hostile — most issuers should wait unless the story is exceptional.'}</div>
+      <ul>${(W.checks||[]).map(c => `<li style="${c.bad ? 'color:var(--rust)' : ''}">${c.bad === null ? '○' : c.bad ? '✗' : '✓'} ${c.name}: ${c.value ?? 'n/a'} <span style="opacity:.75">(${c.rule})</span></li>`).join('')}</ul>
+      <div class="card-meta" style="margin-top:8px;">${ipoDeal}</div>
+      <div class="card-meta" style="margin-top:4px;">${W.note}</div></div>
+    <div class="note-block" style="grid-column:1/-1;"><strong>Evidence tier:</strong> ${D.evidence_tier}</div>`;
 }
 
 function scoreCard(title, pct, formula, color){
@@ -495,7 +568,7 @@ async function load(){
   data = await res.json();
   manual = data.manual || {};
   ZONE_LOG = []; CARD_N = 0; PREV = null; PREV_DATE = null;
-  ['us_global','japan','global_systemic','world','malaysia','social'].forEach(sec => {
+  ['us_global','japan','global_systemic','world','malaysia','fmcg_costs','social'].forEach(sec => {
     Object.entries(data[sec] || {}).forEach(([k, v]) => { if (v && typeof v === 'object') v._path = sec + '.' + k; });
   });
   try {
@@ -766,6 +839,16 @@ async function load(){
     card('USD/MYR', myp('usd_myr'), {thresholdKey:'usd_myr'}),
     card('Ringgit 3M move (+ = weaker)', myp('myr_3m_move'), {thresholdKey:'myr_3m_move'}),
     card('FBM KLCI', myp('klci'), {thresholdKey:'klci'}),
+    card('KLCI drawdown from 1Y high', myp('klci_drawdown'), {thresholdKey:'klci_drawdown'}),
+  ].join('');
+  const fc2 = data.fmcg_costs || {}, fcp = k => fc2[k] || {};
+  document.getElementById('fmcgGrid').innerHTML = [
+    card('FMCG Input Cost Pressure', fcp('pressure_score'), {thresholdKey:'fmcg_pressure_score'}),
+    card('Sugar — 12M change in MYR', fcp('sugar'), {thresholdKey:'fmcg_input'}),
+    card('Wheat / flour — 12M in MYR', fcp('wheat'), {thresholdKey:'fmcg_input'}),
+    card('Palm oil — 12M in MYR', fcp('palm_oil'), {thresholdKey:'fmcg_input'}),
+    card('Cocoa — 12M in MYR', fcp('cocoa'), {thresholdKey:'fmcg_input'}),
+    card('Coffee — 12M in MYR', fcp('coffee'), {thresholdKey:'fmcg_input'}),
   ].join('');
   document.getElementById('myCommodityGrid').innerHTML = [
     card('Brent Crude', myp('brent'), {thresholdKey:'brent'}),
@@ -827,6 +910,13 @@ async function load(){
     card('10Y Breakeven Inflation', pick('breakeven_10y'), {thresholdKey:'breakeven_10y'}),
     card('10Y Real Yield (TIPS)', pick('real_yield_10y'), {thresholdKey:'real_yield_10y'}),
     card('Fed Balance Sheet', pick('fed_balance_sheet'), {thresholdKey:'fed_balance_sheet'}),
+    card('Treasury General Account (TGA)', pick('tga'), {thresholdKey:'tga'}),
+    card('Bank Reserves at the Fed', pick('bank_reserves'), {thresholdKey:'bank_reserves'}),
+    card('Net Liquidity (Fed − TGA − RRP)', pick('net_liquidity'), {thresholdKey:'net_liquidity'}),
+    card('Net Liquidity drain, 13W (+ = draining)', pick('net_liquidity_drain_13w'), {thresholdKey:'net_liquidity_drain_13w'}),
+    card('3m10y Yield Curve', pick('curve_3m10y'), {thresholdKey:'curve_3m10y'}),
+    card('Sahm Rule (real-time)', pick('sahm_rule'), {thresholdKey:'sahm_rule'}),
+    card('US Investment-Grade Credit Spread', pick('us_ig_credit_spread'), {thresholdKey:'us_ig_credit_spread'}),
   ].join('');
   const listHtml = (arr, f) => '<ul style="margin:6px 0 0 18px;">' + (arr||[]).map(f).join('') + '</ul>';
   const cp = manual.china_property || {}, tw = manual.taiwan_watch || {};
@@ -839,6 +929,7 @@ async function load(){
     listHtml(tw.indicators_to_watch, i => `<li><strong>${i.item}</strong> — ${i.primary_source}</li>`) +
     `<br><strong>Escalation ladder:</strong> ${tw.escalation_ladder||'—'}`;
 
+  renderDecision(data, manual);
   renderSummary(data);
 
   document.getElementById('footerSources').innerHTML =

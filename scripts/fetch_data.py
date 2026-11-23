@@ -92,19 +92,44 @@ def get_ust(series_id, label):
     return _f
 
 
+def _shift_month(ym, k):
+    """'YYYY-MM' shifted by k months."""
+    y, m = int(ym[:4]), int(ym[5:7]) - 1 + k
+    return f"{y + m // 12:04d}-{m % 12 + 1:02d}"
+
+
+def yoy_at(obs_map, ym):
+    """YoY % for month `ym` from a {'YYYY-MM': value} map, matched BY DATE, not by
+    position. If the year-ago month is missing (e.g. US Oct-2025 CPI was never
+    published because of the federal shutdown) the base is the geometric mean of
+    the neighbouring months and the result is flagged. Returns (yoy, flag) or None."""
+    if ym not in obs_map:
+        return None
+    base_ym = _shift_month(ym, -12)
+    if base_ym in obs_map:
+        return (obs_map[ym] / obs_map[base_ym] - 1) * 100, None
+    lo, hi = _shift_month(base_ym, -1), _shift_month(base_ym, 1)
+    if lo in obs_map and hi in obs_map:
+        base = (obs_map[lo] * obs_map[hi]) ** 0.5
+        return (obs_map[ym] / base - 1) * 100, f"year-ago month {base_ym} missing at source; base interpolated from {lo} & {hi}"
+    return None
+
+
 def get_cpi_yoy():
-    obs = fred_latest("CPIAUCSL", n=14)
-    obs_sorted = sorted(obs, key=lambda x: x[0])
-    latest_date, latest_val = obs_sorted[-1]
-    year_ago_val = None
-    for d, v in obs_sorted:
-        if d[:4] == str(int(latest_date[:4]) - 1) and d[5:7] == latest_date[5:7]:
-            year_ago_val = float(v)
-            break
-    if year_ago_val is None:
+    obs = fred_latest("CPIAUCSL", n=30)
+    om = {d[:7]: float(v) for d, v in obs}
+    latest_ym = max(om)
+    r = yoy_at(om, latest_ym)
+    if r is None:
         raise RuntimeError("could not locate year-ago CPI print")
-    yoy = (float(latest_val) / year_ago_val - 1) * 100
-    return {"value": round(yoy, 2), "unit": "% YoY", "as_of": latest_date, "source": "FRED:CPIAUCSL"}
+    yoy, flag = r
+    out = {"value": round(yoy, 2), "unit": "% YoY", "as_of": latest_ym + "-01", "source": "FRED:CPIAUCSL"}
+    if flag:
+        out["source"] += f" — NOTE: {flag}"
+    prev = yoy_at(om, _shift_month(latest_ym, -3))
+    if prev:
+        out["yoy_3m_ago"] = round(prev[0], 2)
+    return out
 
 
 def get_unemployment():
@@ -364,6 +389,209 @@ def _plain(series_id, label, unit, divisor=1.0, digits=2):
     return fn
 
 
+def get_net_liquidity():
+    """Fed net liquidity = Fed total assets − Treasury General Account − overnight RRP.
+    The practitioner proxy for how much central-bank cash is actually circulating in
+    markets. Matched on the weekly (Wednesday) H.4.1 date; RRP taken on/just before it."""
+    walcl = dict(fred_latest("WALCL", n=20))          # USD mn
+    tga = dict(fred_latest("WTREGEN", n=20))          # USD mn
+    rrp = sorted(fred_latest("RRPONTSYD", n=140))      # USD bn, daily, ascending
+    weeks = sorted(set(walcl) & set(tga))
+    if not weeks:
+        raise RuntimeError("no common WALCL/WTREGEN week")
+
+    def rrp_on(d):
+        v = None
+        for rd, rv in rrp:
+            if rd <= d: v = float(rv)
+            else: break
+        return v
+
+    def nl(d):
+        r = rrp_on(d)
+        return None if r is None else float(walcl[d]) / 1000 - float(tga[d]) / 1000 - r
+    d0 = weeks[-1]; v0 = nl(d0)
+    if v0 is None:
+        raise RuntimeError("no RRP reading on/before the H.4.1 date")
+    target = (datetime.fromisoformat(d0) - timedelta(days=91)).date().isoformat()
+    old = [d for d in weeks if d <= target]
+    drain = None
+    if old and nl(old[-1]) is not None:
+        drain = round(-(v0 - nl(old[-1])))
+    return {"value": round(v0), "unit": "USD bn", "as_of": d0, "drain_13w": drain,
+            "source": "derived: Fed total assets − TGA − overnight RRP, weekly H.4.1 date [FRED:WALCL, FRED:WTREGEN, FRED:RRPONTSYD]"}
+
+
+FMCG_INPUTS = [
+    # key, FRED id, label
+    ("sugar", "PSUGAISAUSDM", "Sugar (No. 11)"),
+    ("wheat", "PWHEAMTUSDM", "Wheat"),
+    ("cocoa", "PCOCOUSDM", "Cocoa"),
+    ("coffee", "PCOFFOTMUSDM", "Coffee (arabica)"),
+    ("palm_oil", "PPOILUSDM", "Palm oil"),
+]
+
+
+def build_fmcg_costs():
+    """Input-cost pressure for a Malaysian FMCG P&L: world price YoY in USD, then
+    converted into RINGGIT terms using the monthly-average USD/MYR, because that is
+    the cost the company actually books."""
+    out = {"_purpose": "What the commodity cycle does to a Malaysian FMCG company's gross margin: each input's price change over 12 months in RINGGIT terms (USD price move × ringgit move). Monthly IMF data — lags 1–2 months."}
+    fx = {}
+    try:
+        daily = fred_latest("DEXMAUS", n=700)
+        acc = {}
+        for d, v in daily:
+            acc.setdefault(d[:7], []).append(float(v))
+        fx = {m: sum(v) / len(v) for m, v in acc.items() if len(v) >= 10}
+    except Exception as e:
+        print(f"[warn] fmcg fx fetch failed: {e}", file=sys.stderr)
+    hits, missing = 0, 0
+    for key, sid, label in FMCG_INPUTS:
+        def fn(sid=sid, label=label):
+            obs = fred_latest(sid, n=26)
+            om = {d[:7]: float(v) for d, v in obs}
+            ym = max(om)
+            r = yoy_at(om, ym)
+            if r is None:
+                raise RuntimeError(f"{sid}: no year-ago month")
+            usd_yoy = r[0]
+            base = _shift_month(ym, -12)
+            if ym in fx and base in fx:
+                fx_yoy = (fx[ym] / fx[base] - 1) * 100
+                myr_yoy = ((1 + usd_yoy / 100) * (1 + fx_yoy / 100) - 1) * 100
+                note = f"USD price {usd_yoy:+.1f}% · ringgit effect {fx_yoy:+.1f}% (+ = weaker MYR)"
+            else:
+                fx_yoy, myr_yoy, note = None, usd_yoy, "MYR conversion unavailable — showing USD YoY"
+            return {"value": round(myr_yoy, 1), "unit": "% YoY in MYR", "usd_yoy": round(usd_yoy, 1),
+                    "fx_effect": None if fx_yoy is None else round(fx_yoy, 1), "level_usd": om[ym],
+                    "as_of": ym + "-01", "source": f"FRED:{sid} (IMF {label}, monthly) × FRED:DEXMAUS monthly avg — {note}"}
+        out[key] = safe_fetch("fmcg_" + key, fn, {"value": None, "unit": "% YoY in MYR"})
+        v = out[key].get("value")
+        if v is None: missing += 1
+        elif v > 15: hits += 1
+    out["pressure_score"] = {"value": hits, "unit": f"/ {len(FMCG_INPUTS)} inputs up >15% in MYR",
+        "as_of": datetime.now(timezone.utc).date().isoformat(),
+        "source": "derived: count of sugar, wheat, cocoa, coffee, palm oil whose 12M price change in ringgit terms exceeds +15%",
+        "tier": "live-api" if missing == 0 else "stale", "error": None if missing == 0 else f"{missing} input(s) missing"}
+    return out
+
+
+def get_klci_drawdown():
+    raw = http_get("https://query1.finance.yahoo.com/v8/finance/chart/%5EKLSE?range=1y&interval=1d", timeout=25)
+    r = json.loads(raw)["chart"]["result"][0]
+    closes = [c for c in r["indicators"]["quote"][0]["close"] if c is not None]
+    if len(closes) < 120:
+        raise RuntimeError("KLCI: under 120 daily closes")
+    last, high = closes[-1], max(closes)
+    return {"value": round((high - last) / high * 100, 2), "unit": "% below 1Y high", "level": round(last, 2),
+            "as_of": datetime.fromtimestamp(r["timestamp"][-1], timezone.utc).date().isoformat(),
+            "source": "Yahoo Finance ^KLSE 1Y daily closes — best-effort, unofficial; drawdown from trailing-1-year high"}
+
+
+def build_decision(data):
+    """The 'so what' layer. Every rule is written out so it can be audited and
+    changed; these are heuristics (evidence tier: Josh's own rules, NOT backtested)."""
+    def v(sec, key, field="value"):
+        e = data.get(sec, {}).get(key, {})
+        return e.get(field) if isinstance(e, dict) else None
+
+    def m1(sec, key):
+        e = data.get(sec, {}).get(key, {})
+        c = (e.get("changes") or {}).get("m1") if isinstance(e, dict) else None
+        return c
+
+    out = {"_purpose": "Turns the indicators into three answers: what regime are we in, is liquidity helping or hurting, and is the Malaysian ECM window open. Rules are explicit and editable in fetch_data.py → build_decision().",
+           "evidence_tier": "Heuristic — analyst-defined rules, not backtested. Use as a structured checklist, not a signal."}
+
+    # --- 1. Growth direction (US, because it sets the global cycle) ---
+    g_votes, g_why = 0, []
+    sahm = v("world", "sahm_rule")
+    if sahm is not None:
+        if sahm < 0.3: g_votes += 1; g_why.append(f"Sahm {sahm} < 0.30 (+1)")
+        else: g_votes -= 1; g_why.append(f"Sahm {sahm} ≥ 0.30 (−1)")
+    cl = m1("world", "jobless_claims")
+    if cl and cl.get("pct") is not None:
+        if cl["pct"] <= 5: g_votes += 1; g_why.append(f"claims 1M {cl['pct']:+.1f}% ≤ +5% (+1)")
+        else: g_votes -= 1; g_why.append(f"claims 1M {cl['pct']:+.1f}% > +5% (−1)")
+    nfci = v("world", "nfci")
+    if nfci is not None:
+        if nfci < 0: g_votes += 1; g_why.append(f"NFCI {nfci} < 0, loose (+1)")
+        else: g_votes -= 1; g_why.append(f"NFCI {nfci} ≥ 0, tight (−1)")
+    c3 = v("world", "curve_3m10y")
+    if c3 is not None:
+        if c3 > 0: g_votes += 1; g_why.append(f"3m10y {c3} > 0 (+1)")
+        else: g_votes -= 1; g_why.append(f"3m10y {c3} inverted (−1)")
+    growth = "up" if g_votes > 0 else "down" if g_votes < 0 else "flat"
+
+    # --- 2. Inflation direction ---
+    i_votes, i_why = 0, []
+    cpi, cpi3 = v("us_global", "cpi_yoy"), v("us_global", "cpi_yoy", "yoy_3m_ago")
+    if cpi is not None and cpi3 is not None:
+        d = cpi - cpi3
+        # realised CPI counts double: market expectations (breakevens, oil) can't overrule an actual print
+        if d > 0.15: i_votes += 2; i_why.append(f"CPI {cpi}% vs {cpi3}% 3M ago, rising (+2, realised data counts double)")
+        elif d < -0.15: i_votes -= 2; i_why.append(f"CPI {cpi}% vs {cpi3}% 3M ago, falling (−2, realised data counts double)")
+        else: i_why.append(f"CPI {cpi}% vs {cpi3}% 3M ago, flat (0)")
+    be = m1("world", "breakeven_10y")
+    if be and be.get("abs") is not None:
+        if be["abs"] > 0.05: i_votes += 1; i_why.append(f"10Y breakeven 1M {be['abs']:+.2f}pp (+1)")
+        elif be["abs"] < -0.05: i_votes -= 1; i_why.append(f"10Y breakeven 1M {be['abs']:+.2f}pp (−1)")
+        else: i_why.append(f"10Y breakeven 1M {be['abs']:+.2f}pp (0)")
+    oil = m1("global_systemic", "wti_oil")
+    if oil and oil.get("pct") is not None:
+        if oil["pct"] > 10: i_votes += 1; i_why.append(f"WTI 1M {oil['pct']:+.1f}% (+1)")
+        elif oil["pct"] < -10: i_votes -= 1; i_why.append(f"WTI 1M {oil['pct']:+.1f}% (−1)")
+    inflation = "up" if i_votes > 0 else "down" if i_votes < 0 else "flat"
+
+    names = {("up", "down"): "Goldilocks — growth up, inflation down",
+             ("up", "up"): "Reflation / overheating — growth up, inflation up",
+             ("down", "up"): "Stagflation — growth down, inflation up",
+             ("down", "down"): "Disinflationary slowdown — growth down, inflation down"}
+    regime = names.get((growth, inflation), f"Transition — growth {growth}, inflation {inflation}")
+    out["regime"] = {"growth": growth, "growth_score": g_votes, "growth_why": g_why,
+                     "inflation": inflation, "inflation_score": i_votes, "inflation_why": i_why, "label": regime}
+
+    # --- 3. Liquidity direction ---
+    l_votes, l_why = 0, []
+    dr = v("world", "net_liquidity_drain_13w")
+    if dr is not None:
+        if dr < -100: l_votes += 1; l_why.append(f"net liquidity +{-dr}bn over 13W (+1)")
+        elif dr > 100: l_votes -= 1; l_why.append(f"net liquidity −{dr}bn over 13W (−1)")
+        else: l_why.append(f"net liquidity {-dr:+}bn over 13W, flat (0)")
+    ry = m1("world", "real_yield_10y")
+    if ry and ry.get("abs") is not None:
+        if ry["abs"] < -0.15: l_votes += 1; l_why.append(f"real yield 1M {ry['abs']:+.2f}pp (+1)")
+        elif ry["abs"] > 0.15: l_votes -= 1; l_why.append(f"real yield 1M {ry['abs']:+.2f}pp (−1)")
+        else: l_why.append(f"real yield 1M {ry['abs']:+.2f}pp (0)")
+    dx = m1("global_systemic", "dxy")
+    if dx and dx.get("pct") is not None:
+        if dx["pct"] < -1.5: l_votes += 1; l_why.append(f"broad USD 1M {dx['pct']:+.1f}% (+1)")
+        elif dx["pct"] > 1.5: l_votes -= 1; l_why.append(f"broad USD 1M {dx['pct']:+.1f}% (−1)")
+    out["liquidity"] = {"direction": "tailwind" if l_votes > 0 else "headwind" if l_votes < 0 else "neutral",
+                        "score": l_votes, "why": l_why}
+
+    # --- 4. Malaysia ECM / IPO window ---
+    flags, checks = 0, []
+    def chk(name, val, bad, rule):
+        nonlocal flags
+        if val is None:
+            checks.append({"name": name, "value": None, "bad": None, "rule": rule}); return
+        b = bad(val); flags += 1 if b else 0
+        checks.append({"name": name, "value": val, "bad": b, "rule": rule})
+    chk("VIX", v("us_global", "vix"), lambda x: x > 22, "> 22 = global risk appetite too weak")
+    chk("KLCI drawdown from 1Y high", v("malaysia", "klci_drawdown"), lambda x: x > 10, "> 10% = local buyers nursing losses")
+    chk("Ringgit 3M move", v("malaysia", "myr_3m_move"), lambda x: x > 3, "> +3% weaker = foreign money leaving")
+    chk("EM stress score", v("world", "em_stress_score"), lambda x: x >= 3, "≥ 3 flags = EM risk-off")
+    chk("US HY credit spread", v("global_systemic", "us_hy_credit_spread"), lambda x: x > 4.5, "> 4.5% = risk capital repricing")
+    chk("Net liquidity drain (13W)", dr, lambda x: x > 200, "> USD 200bn drained = liquidity headwind")
+    known = sum(1 for c in checks if c["bad"] is not None)
+    state = "OPEN" if flags <= 1 else "CAUTION" if flags <= 3 else "SHUT"
+    out["ipo_window"] = {"state": state, "flags": flags, "of": known, "checks": checks,
+                         "note": "Market-conditions only. It does NOT see the deal pipeline (recent Bursa IPO first-day performance, oversubscription, cornerstone appetite) — check those in manual.json → my_ipo_activity before advising a client on timing."}
+    return out
+
+
 def build_world():
     w = {"_purpose": "Beyond US/Japan: sovereign spreads in Europe/UK, Asia & EM currency stress, EM credit, and US financial conditions — the channels through which a local problem becomes a global one."}
     w["de_10y"] = safe_fetch("de_10y", _monthly_yield("IRLTLT01DEM156N", "Germany"), {"value": None, "unit": "%"})
@@ -380,6 +608,16 @@ def build_world():
     w["breakeven_10y"] = safe_fetch("be10", _plain("T10YIE", "10Y breakeven inflation", "%"), {"value": None, "unit": "%"})
     w["real_yield_10y"] = safe_fetch("tips10", _plain("DFII10", "10Y TIPS real yield", "%"), {"value": None, "unit": "%"})
     w["fed_balance_sheet"] = safe_fetch("walcl", _plain("WALCL", "Fed total assets, weekly", "USD bn", divisor=1000.0, digits=0), {"value": None, "unit": "USD bn"})
+    w["tga"] = safe_fetch("tga", _plain("WTREGEN", "US Treasury General Account at the Fed, week average", "USD bn", divisor=1000.0, digits=0), {"value": None, "unit": "USD bn"})
+    w["bank_reserves"] = safe_fetch("wresbal", _plain("WRESBAL", "Bank reserve balances at the Fed, week average", "USD bn", divisor=1000.0, digits=0), {"value": None, "unit": "USD bn"})
+    w["net_liquidity"] = safe_fetch("netliq", get_net_liquidity, {"value": None, "unit": "USD bn"})
+    nl = w["net_liquidity"]
+    w["net_liquidity_drain_13w"] = {"value": nl.get("drain_13w"), "unit": "USD bn (+ = draining, 13W)", "as_of": nl.get("as_of"),
+        "source": "derived from net liquidity: −(today − 13 weeks ago) [FRED:WALCL, FRED:WTREGEN, FRED:RRPONTSYD]",
+        "tier": nl.get("tier") if nl.get("drain_13w") is not None else "stale", "error": nl.get("error")}
+    w["curve_3m10y"] = safe_fetch("t10y3m", _plain("T10Y3M", "10Y minus 3M Treasury — the Fed's preferred curve recession signal", "pp"), {"value": None, "unit": "pp"})
+    w["sahm_rule"] = safe_fetch("sahm", _plain("SAHMREALTIME", "Real-time Sahm rule: 3M avg unemployment vs its 12M low; ≥0.50 = recession has likely begun", "pp"), {"value": None, "unit": "pp"})
+    w["us_ig_credit_spread"] = safe_fetch("ig_oas", _plain("BAMLC0A0CM", "ICE BofA US Corporate (investment-grade) OAS", "%"), {"value": None, "unit": "%"})
 
     # ---- Derived: sovereign spreads (computed from the monthly yields above) ----
     def spread(a, b, name, ids=""):
@@ -447,6 +685,16 @@ HISTORY_SPECS = [
     ("global_epu", "GEPUCURRENT", "Global economic policy uncertainty", "index", None),
     ("sp500", "SP500", "S&P 500", "pts", None),
     ("copper", "PCOPPUSDM", "Copper price (monthly)", "USD/mt", None),
+    ("ust_3m10y", "T10Y3M", "US 3m10y yield curve (10Y − 3M)", "pp", None),
+    ("sahm", "SAHMREALTIME", "Sahm rule recession indicator (real-time)", "pp", None),
+    ("us_ig_credit_spread", "BAMLC0A0CM", "US Investment-Grade credit spread", "%", None),
+    ("real_yield_10y", "DFII10", "US 10Y real yield (TIPS)", "%", None),
+    ("bank_reserves", "WRESBAL", "Bank reserves at the Fed (USD mn)", "USD mn", None),
+    ("sugar_yoy", "PSUGAISAUSDM", "Sugar price (YoY, USD)", "%", "yoy"),
+    ("wheat_yoy", "PWHEAMTUSDM", "Wheat price (YoY, USD)", "%", "yoy"),
+    ("cocoa_yoy", "PCOCOUSDM", "Cocoa price (YoY, USD)", "%", "yoy"),
+    ("coffee_yoy", "PCOFFOTMUSDM", "Coffee (arabica) price (YoY, USD)", "%", "yoy"),
+    ("palm_oil_yoy", "PPOILUSDM", "Palm oil price (YoY, USD)", "%", "yoy"),
 ]
 
 
@@ -478,7 +726,8 @@ def build_us_history():
         try:
             pts = fred_full(sid)
             if tf == "yoy":
-                pts = [(pts[i][0], round((pts[i][1] / pts[i - 12][1] - 1) * 100, 2)) for i in range(12, len(pts))]
+                om = {d[:7]: v for d, v in pts}
+                pts = [(d, round(r[0], 2)) for d, v in pts if (r := yoy_at(om, d[:7]))]
             elif len(pts) > 5000:
                 pts = _weekly(pts)
             series[key] = {"label": label, "unit": unit, "source": f"FRED:{sid}",
@@ -613,6 +862,7 @@ def build_malaysia():
     m["usd_myr"] = safe_fetch("usd_myr", _plain("DEXMAUS", "Malaysian ringgit per USD, daily (Fed H.10)", "MYR per USD", digits=4), {"value": None, "unit": "MYR per USD"})
     m["myr_3m_move"] = safe_fetch("myr_3m", _fx_3m_move("DEXMAUS", "Malaysian ringgit"), {"value": None, "unit": "%"})
     m["klci"] = safe_fetch("klci", get_klci, {"value": None, "unit": "pts"})
+    m["klci_drawdown"] = safe_fetch("klci_dd", get_klci_drawdown, {"value": None, "unit": "% below 1Y high"})
     m["brent"] = safe_fetch("brent", _plain("DCOILBRENTEU", "Brent crude spot, daily", "USD/bbl"), {"value": None, "unit": "USD/bbl"})
     m["palm_oil"] = safe_fetch("palm", _plain("PPOILUSDM", "Global price of palm oil, monthly (IMF)", "USD/mt"), {"value": None, "unit": "USD/mt"})
     return m
@@ -624,11 +874,15 @@ def build_malaysia():
 
 def _yoy(series_id, label, unit="% YoY", n=16):
     def fn():
-        obs = fred_latest(series_id, n=n)
-        if len(obs) < 13:
-            raise RuntimeError(f"{series_id}: fewer than 13 observations")
-        return {"value": round((float(obs[0][1]) / float(obs[12][1]) - 1) * 100, 2), "unit": unit, "as_of": obs[0][0],
-                "source": f"FRED:{series_id} ({label}; YoY computed)"}
+        obs = fred_latest(series_id, n=max(n, 26))
+        om = {d[:7]: float(v) for d, v in obs}
+        r = yoy_at(om, max(om))
+        if r is None:
+            raise RuntimeError(f"{series_id}: no year-ago observation")
+        src = f"FRED:{series_id} ({label}; YoY computed, date-matched)"
+        if r[1]:
+            src += f" — NOTE: {r[1]}"
+        return {"value": round(r[0], 2), "unit": unit, "as_of": max(om) + "-01", "source": src}
     return fn
 
 
@@ -743,6 +997,8 @@ MARKET_SYMBOLS = [
     ("hsi", "^HSI", "Hang Seng", "Equities", "pts"),
     ("kospi", "^KS11", "KOSPI", "Equities", "pts"),
     ("klci", "^KLSE", "FBM KLCI", "Equities", "pts"),
+    ("shcomp", "000001.SS", "Shanghai Composite", "Equities", "pts"),
+    ("sox", "^SOX", "Philadelphia Semiconductor (SOX) — Malaysia E&E proxy", "Equities", "pts"),
     ("dax", "^GDAXI", "DAX", "Equities", "pts"),
     ("cac", "^FCHI", "CAC 40", "Equities", "pts"),
     ("ftse", "^FTSE", "FTSE 100", "Equities", "pts"),
@@ -861,6 +1117,7 @@ def main():
         },
         "world": build_world(),
         "malaysia": build_malaysia(),
+        "fmcg_costs": build_fmcg_costs(),
         "social": build_social(),
         "markets": build_markets(),
         "global_systemic": {
@@ -889,6 +1146,12 @@ def main():
     except Exception as e:
         print(f"[warn] add_changes failed: {e}", file=sys.stderr)
 
+    try:
+        data["decision"] = build_decision(data)
+    except Exception as e:
+        print(f"[warn] decision layer failed: {e}", file=sys.stderr)
+        data["decision"] = {"error": str(e)}
+
     # Preserve last-good values for anything that came back stale, by
     # merging against the previous data.json if present.
     out_path = os.path.join(os.path.dirname(__file__), "..", "data.json")
@@ -896,7 +1159,7 @@ def main():
         try:
             with open(out_path) as f:
                 prev = json.load(f)
-            for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social", "markets"):
+            for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "fmcg_costs", "social", "markets"):
                 for k, v in data.get(section, {}).items():
                     if not isinstance(v, dict):
                         continue  # skip non-metric entries like "_purpose" descriptive strings
@@ -916,7 +1179,7 @@ def main():
     # ---- Daily snapshot of every numeric metric (powers "since last run" deltas) ----
     try:
         flat = {}
-        for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "social", "markets"):
+        for section in ("us_global", "japan", "global_systemic", "world", "malaysia", "fmcg_costs", "social", "markets"):
             for k, v in data.get(section, {}).items():
                 if not isinstance(v, dict):
                     continue

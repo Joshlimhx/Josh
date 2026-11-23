@@ -359,6 +359,49 @@
     },
     "copper": {
       "note": "Growth barometer: a sharp fall signals weakening global demand; a sharp rise signals tight industrial demand or supply shocks. No fixed band."
+    },
+    "_v5_band_disclosure": "Bands added in v5 (liquidity, Sahm, IG credit, FMCG input costs, KLCI drawdown) are proposed starting points from historical stress episodes, not official limits — adjust to your own view.",
+    "sahm_rule": {
+      "normal_max": 0.3,
+      "watch_max": 0.5,
+      "danger": "≥0.50pp — the rule's own trigger: historically a recession had already begun (has had near-misses, e.g. 2024)"
+    },
+    "curve_3m10y": {
+      "note": "Like 2s10s, the SIGN matters: inverted (negative) has preceded US recessions. The more dangerous phase is usually when it RE-STEEPENS back above zero because the Fed is cutting into weakness."
+    },
+    "us_ig_credit_spread": {
+      "normal_max": 1.5,
+      "watch_max": 2.0,
+      "danger": ">2% — stress has spread to quality borrowers, not just junk (2008 ~6%, 2020 ~4%, 2022 peak ~1.6%)"
+    },
+    "net_liquidity": {
+      "note": "Level has no meaning on its own — read the 13-week drain card next to it. Practitioner proxy (Fed assets − TGA − RRP), not an official Fed measure."
+    },
+    "net_liquidity_drain_13w": {
+      "normal_max": 100,
+      "watch_max": 300,
+      "danger": ">USD 300bn drained in 13 weeks — a liquidity headwind for risk assets and EM (positive = draining)"
+    },
+    "tga": {
+      "note": "A rising TGA (Treasury rebuilding cash, e.g. after a debt-ceiling deal) pulls liquidity OUT of markets; a falling TGA pushes it in. Direction, not level."
+    },
+    "bank_reserves": {
+      "note": "Direction matters: a sustained fall together with funding-rate spikes is the warning (the Sep-2019 repo spike happened as reserves fell). Compare with Interbank/SOFR behaviour."
+    },
+    "fmcg_input": {
+      "normal_max": 10,
+      "watch_max": 25,
+      "danger": ">25% YoY in ringgit — margin squeeze unless the company can reprice; check the client's hedging and contract terms"
+    },
+    "fmcg_pressure_score": {
+      "normal_max": 1,
+      "watch_max": 2,
+      "danger": "≥3 of 5 inputs up >15% in MYR — broad input inflation, expect FMCG price hikes or margin compression across the sector"
+    },
+    "klci_drawdown": {
+      "normal_max": 10,
+      "watch_max": 20,
+      "danger": ">20% below the 1-year high — bear-market territory for Bursa; IPO pricing becomes very hard"
     }
   },
   "real_economy_stress": {
@@ -648,5 +691,16 @@
     ],
     "upcoming_source": "Israel Hayom, 2026-11-02 only — confirm each date with a second source before relying on it.",
     "outside_europe": "Not tracked here. Sources describe a wider Gen-Z protest pattern since 2025 across Africa, Latin America and South Asia (e.g. Wikipedia 'Gen Z protests'), but no country-level 2026 data was verified for this log."
+  },
+  "my_ipo_activity": {
+    "_purpose": "The deal-side half of the IPO window that no free API covers. Update monthly from Bursa listing announcements / The Edge. The dashboard's IPO Window panel shows these next to the market-conditions score.",
+    "tier": "event-driven",
+    "as_of": null,
+    "ipos_last_3m": null,
+    "avg_first_day_return_pct": null,
+    "share_trading_below_ipo_price_pct": null,
+    "notable_oversubscription": null,
+    "notes": null,
+    "source_url": "https://www.bursamalaysia.com/"
   }
 }
