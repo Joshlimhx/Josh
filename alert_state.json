@@ -1,7 +1,7 @@
 {
  "10Y Treasury": "watch",
  "30Y Treasury": "watch",
- "CPI (YoY)": "watch",
+ "CPI (YoY)": "danger",
  "Debt / GDP": "watch",
  "VIX": "watch",
  "Shiller CAPE": "watch",
@@ -34,5 +34,15 @@
  "EM Stress Score": "watch",
  "Financial Conditions (NFCI)": "normal",
  "US Initial Jobless Claims": "normal",
- "Dollar Index (DXY, ICE)": "watch"
+ "Dollar Index (DXY, ICE)": "watch",
+ "KLCI drawdown from 1Y high": "watch",
+ "FMCG Input Cost Pressure": "normal",
+ "Sugar — 12M change in MYR": "normal",
+ "Wheat / flour — 12M in MYR": "danger",
+ "Palm oil — 12M in MYR": "normal",
+ "Cocoa — 12M in MYR": "normal",
+ "Coffee — 12M in MYR": "normal",
+ "Net Liquidity drain, 13W (+ = draining)": "normal",
+ "Sahm Rule (real-time)": "normal",
+ "US Investment-Grade Credit Spread": "normal"
 }

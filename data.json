@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-23T01:43:04.144493+00:00",
+  "generated_at": "2026-11-23T04:11:10.335741+00:00",
   "us_global": {
     "fed_funds_rate": {
       "value": 3.88,
@@ -102,12 +102,13 @@
       }
     },
     "cpi_yoy": {
-      "value": 3.72,
+      "value": 3.95,
       "unit": "% YoY",
-      "as_of": "2026-09-01",
-      "source": "FRED:CPIAUCSL",
-      "tier": "stale",
-      "error": "could not locate year-ago CPI print"
+      "as_of": "2026-10-01",
+      "source": "FRED:CPIAUCSL — NOTE: year-ago month 2025-10 missing at source; base interpolated from 2025-09 & 2025-11",
+      "yoy_3m_ago": 3.3,
+      "tier": "live-api",
+      "error": null
     },
     "unemployment": {
       "value": 4.1,
@@ -207,7 +208,7 @@
       "error": null
     },
     "bitcoin": {
-      "value": 60949,
+      "value": 61198,
       "unit": "USD",
       "as_of": "2026-11-23",
       "source": "CoinGecko",
@@ -215,7 +216,7 @@
       "error": null
     },
     "gold": {
-      "value": 3604.5,
+      "value": 3604.449951,
       "unit": "USD/oz",
       "as_of": "2026-11-23",
       "source": "gold-api.com",
@@ -537,6 +538,114 @@
       "tier": "live-api",
       "error": null
     },
+    "tga": {
+      "value": 917.0,
+      "unit": "USD bn",
+      "as_of": "2026-11-18",
+      "source": "FRED:WTREGEN (US Treasury General Account at the Fed, week average)",
+      "tier": "live-api",
+      "error": null
+    },
+    "bank_reserves": {
+      "value": 2980.0,
+      "unit": "USD bn",
+      "as_of": "2026-11-18",
+      "source": "FRED:WRESBAL (Bank reserve balances at the Fed, week average)",
+      "tier": "live-api",
+      "error": null
+    },
+    "net_liquidity": {
+      "value": 5825,
+      "unit": "USD bn",
+      "as_of": "2026-11-18",
+      "drain_13w": -33,
+      "source": "derived: Fed total assets − TGA − overnight RRP, weekly H.4.1 date [FRED:WALCL, FRED:WTREGEN, FRED:RRPONTSYD]",
+      "tier": "live-api",
+      "error": null
+    },
+    "net_liquidity_drain_13w": {
+      "value": -33,
+      "unit": "USD bn (+ = draining, 13W)",
+      "as_of": "2026-11-18",
+      "source": "derived from net liquidity: −(today − 13 weeks ago) [FRED:WALCL, FRED:WTREGEN, FRED:RRPONTSYD]",
+      "tier": "live-api",
+      "error": null
+    },
+    "curve_3m10y": {
+      "value": 0.6,
+      "unit": "pp",
+      "as_of": "2026-11-20",
+      "source": "FRED:T10Y3M (10Y minus 3M Treasury — the Fed's preferred curve recession signal)",
+      "tier": "live-api",
+      "error": null,
+      "changes": {
+        "d1": {
+          "ref": "2026-11-19",
+          "abs": -0.1,
+          "pct": -14.29
+        },
+        "w1": {
+          "ref": "2026-11-13",
+          "abs": -0.23,
+          "pct": -27.71
+        },
+        "m1": {
+          "ref": "2026-10-21",
+          "abs": -0.28,
+          "pct": -31.82
+        }
+      }
+    },
+    "sahm_rule": {
+      "value": 0.0,
+      "unit": "pp",
+      "as_of": "2026-10-01",
+      "source": "FRED:SAHMREALTIME (Real-time Sahm rule: 3M avg unemployment vs its 12M low; ≥0.50 = recession has likely begun)",
+      "tier": "live-api",
+      "error": null,
+      "changes": {
+        "d1": {
+          "ref": "2026-09-01",
+          "abs": 0.0,
+          "pct": null
+        },
+        "w1": {
+          "ref": "2026-09-01",
+          "abs": 0.0,
+          "pct": null
+        },
+        "m1": {
+          "ref": "2026-09-01",
+          "abs": 0.0,
+          "pct": null
+        }
+      }
+    },
+    "us_ig_credit_spread": {
+      "value": 0.94,
+      "unit": "%",
+      "as_of": "2026-11-19",
+      "source": "FRED:BAMLC0A0CM (ICE BofA US Corporate (investment-grade) OAS)",
+      "tier": "live-api",
+      "error": null,
+      "changes": {
+        "d1": {
+          "ref": "2026-11-18",
+          "abs": 0.01,
+          "pct": 1.08
+        },
+        "w1": {
+          "ref": "2026-11-12",
+          "abs": 0.05,
+          "pct": 5.62
+        },
+        "m1": {
+          "ref": "2026-10-20",
+          "abs": 0.07,
+          "pct": 8.05
+        }
+      }
+    },
     "oat_bund_spread": {
       "value": 147,
       "unit": "bp",
@@ -641,10 +750,19 @@
       "error": null
     },
     "klci": {
-      "value": 1546.84,
+      "value": 1549.68,
       "unit": "pts",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance ^KLSE (FBM KLCI) — best-effort, unofficial; Bursa Malaysia is the official source",
+      "tier": "live-api",
+      "error": null
+    },
+    "klci_drawdown": {
+      "value": 12.51,
+      "unit": "% below 1Y high",
+      "level": 1549.68,
+      "as_of": "2026-11-23",
+      "source": "Yahoo Finance ^KLSE 1Y daily closes — best-effort, unofficial; drawdown from trailing-1-year high",
       "tier": "live-api",
       "error": null
     },
@@ -699,13 +817,79 @@
       }
     }
   },
+  "fmcg_costs": {
+    "_purpose": "What the commodity cycle does to a Malaysian FMCG company's gross margin: each input's price change over 12 months in RINGGIT terms (USD price move × ringgit move). Monthly IMF data — lags 1–2 months.",
+    "sugar": {
+      "value": 9.8,
+      "unit": "% YoY in MYR",
+      "usd_yoy": 13.6,
+      "fx_effect": -3.3,
+      "level_usd": 17.93714285714286,
+      "as_of": "2026-09-01",
+      "source": "FRED:PSUGAISAUSDM (IMF Sugar (No. 11), monthly) × FRED:DEXMAUS monthly avg — USD price +13.6% · ringgit effect -3.3% (+ = weaker MYR)",
+      "tier": "live-api",
+      "error": null
+    },
+    "wheat": {
+      "value": 53.8,
+      "unit": "% YoY in MYR",
+      "usd_yoy": 59.1,
+      "fx_effect": -3.3,
+      "level_usd": 246.85180245,
+      "as_of": "2026-09-01",
+      "source": "FRED:PWHEAMTUSDM (IMF Wheat, monthly) × FRED:DEXMAUS monthly avg — USD price +59.1% · ringgit effect -3.3% (+ = weaker MYR)",
+      "tier": "live-api",
+      "error": null
+    },
+    "cocoa": {
+      "value": -18.3,
+      "unit": "% YoY in MYR",
+      "usd_yoy": -15.5,
+      "fx_effect": -3.3,
+      "level_usd": 5918.981427980948,
+      "as_of": "2026-09-01",
+      "source": "FRED:PCOCOUSDM (IMF Cocoa, monthly) × FRED:DEXMAUS monthly avg — USD price -15.5% · ringgit effect -3.3% (+ = weaker MYR)",
+      "tier": "live-api",
+      "error": null
+    },
+    "coffee": {
+      "value": -20.1,
+      "unit": "% YoY in MYR",
+      "usd_yoy": -17.4,
+      "fx_effect": -3.3,
+      "level_usd": 330.1219047619048,
+      "as_of": "2026-09-01",
+      "source": "FRED:PCOFFOTMUSDM (IMF Coffee (arabica), monthly) × FRED:DEXMAUS monthly avg — USD price -17.4% · ringgit effect -3.3% (+ = weaker MYR)",
+      "tier": "live-api",
+      "error": null
+    },
+    "palm_oil": {
+      "value": 5.8,
+      "unit": "% YoY in MYR",
+      "usd_yoy": 9.5,
+      "fx_effect": -3.3,
+      "level_usd": 1133.128854318491,
+      "as_of": "2026-09-01",
+      "source": "FRED:PPOILUSDM (IMF Palm oil, monthly) × FRED:DEXMAUS monthly avg — USD price +9.5% · ringgit effect -3.3% (+ = weaker MYR)",
+      "tier": "live-api",
+      "error": null
+    },
+    "pressure_score": {
+      "value": 1,
+      "unit": "/ 5 inputs up >15% in MYR",
+      "as_of": "2026-11-23",
+      "source": "derived: count of sugar, wheat, cocoa, coffee, palm oil whose 12M price change in ringgit terms exceeds +15%",
+      "tier": "live-api",
+      "error": null
+    }
+  },
   "social": {
     "_purpose": "Pressure that turns economic stress into street stress: cost of living, fuel, youth jobs, policy/geopolitical uncertainty, supply chains, and how much the world's news is about unrest right now.",
     "ez_hicp_yoy": {
       "value": 4.01,
       "unit": "% YoY",
       "as_of": "2026-10-01",
-      "source": "FRED:CP0000EZ19M086NEST (Euro-area HICP inflation; YoY computed)",
+      "source": "FRED:CP0000EZ19M086NEST (Euro-area HICP inflation; YoY computed, date-matched)",
       "tier": "live-api",
       "error": null
     },
@@ -713,7 +897,7 @@
       "value": 8.25,
       "unit": "% YoY",
       "as_of": "2026-09-01",
-      "source": "FRED:PFOODINDEXM (IMF global food price index; YoY computed)",
+      "source": "FRED:PFOODINDEXM (IMF global food price index; YoY computed, date-matched)",
       "tier": "live-api",
       "error": null
     },
@@ -956,47 +1140,77 @@
       "error": null
     },
     "hsi": {
-      "value": 22168.19,
+      "value": 22280.71,
       "unit": "pts",
       "label": "Hang Seng",
       "group": "Equities",
       "symbol": "^HSI",
-      "prev_close": 22841.62,
-      "pct_1d": -2.95,
-      "abs_1d": -673.4291,
-      "quote_time": "2026-11-23T01:28:30+00:00",
+      "prev_close": 22410.8,
+      "pct_1d": -0.58,
+      "abs_1d": -130.0908,
+      "quote_time": "2026-11-23T03:56:40+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance ^HSI — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "kospi": {
-      "value": 4676.5,
+      "value": 4684.74,
       "unit": "pts",
       "label": "KOSPI",
       "group": "Equities",
       "symbol": "^KS11",
       "prev_close": 4869.96,
-      "pct_1d": -3.97,
-      "abs_1d": -193.46,
-      "quote_time": "2026-11-23T01:23:30+00:00",
+      "pct_1d": -3.8,
+      "abs_1d": -185.22,
+      "quote_time": "2026-11-23T03:51:40+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance ^KS11 — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "klci": {
-      "value": 1546.84,
+      "value": 1549.68,
       "unit": "pts",
       "label": "FBM KLCI",
       "group": "Equities",
       "symbol": "^KLSE",
       "prev_close": 1556.51,
-      "pct_1d": -0.62,
-      "abs_1d": -9.67,
-      "quote_time": "2026-11-23T01:28:15+00:00",
+      "pct_1d": -0.44,
+      "abs_1d": -6.83,
+      "quote_time": "2026-11-23T03:55:59+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance ^KLSE — unofficial, best-effort; the exchange/central bank is the official source",
+      "tier": "live-api",
+      "error": null
+    },
+    "shcomp": {
+      "value": 3499.91,
+      "unit": "pts",
+      "label": "Shanghai Composite",
+      "group": "Equities",
+      "symbol": "000001.SS",
+      "prev_close": 3533.79,
+      "pct_1d": -0.96,
+      "abs_1d": -33.881,
+      "quote_time": "2026-11-23T03:30:20+00:00",
+      "as_of": "2026-11-23",
+      "source": "Yahoo Finance 000001.SS — unofficial, best-effort; the exchange/central bank is the official source",
+      "tier": "live-api",
+      "error": null
+    },
+    "sox": {
+      "value": 8408.59,
+      "unit": "pts",
+      "label": "Philadelphia Semiconductor (SOX) — Malaysia E&E proxy",
+      "group": "Equities",
+      "symbol": "^SOX",
+      "prev_close": 9419.72,
+      "pct_1d": -10.73,
+      "abs_1d": -1011.1287,
+      "quote_time": "2026-11-20T22:15:59+00:00",
+      "as_of": "2026-11-20",
+      "source": "Yahoo Finance ^SOX — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
@@ -1082,129 +1296,129 @@
       "group": "Risk & rates",
       "symbol": "DX-Y.NYB",
       "prev_close": 103.81,
-      "pct_1d": -0.03,
-      "abs_1d": -0.036,
-      "quote_time": "2026-11-23T01:33:34+00:00",
+      "pct_1d": -0.04,
+      "abs_1d": -0.042,
+      "quote_time": "2026-11-23T04:01:46+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance DX-Y.NYB — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "usdjpy": {
-      "value": 158.96,
+      "value": 159.0,
       "unit": "JPY",
       "label": "USD/JPY",
       "group": "FX",
       "symbol": "JPY=X",
       "prev_close": 159.71,
-      "pct_1d": -0.47,
-      "abs_1d": -0.75,
-      "quote_time": "2026-11-23T01:43:35+00:00",
+      "pct_1d": -0.44,
+      "abs_1d": -0.707,
+      "quote_time": "2026-11-23T04:11:47+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance JPY=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "usdmyr": {
-      "value": 4.112,
+      "value": 4.116,
       "unit": "MYR",
       "label": "USD/MYR",
       "group": "FX",
       "symbol": "MYR=X",
       "prev_close": 4.1107,
-      "pct_1d": 0.03,
-      "abs_1d": 0.0013,
-      "quote_time": "2026-11-23T01:40:36+00:00",
+      "pct_1d": 0.13,
+      "abs_1d": 0.0053,
+      "quote_time": "2026-11-23T04:01:36+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance MYR=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "eurusd": {
-      "value": 1.0985,
+      "value": 1.0983,
       "unit": "USD",
       "label": "EUR/USD",
       "group": "FX",
       "symbol": "EURUSD=X",
       "prev_close": 1.097,
-      "pct_1d": 0.14,
-      "abs_1d": 0.0015,
-      "quote_time": "2026-11-23T01:42:46+00:00",
+      "pct_1d": 0.12,
+      "abs_1d": 0.0013,
+      "quote_time": "2026-11-23T04:11:44+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance EURUSD=X — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "wti": {
-      "value": 83.18,
+      "value": 83.32,
       "unit": "USD/bbl",
       "label": "WTI crude (front month)",
       "group": "Commodities",
       "symbol": "CL=F",
       "prev_close": 83.98,
-      "pct_1d": -0.95,
-      "abs_1d": -0.8,
-      "quote_time": "2026-11-23T01:33:33+00:00",
+      "pct_1d": -0.79,
+      "abs_1d": -0.66,
+      "quote_time": "2026-11-23T04:01:32+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance CL=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "brent": {
-      "value": 89.74,
+      "value": 89.77,
       "unit": "USD/bbl",
       "label": "Brent crude (front month)",
       "group": "Commodities",
       "symbol": "BZ=F",
       "prev_close": 92.57,
-      "pct_1d": -3.06,
-      "abs_1d": -2.83,
-      "quote_time": "2026-11-23T01:33:00+00:00",
+      "pct_1d": -3.02,
+      "abs_1d": -2.8,
+      "quote_time": "2026-11-23T04:00:51+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance BZ=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "gold": {
-      "value": 3616.4,
+      "value": 3607.4,
       "unit": "USD/oz",
       "label": "Gold (front month)",
       "group": "Commodities",
       "symbol": "GC=F",
       "prev_close": 3515.4,
-      "pct_1d": 2.87,
-      "abs_1d": 101.0001,
-      "quote_time": "2026-11-23T01:33:36+00:00",
+      "pct_1d": 2.62,
+      "abs_1d": 92.0001,
+      "quote_time": "2026-11-23T04:01:45+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance GC=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "copper": {
-      "value": 5.534,
+      "value": 5.527,
       "unit": "USD/lb",
       "label": "Copper (front month)",
       "group": "Commodities",
       "symbol": "HG=F",
       "prev_close": 5.477,
-      "pct_1d": 1.04,
-      "abs_1d": 0.057,
-      "quote_time": "2026-11-23T01:33:27+00:00",
+      "pct_1d": 0.91,
+      "abs_1d": 0.05,
+      "quote_time": "2026-11-23T04:01:43+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance HG=F — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
       "error": null
     },
     "btc": {
-      "value": 60965.07,
+      "value": 61165.35,
       "unit": "USD",
       "label": "Bitcoin",
       "group": "Crypto",
       "symbol": "BTC-USD",
       "prev_close": 60094.09,
-      "pct_1d": 1.45,
-      "abs_1d": 870.9802,
-      "quote_time": "2026-11-23T01:43:37+00:00",
+      "pct_1d": 1.78,
+      "abs_1d": 1071.2602,
+      "quote_time": "2026-11-23T04:11:47+00:00",
       "as_of": "2026-11-23",
       "source": "Yahoo Finance BTC-USD — unofficial, best-effort; the exchange/central bank is the official source",
       "tier": "live-api",
@@ -1675,6 +1889,49 @@
       },
       "copper": {
         "note": "Growth barometer: a sharp fall signals weakening global demand; a sharp rise signals tight industrial demand or supply shocks. No fixed band."
+      },
+      "_v5_band_disclosure": "Bands added in v5 (liquidity, Sahm, IG credit, FMCG input costs, KLCI drawdown) are proposed starting points from historical stress episodes, not official limits — adjust to your own view.",
+      "sahm_rule": {
+        "normal_max": 0.3,
+        "watch_max": 0.5,
+        "danger": "≥0.50pp — the rule's own trigger: historically a recession had already begun (has had near-misses, e.g. 2024)"
+      },
+      "curve_3m10y": {
+        "note": "Like 2s10s, the SIGN matters: inverted (negative) has preceded US recessions. The more dangerous phase is usually when it RE-STEEPENS back above zero because the Fed is cutting into weakness."
+      },
+      "us_ig_credit_spread": {
+        "normal_max": 1.5,
+        "watch_max": 2.0,
+        "danger": ">2% — stress has spread to quality borrowers, not just junk (2008 ~6%, 2020 ~4%, 2022 peak ~1.6%)"
+      },
+      "net_liquidity": {
+        "note": "Level has no meaning on its own — read the 13-week drain card next to it. Practitioner proxy (Fed assets − TGA − RRP), not an official Fed measure."
+      },
+      "net_liquidity_drain_13w": {
+        "normal_max": 100,
+        "watch_max": 300,
+        "danger": ">USD 300bn drained in 13 weeks — a liquidity headwind for risk assets and EM (positive = draining)"
+      },
+      "tga": {
+        "note": "A rising TGA (Treasury rebuilding cash, e.g. after a debt-ceiling deal) pulls liquidity OUT of markets; a falling TGA pushes it in. Direction, not level."
+      },
+      "bank_reserves": {
+        "note": "Direction matters: a sustained fall together with funding-rate spikes is the warning (the Sep-2019 repo spike happened as reserves fell). Compare with Interbank/SOFR behaviour."
+      },
+      "fmcg_input": {
+        "normal_max": 10,
+        "watch_max": 25,
+        "danger": ">25% YoY in ringgit — margin squeeze unless the company can reprice; check the client's hedging and contract terms"
+      },
+      "fmcg_pressure_score": {
+        "normal_max": 1,
+        "watch_max": 2,
+        "danger": "≥3 of 5 inputs up >15% in MYR — broad input inflation, expect FMCG price hikes or margin compression across the sector"
+      },
+      "klci_drawdown": {
+        "normal_max": 10,
+        "watch_max": 20,
+        "danger": ">20% below the 1-year high — bear-market territory for Bursa; IPO pricing becomes very hard"
       }
     },
     "real_economy_stress": {
@@ -1964,6 +2221,91 @@
       ],
       "upcoming_source": "Israel Hayom, 2026-11-02 only — confirm each date with a second source before relying on it.",
       "outside_europe": "Not tracked here. Sources describe a wider Gen-Z protest pattern since 2025 across Africa, Latin America and South Asia (e.g. Wikipedia 'Gen Z protests'), but no country-level 2026 data was verified for this log."
+    },
+    "my_ipo_activity": {
+      "_purpose": "The deal-side half of the IPO window that no free API covers. Update monthly from Bursa listing announcements / The Edge. The dashboard's IPO Window panel shows these next to the market-conditions score.",
+      "tier": "event-driven",
+      "as_of": null,
+      "ipos_last_3m": null,
+      "avg_first_day_return_pct": null,
+      "share_trading_below_ipo_price_pct": null,
+      "notable_oversubscription": null,
+      "notes": null,
+      "source_url": "https://www.bursamalaysia.com/"
+    }
+  },
+  "decision": {
+    "_purpose": "Turns the indicators into three answers: what regime are we in, is liquidity helping or hurting, and is the Malaysian ECM window open. Rules are explicit and editable in fetch_data.py → build_decision().",
+    "evidence_tier": "Heuristic — analyst-defined rules, not backtested. Use as a structured checklist, not a signal.",
+    "regime": {
+      "growth": "up",
+      "growth_score": 4,
+      "growth_why": [
+        "Sahm 0.0 < 0.30 (+1)",
+        "claims 1M +1.5% ≤ +5% (+1)",
+        "NFCI -0.478 < 0, loose (+1)",
+        "3m10y 0.6 > 0 (+1)"
+      ],
+      "inflation": "flat",
+      "inflation_score": 0,
+      "inflation_why": [
+        "CPI 3.95% vs 3.3% 3M ago, rising (+2, realised data counts double)",
+        "10Y breakeven 1M -0.22pp (−1)",
+        "WTI 1M -17.3% (−1)"
+      ],
+      "label": "Transition — growth up, inflation flat"
+    },
+    "liquidity": {
+      "direction": "neutral",
+      "score": 0,
+      "why": [
+        "net liquidity +33bn over 13W, flat (0)",
+        "real yield 1M +0.11pp (0)"
+      ]
+    },
+    "ipo_window": {
+      "state": "CAUTION",
+      "flags": 2,
+      "of": 6,
+      "checks": [
+        {
+          "name": "VIX",
+          "value": 28.44,
+          "bad": true,
+          "rule": "> 22 = global risk appetite too weak"
+        },
+        {
+          "name": "KLCI drawdown from 1Y high",
+          "value": 12.51,
+          "bad": true,
+          "rule": "> 10% = local buyers nursing losses"
+        },
+        {
+          "name": "Ringgit 3M move",
+          "value": 0.01,
+          "bad": false,
+          "rule": "> +3% weaker = foreign money leaving"
+        },
+        {
+          "name": "EM stress score",
+          "value": 2,
+          "bad": false,
+          "rule": "≥ 3 flags = EM risk-off"
+        },
+        {
+          "name": "US HY credit spread",
+          "value": 3.52,
+          "bad": false,
+          "rule": "> 4.5% = risk capital repricing"
+        },
+        {
+          "name": "Net liquidity drain (13W)",
+          "value": -33,
+          "bad": false,
+          "rule": "> USD 200bn drained = liquidity headwind"
+        }
+      ],
+      "note": "Market-conditions only. It does NOT see the deal pipeline (recent Bursa IPO first-day performance, oversubscription, cornerstone appetite) — check those in manual.json → my_ipo_activity before advising a client on timing."
     }
   }
 }
